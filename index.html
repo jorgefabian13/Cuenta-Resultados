@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Dashboard Autosol Salta</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, sans-serif; background-color: #f4f7f6; padding: 20px; }
+        .container { max-width: 1200px; margin: auto; }
+        .header { text-align: center; margin-bottom: 30px; }
+        #loading { text-align: center; font-size: 18px; color: #2980b9; margin-bottom: 20px; font-weight: bold; }
+        .charts { display: flex; flex-wrap: wrap; gap: 20px; display: none; }
+        .chart-container { background: white; flex: 1; min-width: 500px; padding: 20px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📊 Dashboard en Vivo - Resultados</h1>
+        </div>
+        <div id="loading">Sincronizando datos con Google Sheets... ⏳</div>
+        <div class="charts" id="dashboardContent">
+            <div class="chart-container"><canvas id="costosChart"></canvas></div>
+            <div class="chart-container"><canvas id="utilidadChart"></canvas></div>
+        </div>
+    </div>
+
+    <script>
+        // REEMPLAZA EL TEXTO DE ABAJO CON TU ENLACE LARGO DE GOOGLE
+        const scriptUrl = https://script.googleusercontent.com/macros/echo?user_content_key=AUkAhnQoKvA8RWuSi2eDEQfjy2PEmIeDRiyZfkfNympMWYensb7oiGzRVpoTtgs5KtmD1rdhxerOfZV_4iQ8KphvBwRuqnDl0Mtg1iZDE5ChxJNmgaZOsOV4kFcrU0TTJYpOWhVYvqj1Y-JonYGj6hnYhWfj3hPbImvr51S5l34X1a9o4hkLCxjmC1x6DEZc9q_P4B6FowdiypywEZaQY8Gn9xw2tZKDvyrlRNELGMaN3Xd-BDehgV8NKzLNJUyPTq5ONwo1shSJxTIis85M5NFa0Dqa1cE39Q&lib=M_r06VgJBuIvDRiCsS-Cz9bOY26BTKEWC
+
+        fetch(scriptUrl)
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('dashboardContent').style.display = 'flex';
+
+                new Chart(document.getElementById('costosChart').getContext('2d'), {
+                    type: 'line',
+                    data: {
+                        labels: data.meses,
+                        datasets: [
+                            { label: 'Ventas', data: data.ventas, borderColor: '#2980b9' },
+                            { label: 'Costo de Ventas', data: data.costoVentas, borderColor: '#e74c3c' }
+                        ]
+                    }
+                });
+
+                new Chart(document.getElementById('utilidadChart').getContext('2d'), {
+                    type: 'line',
+                    data: {
+                        labels: data.meses,
+                        datasets: [
+                            { label: 'Utilidad Operativa', data: data.utilidad, borderColor: '#2ecc71' },
+                            { label: 'Controlables', data: data.controlables, borderColor: '#f1c40f' }
+                        ]
+                    }
+                });
+            })
+            .catch(error => {
+                document.getElementById('loading').innerText = 'Error al cargar los datos.';
+                console.error('Error:', error);
+            });
+    </script>
+</body>
+</html>
