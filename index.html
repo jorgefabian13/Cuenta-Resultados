@@ -112,18 +112,28 @@
                     let cssClass = '';
                     let val = vals[i];
                     
-                    if (isProj[i]) {
+                  if (isProj[i]) {
                         cssClass = 'proyeccion';
                     } else if (i > 0) {
                         let prevVal = vals[i-1];
+                        
                         if (prevVal !== 0) {
                             let ratio = val / prevVal;
                             if (ratio > 1.02) {
-                                cssClass = 'sube'; // Supera el 2% de aumento (Rojo)
+                                cssClass = 'sube'; // Rojo
                             } else if (ratio < 0.98) {
-                                cssClass = 'verde'; // Logra más de un 2% de reducción (Verde)
+                                cssClass = 'verde'; // Verde
                             } else {
-                                cssClass = 'estable'; // Franja +/- 2% (Amarillo)
+                                cssClass = 'estable'; // Amarillo
+                            }
+                        } else {
+                            // Qué hacer si el mes anterior fue $0
+                            if (val > 0) {
+                                cssClass = 'sube'; // Pasó de 0 a tener gasto (Rojo)
+                            } else if (val === 0) {
+                                cssClass = 'estable'; // Se mantuvo en 0 (Amarillo)
+                            } else {
+                                cssClass = 'verde'; // Negativo (Verde)
                             }
                         }
                     }
