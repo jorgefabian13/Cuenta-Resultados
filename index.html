@@ -115,8 +115,11 @@
                     let cssClass = '';
                     let val = vals[i];
                     
-                    // Primero evaluamos el color del semáforo para TODOS los meses (Reales y Proyectados)
-                    if (i > 0) {
+                   if (isProj[i]) {
+                        // Si es proyección, fondo blanco/gris muy claro, sin semáforo
+                        cssClass = 'proyeccion'; 
+                    } else if (i > 0) {
+                        // Si es un mes real histórico, aplicamos el mapa de calor
                         let prevVal = vals[i-1];
                         if (prevVal !== 0) {
                             let ratio = val / prevVal;
@@ -128,11 +131,6 @@
                             else if (val === 0) cssClass = 'estable';
                             else cssClass = 'verde';
                         }
-                    }
-                    
-                    // Luego, si es proyección, le agregamos la cursiva al número (sin borrar el color de fondo)
-                    if (isProj[i]) {
-                        cssClass += ' texto-proyectado';
                     }
                     
                     html += `<td class="${cssClass.trim()}">${formatMoney(val)}</td>`;
