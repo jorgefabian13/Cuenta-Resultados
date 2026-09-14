@@ -15,9 +15,13 @@
         th, td { padding: 10px; text-align: center; border-bottom: 1px solid #ddd; }
         th:first-child, td:first-child { text-align: left; font-weight: bold; min-width: 200px; }
         th { background: #f8f9fa; color: #2c3e50; }
-        .sube { background-color: #e74c3c !important; color: white !important; font-weight: bold; border-radius: 4px; }
-        .baja { background-color: #f1c40f !important; color: black !important; font-weight: bold; border-radius: 4px; }
+        
+        /* Nuevas reglas de colores para Costos Operativos */
+        .sube { background-color: #e74c3c !important; color: white !important; font-weight: bold; border-radius: 4px; } /* Rojo: Sube > 2% */
+        .verde { background-color: #2ecc71 !important; color: white !important; font-weight: bold; border-radius: 4px; } /* Verde: Baja > 2% */
+        .estable { background-color: #f1c40f !important; color: black !important; font-weight: bold; border-radius: 4px; } /* Amarillo: +/- 2% */
         .proyeccion { color: #7f8c8d !important; font-style: italic; background-color: #fafafa; }
+        
         #loading { text-align: center; font-size: 18px; color: #2980b9; font-weight: bold; padding: 50px; }
     </style>
 </head>
@@ -27,7 +31,7 @@
             <h1>📊 Tablero Gerencial - Utilidad Operativa y Costos</h1>
         </div>
         
-        <div id="loading">Sincronizando proyecciones y mapa de calor... ⏳</div>
+        <div id="loading">Sincronizando proyecciones móviles y mapa de calor... ⏳</div>
         
         <div id="dashboard" style="display:none;">
             <div class="chart-container">
@@ -36,12 +40,12 @@
             </div>
 
             <div class="table-container">
-                <h2>🟡 Costos Controlables (Valores $ - Proyección a Dic)</h2>
+                <h2>🟡 Costos Controlables (Valores $ - Proyección Móvil a Dic)</h2>
                 <div id="tabla-controlables"></div>
             </div>
 
             <div class="table-container">
-                <h2>🔵 Costos No Controlables (Valores $ - Proyección a Dic)</h2>
+                <h2>🔵 Costos No Controlables (Valores $ - Proyección Móvil a Dic)</h2>
                 <div id="tabla-no-controlables"></div>
             </div>
         </div>
@@ -53,32 +57,32 @@
 
         const formatMoney = (n) => new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS', maximumFractionDigits: 0 }).format(n);
 
-        // Calcula el promedio móvil de los últimos 3 meses con datos
+        // Promedio Móvil: Calcula cada mes proyectado basándose en los 3 meses INMEDIATAMENTE anteriores (reales o proyectados)
         function projectData(rawData) {
             let processed = [...rawData];
             let lastIdx = -1;
             
+            // Detectar el último mes con datos reales cargados
             for (let i = 0; i < 12; i++) {
-                if (processed[i] !== null && processed[i] !== undefined) {
+                if (processed[i] !== null && processed[i] !== undefined && processed[i] !== 0) {
                     lastIdx = i;
                 }
             }
             
-            let avg = 0;
-            if (lastIdx >= 2) {
-                avg = (processed[lastIdx] + processed[lastIdx-1] + processed[lastIdx-2]) / 3;
-            } else if (lastIdx >= 0) {
-                let sum = 0;
-                for (let i = 0; i <= lastIdx; i++) sum += processed[i];
-                avg = sum / (lastIdx + 1);
-            }
-            
             let isProjected = Array(12).fill(false);
+            
             for (let i = 0; i < 12; i++) {
                 if (i > lastIdx) {
-                    processed[i] = avg;       
+                    // Tomar los últimos 3 datos (incluso si son proyectados) para el cálculo encadenado
+                    let sum = 0;
+                    let count = 0;
+                    if (i >= 1) { sum += processed[i-1]; count++; }
+                    if (i >= 2) { sum += processed[i-2]; count++; }
+                    if (i >= 3) { sum += processed[i-3]; count++; }
+                    
+                    processed[i] = count > 0 ? (sum / count) : 0;       
                     isProjected[i] = true;    
-                } else if (processed[i] === null) {
+                } else if (processed[i] === null || processed[i] === undefined) {
                     processed[i] = 0;
                 }
             }
@@ -111,8 +115,16 @@
                         cssClass = 'proyeccion';
                     } else if (i > 0) {
                         let prevVal = vals[i-1];
-                        if (val > prevVal) cssClass = 'sube'; // Rojo si sube el costo
-                        else if (val < prevVal) cssClass = 'baja'; // Amarillo si baja
+                        if (prevVal !== 0) {
+                            let ratio = val / prevVal;
+                            if (ratio > 1.02) {
+                                cssClass = 'sube'; // Supera el 2% de aumento (Rojo)
+                            } else if (ratio < 0.98) {
+                                cssClass = 'verde'; // Logra más de un 2% de reducción (Verde)
+                            } else {
+                                cssClass = 'estable'; // Franja +/- 2% (Amarillo)
+                            }
+                        }
                     }
                     html += `<td class="${cssClass}">${formatMoney(val)}</td>`;
                 }
