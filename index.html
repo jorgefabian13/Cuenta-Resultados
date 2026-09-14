@@ -2,51 +2,46 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Dashboard Posventa - Análisis Porcentual</title>
+    <title>Dashboard Posventa - Proyecciones</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         body { font-family: 'Segoe UI', Tahoma, sans-serif; background: #f4f7f6; padding: 20px; color: #333; }
         .container { max-width: 1400px; margin: auto; }
         .header { text-align: center; margin-bottom: 20px; }
-        .charts-row { display: flex; flex-wrap: wrap; gap: 20px; margin-bottom: 30px; }
-        .chart-box { background: white; padding: 20px; border-radius: 8px; flex: 1; min-width: 450px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+        .chart-container { background: white; padding: 20px; border-radius: 8px; margin-bottom: 30px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
         .table-container { background: white; padding: 20px; border-radius: 8px; margin-bottom: 30px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); overflow-x: auto; }
         h2 { color: #2c3e50; font-size: 18px; border-bottom: 2px solid #ecf0f1; padding-bottom: 10px; margin-top:0; }
         table { width: 100%; border-collapse: collapse; font-size: 13px; }
         th, td { padding: 10px; text-align: center; border-bottom: 1px solid #ddd; }
         th:first-child, td:first-child { text-align: left; font-weight: bold; min-width: 200px; }
         th { background: #f8f9fa; color: #2c3e50; }
-        .sube { background-color: #e74c3c; color: white; font-weight: bold; border-radius: 4px; }
-        .baja { background-color: #f1c40f; color: black; font-weight: bold; border-radius: 4px; }
-        .proyeccion { color: #7f8c8d; font-style: italic; background-color: #fafafa; }
+        .sube { background-color: #e74c3c !important; color: white !important; font-weight: bold; border-radius: 4px; }
+        .baja { background-color: #f1c40f !important; color: black !important; font-weight: bold; border-radius: 4px; }
+        .proyeccion { color: #7f8c8d !important; font-style: italic; background-color: #fafafa; }
         #loading { text-align: center; font-size: 18px; color: #2980b9; font-weight: bold; padding: 50px; }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="header">
-            <h1>📊 Tablero de Análisis Porcentual - Total Sol</h1>
+            <h1>📊 Tablero Gerencial - Utilidad Operativa y Costos</h1>
         </div>
         
-        <div id="loading">Sincronizando porcentajes y proyecciones... ⏳</div>
+        <div id="loading">Sincronizando proyecciones y mapa de calor... ⏳</div>
         
         <div id="dashboard" style="display:none;">
-            <div class="charts-row">
-                <div class="chart-box">
-                    <canvas id="ventasChart"></canvas>
-                </div>
-                <div class="chart-box">
-                    <canvas id="utilidadChart"></canvas>
-                </div>
+            <div class="chart-container">
+                <h2>📈 Utilidad Operativa Después de Impuestos (Fila 103)</h2>
+                <canvas id="combinedChart" height="80"></canvas>
             </div>
 
             <div class="table-container">
-                <h2>🟡 KPIs Costos Controlables (Comparativo Mensual)</h2>
+                <h2>🟡 Costos Controlables (Valores $ - Proyección a Dic)</h2>
                 <div id="tabla-controlables"></div>
             </div>
 
             <div class="table-container">
-                <h2>🔵 KPIs Costos No Controlables (Comparativo Mensual)</h2>
+                <h2>🔵 Costos No Controlables (Valores $ - Proyección a Dic)</h2>
                 <div id="tabla-no-controlables"></div>
             </div>
         </div>
@@ -54,32 +49,73 @@
 
     <script>
         // PEGA AQUÍ TU ENLACE TERMINADO EN /exec
-        const scriptUrl ="https://script.google.com/macros/s/AKfycbyDV-LAoMQVORJfYptA6X6ozMgAvEzRiSyM17zJ-BBqNYDGEBP9kVia4i-vM64bDjdR/exec"
+        const scriptUrl = "https://script.google.com/macros/s/AKfycbyDV-LAoMQVORJfYptA6X6ozMgAvEzRiSyM17zJ-BBqNYDGEBP9kVia4i-vM64bDjdR/exec"
+
+        const formatMoney = (n) => new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS', maximumFractionDigits: 0 }).format(n);
+
+        // Calcula el promedio móvil de los últimos 3 meses con datos
+        function projectData(rawData) {
+            let processed = [...rawData];
+            let lastIdx = -1;
+            
+            for (let i = 0; i < 12; i++) {
+                if (processed[i] !== null && processed[i] !== undefined) {
+                    lastIdx = i;
+                }
+            }
+            
+            let avg = 0;
+            if (lastIdx >= 2) {
+                avg = (processed[lastIdx] + processed[lastIdx-1] + processed[lastIdx-2]) / 3;
+            } else if (lastIdx >= 0) {
+                let sum = 0;
+                for (let i = 0; i <= lastIdx; i++) sum += processed[i];
+                avg = sum / (lastIdx + 1);
+            }
+            
+            let isProjected = Array(12).fill(false);
+            for (let i = 0; i < 12; i++) {
+                if (i > lastIdx) {
+                    processed[i] = avg;       
+                    isProjected[i] = true;    
+                } else if (processed[i] === null) {
+                    processed[i] = 0;
+                }
+            }
+            return { data: processed, isProjected: isProjected };
+        }
+
         function buildTable(items, containerId) {
+            if(!items || items.length === 0) return;
+            const months = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
+            let baseProj = projectData(items[0].data);
+            
             let html = '<table><thead><tr><th>Concepto</th>';
-            const months = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago (P)', 'Sep (P)', 'Oct (P)', 'Nov (P)', 'Dic (P)'];
-            months.forEach(m => html += `<th>${m}</th>`);
+            for (let i = 0; i < 12; i++) {
+                let suffix = baseProj.isProjected[i] ? ' (P)' : '';
+                html += `<th>${months[i]}${suffix}</th>`;
+            }
             html += '</tr></thead><tbody>';
             
             items.forEach(item => {
                 html += `<tr><td>${item.name}</td>`;
+                let proj = projectData(item.data);
+                let vals = proj.data;
+                let isProj = proj.isProjected;
                 
-                // Promedio últimos 3 meses para proyectar hasta fin de año
-                const d = item.data;
-                const avg3 = (d[4] + d[5] + d[6]) / 3;
-                const projected = [...d, avg3, avg3, avg3, avg3, avg3];
-                
-                projected.forEach((val, i) => {
+                for (let i = 0; i < 12; i++) {
                     let cssClass = '';
-                    if (i > 0 && i <= 6) { 
-                        if (val > projected[i-1]) cssClass = 'sube'; // Rojo si sube
-                        else if (val < projected[i-1]) cssClass = 'baja'; // Amarillo si baja
-                    } 
-                    else if (i > 6) {
+                    let val = vals[i];
+                    
+                    if (isProj[i]) {
                         cssClass = 'proyeccion';
+                    } else if (i > 0) {
+                        let prevVal = vals[i-1];
+                        if (val > prevVal) cssClass = 'sube'; // Rojo si sube el costo
+                        else if (val < prevVal) cssClass = 'baja'; // Amarillo si baja
                     }
-                    html += `<td class="${cssClass}">${val.toFixed(2)}%</td>`;
-                });
+                    html += `<td class="${cssClass}">${formatMoney(val)}</td>`;
+                }
                 html += '</tr>';
             });
             html += '</tbody></table>';
@@ -95,29 +131,67 @@
                 buildTable(data.controlables, 'tabla-controlables');
                 buildTable(data.noControlables, 'tabla-no-controlables');
 
-                new Chart(document.getElementById('ventasChart').getContext('2d'), {
-                    type: 'line',
-                    data: {
-                        labels: data.meses,
-                        datasets: [
-                            { label: 'Ventas (%)', data: data.ventas, borderColor: '#3498db', tension: 0.3 },
-                            { label: 'Costo de Ventas (%)', data: data.costoVentas, borderColor: '#e74c3c', tension: 0.3 }
-                        ]
-                    }
-                });
+                const utilVals = projectData(data.utilidadValores);
+                const utilPcts = projectData(data.utilidadPorcentajes);
+                const labelMeses = data.meses.map((mes, i) => utilVals.isProjected[i] ? mes + ' (P)' : mes);
 
-                new Chart(document.getElementById('utilidadChart').getContext('2d'), {
+                new Chart(document.getElementById('combinedChart').getContext('2d'), {
                     type: 'line',
                     data: {
-                        labels: data.meses,
+                        labels: labelMeses,
                         datasets: [
-                            { label: 'Utilidad Operativa (%)', data: data.utilidad, borderColor: '#2ecc71', backgroundColor: 'rgba(46, 204, 113, 0.1)', fill: true, tension: 0.3 }
+                            {
+                                type: 'bar',
+                                label: 'Utilidad en $ (Eje Izq)',
+                                data: utilVals.data,
+                                backgroundColor: 'rgba(46, 204, 113, 0.7)',
+                                yAxisID: 'y'
+                            },
+                            {
+                                type: 'line',
+                                label: 'Margen % (Eje Der)',
+                                data: utilPcts.data,
+                                borderColor: '#3498db',
+                                backgroundColor: '#3498db',
+                                borderWidth: 3,
+                                tension: 0.3,
+                                yAxisID: 'y1'
+                            }
                         ]
+                    },
+                    options: {
+                        responsive: true,
+                        interaction: { mode: 'index', intersect: false },
+                        scales: {
+                            y: {
+                                type: 'linear',
+                                display: true,
+                                position: 'left',
+                                title: { display: true, text: 'Valores en $' },
+                                ticks: { callback: function(value) { return formatMoney(value); } }
+                            },
+                            y1: {
+                                type: 'linear',
+                                display: true,
+                                position: 'right',
+                                title: { display: true, text: 'Porcentaje (%)' },
+                                grid: { drawOnChartArea: false },
+                                ticks: { callback: function(value) { return value + '%'; } }
+                            }
+                        },
+                        plugins: {
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        let val = context.raw;
+                                        if (context.datasetIndex === 0) return formatMoney(val); 
+                                        return val.toFixed(2) + '%';
+                                    }
+                                }
+                            }
+                        }
                     }
                 });
-            })
-            .catch(error => {
-                document.getElementById('loading').innerText = 'Error de conexión. Verifica el enlace.';
             });
     </script>
 </body>
