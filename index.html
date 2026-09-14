@@ -16,12 +16,11 @@
         th:first-child, td:first-child { text-align: left; font-weight: bold; min-width: 200px; }
         th { background: #f8f9fa; color: #2c3e50; }
         
-        /* Nuevas reglas de colores para Costos Operativos */
         /* Colores Pastel Suaves para Costos Operativos */
-        .sube { background-color: #f8d7da !important; color: #721c24 !important; font-weight: bold; border-radius: 4px; } /* Rojo pastel */
-        .verde { background-color: #d4edda !important; color: #155724 !important; font-weight: bold; border-radius: 4px; } /* Verde pastel */
-        .estable { background-color: #fff3cd !important; color: #856404 !important; font-weight: bold; border-radius: 4px; } /* Amarillo pastel */
-        .proyeccion { color: #7f8c8d !important; font-style: italic; background-color: #fafafa; }
+        .sube { background-color: #f8d7da !important; color: #721c24 !important; font-weight: bold; border-radius: 4px; } 
+        .verde { background-color: #d4edda !important; color: #155724 !important; font-weight: bold; border-radius: 4px; } 
+        .estable { background-color: #fff3cd !important; color: #856404 !important; font-weight: bold; border-radius: 4px; } 
+        .texto-proyectado { font-style: italic; opacity: 0.7; }
         
         #loading { text-align: center; font-size: 18px; color: #2980b9; font-weight: bold; padding: 50px; }
     </style>
@@ -54,27 +53,31 @@
 
     <script>
         // PEGA AQUÍ TU ENLACE TERMINADO EN /exec
-        const scriptUrl = "https://script.google.com/macros/s/AKfycbyDV-LAoMQVORJfYptA6X6ozMgAvEzRiSyM17zJ-BBqNYDGEBP9kVia4i-vM64bDjdR/exec"
+        const scriptUrl ="https://script.google.com/macros/s/AKfycbyDV-LAoMQVORJfYptA6X6ozMgAvEzRiSyM17zJ-BBqNYDGEBP9kVia4i-vM64bDjdR/exec" 
 
         const formatMoney = (n) => new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS', maximumFractionDigits: 0 }).format(n);
 
-        // Promedio Móvil: Calcula cada mes proyectado basándose en los 3 meses INMEDIATAMENTE anteriores (reales o proyectados)
-        function projectData(rawData) {
-            let processed = [...rawData];
-            let lastIdx = -1;
-            
-            // Detectar el último mes con datos reales cargados
-            for (let i = 0; i < 12; i++) {
-                if (processed[i] !== null && processed[i] !== undefined && processed[i] !== 0) {
-                    lastIdx = i;
+        // Calcula hasta qué mes hay datos cargados globalmente para arrancar la proyección en bloque
+        function getGlobalLastIdx(dataObj) {
+            let maxIdx = -1;
+            const items = [...dataObj.controlables, ...dataObj.noControlables];
+            items.forEach(item => {
+                for(let i=0; i<12; i++) {
+                    if (item.data[i] !== null && item.data[i] !== undefined && item.data[i] !== 0) {
+                        if (i > maxIdx) maxIdx = i;
+                    }
                 }
-            }
-            
+            });
+            return maxIdx;
+        }
+
+        // Proyecta en base al último mes consolidado global
+        function projectData(rawData, globalLastIdx) {
+            let processed = [...rawData];
             let isProjected = Array(12).fill(false);
             
             for (let i = 0; i < 12; i++) {
-                if (i > lastIdx) {
-                    // Tomar los últimos 3 datos (incluso si son proyectados) para el cálculo encadenado
+                if (i > globalLastIdx) {
                     let sum = 0;
                     let count = 0;
                     if (i >= 1) { sum += processed[i-1]; count++; }
@@ -90,10 +93,10 @@
             return { data: processed, isProjected: isProjected };
         }
 
-        function buildTable(items, containerId) {
+        function buildTable(items, containerId, globalLastIdx) {
             if(!items || items.length === 0) return;
             const months = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
-            let baseProj = projectData(items[0].data);
+            let baseProj = projectData(items[0].data, globalLastIdx);
             
             let html = '<table><thead><tr><th>Concepto</th>';
             for (let i = 0; i < 12; i++) {
@@ -104,7 +107,7 @@
             
             items.forEach(item => {
                 html += `<tr><td>${item.name}</td>`;
-                let proj = projectData(item.data);
+                let proj = projectData(item.data, globalLastIdx);
                 let vals = proj.data;
                 let isProj = proj.isProjected;
                 
@@ -112,32 +115,27 @@
                     let cssClass = '';
                     let val = vals[i];
                     
-                  if (isProj[i]) {
-                        cssClass = 'proyeccion';
-                    } else if (i > 0) {
+                    // Primero evaluamos el color del semáforo para TODOS los meses (Reales y Proyectados)
+                    if (i > 0) {
                         let prevVal = vals[i-1];
-                        
                         if (prevVal !== 0) {
                             let ratio = val / prevVal;
-                            if (ratio > 1.02) {
-                                cssClass = 'sube'; // Rojo
-                            } else if (ratio < 0.98) {
-                                cssClass = 'verde'; // Verde
-                            } else {
-                                cssClass = 'estable'; // Amarillo
-                            }
+                            if (ratio > 1.02) cssClass = 'sube'; 
+                            else if (ratio < 0.98) cssClass = 'verde'; 
+                            else cssClass = 'estable'; 
                         } else {
-                            // Qué hacer si el mes anterior fue $0
-                            if (val > 0) {
-                                cssClass = 'sube'; // Pasó de 0 a tener gasto (Rojo)
-                            } else if (val === 0) {
-                                cssClass = 'estable'; // Se mantuvo en 0 (Amarillo)
-                            } else {
-                                cssClass = 'verde'; // Negativo (Verde)
-                            }
+                            if (val > 0) cssClass = 'sube';
+                            else if (val === 0) cssClass = 'estable';
+                            else cssClass = 'verde';
                         }
                     }
-                    html += `<td class="${cssClass}">${formatMoney(val)}</td>`;
+                    
+                    // Luego, si es proyección, le agregamos la cursiva al número (sin borrar el color de fondo)
+                    if (isProj[i]) {
+                        cssClass += ' texto-proyectado';
+                    }
+                    
+                    html += `<td class="${cssClass.trim()}">${formatMoney(val)}</td>`;
                 }
                 html += '</tr>';
             });
@@ -151,11 +149,13 @@
                 document.getElementById('loading').style.display = 'none';
                 document.getElementById('dashboard').style.display = 'block';
 
-                buildTable(data.controlables, 'tabla-controlables');
-                buildTable(data.noControlables, 'tabla-no-controlables');
+                let globalLastIdx = getGlobalLastIdx(data);
 
-                const utilVals = projectData(data.utilidadValores);
-                const utilPcts = projectData(data.utilidadPorcentajes);
+                buildTable(data.controlables, 'tabla-controlables', globalLastIdx);
+                buildTable(data.noControlables, 'tabla-no-controlables', globalLastIdx);
+
+                const utilVals = projectData(data.utilidadValores, globalLastIdx);
+                const utilPcts = projectData(data.utilidadPorcentajes, globalLastIdx);
                 const labelMeses = data.meses.map((mes, i) => utilVals.isProjected[i] ? mes + ' (P)' : mes);
 
                 new Chart(document.getElementById('combinedChart').getContext('2d'), {
