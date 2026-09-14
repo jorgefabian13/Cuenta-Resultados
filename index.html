@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Autosol VW - Posventa</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,700;0,900;1,900&display=swap');
+        
+        body, html {
+            margin: 0; padding: 0; height: 100%; font-family: 'Montserrat', sans-serif;
+            background-color: #0f172a; color: white;
+            /* Imagen de un taller moderno con capa oscura para que resalten los botones */
+            background-image: linear-gradient(rgba(15, 23, 42, 0.85), rgba(15, 23, 42, 0.90)), url('https://images.unsplash.com/photo-1613214149922-f1809c99b414?q=80&w=2070&auto=format&fit=crop');
+            background-size: cover; background-position: center; display: flex; flex-direction: column; align-items: center; justify-content: center;
+        }
+        
+        .header { text-align: center; margin-bottom: 40px; display: flex; flex-direction: column; align-items: center; }
+        
+        /* Estilo del logo VW */
+        .vw-logo { width: 90px; margin-bottom: 15px; filter: drop-shadow(0px 4px 10px rgba(0,0,0,0.6)); }
+        
+        .logo-title { font-size: 4.5rem; font-weight: 900; font-style: italic; letter-spacing: -2px; margin: 0; text-transform: uppercase; line-height: 1.1; }
+        .text-white { color: #ffffff; }
+        .text-blue { color: #00b0f0; } /* Tono azul limpio y corporativo */
+        .subtitle { font-size: 1rem; letter-spacing: 6px; color: #cbd5e1; text-transform: uppercase; border-top: 1px solid rgba(255,255,255,0.2); border-bottom: 1px solid rgba(255,255,255,0.2); padding: 8px 0; margin-top: 15px; display: inline-block; font-weight: 700; }
+
+        .cards-container { display: flex; gap: 30px; flex-wrap: wrap; justify-content: center; max-width: 1200px; padding: 20px; }
+        
+        .card {
+            background: rgba(30, 41, 59, 0.5); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.15); border-radius: 20px; padding: 40px 30px; width: 300px;
+            text-decoration: none; color: white; transition: all 0.3s ease; display: flex; flex-direction: column; box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+        .card:hover { transform: translateY(-10px); background: rgba(30, 41, 59, 0.8); border-color: #00b0f0; box-shadow: 0 20px 40px rgba(0, 176, 240, 0.2); }
+        
+        .icon-box {
+            width: 60px; height: 60px; border-radius: 15px; display: flex; align-items: center; justify-content: center; font-size: 24px; margin-bottom: 20px;
+        }
+        .bg-blue { background-color: #00b0f0; }
+        .bg-green { background-color: #10b981; }
+        .bg-purple { background-color: #8b5cf6; }
+        
+        .card-title { font-size: 1.5rem; font-weight: 900; font-style: italic; margin: 0 0 5px 0; text-transform: uppercase; }
+        .card-subtitle { font-size: 0.8rem; color: #94a3b8; text-transform: uppercase; font-weight: 700; letter-spacing: 1px; margin: 0; }
+        
+        .footer { position: absolute; bottom: 20px; font-size: 0.7rem; color: #64748b; letter-spacing: 2px; }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <!-- Logo VW oficial actualizado (Diseño Flat) -->
+        <img src="https://upload.wikimedia.org/wikipedia/commons/6/6d/Volkswagen_logo_2019.svg" alt="Volkswagen Logo" class="vw-logo">
+        
+        <h1 class="logo-title"><span class="text-white">AUTOSOL</span> <span class="text-blue">POSVENTA</span></h1>
+        <div class="subtitle">SISTEMA DE GESTIÓN GERENCIAL</div>
+    </div>
+
+    <div class="cards-container">
+        <!-- Tarjeta Operación -->
+        <a href="ppt.html" class="card">
+            <div class="icon-box bg-blue">⚙️</div>
+            <h2 class="card-title">Operación</h2>
+            <p class="card-subtitle">PPT & Performance</p>
+        </a>
+
+        <!-- Tarjeta Costos -->
+        <a href="costos.html" class="card">
+            <div class="icon-box bg-green">🎯</div>
+            <h2 class="card-title">Costos</h2>
+            <p class="card-subtitle">Utilidad & Gastos</p>
+        </a>
+
+        <!-- Tarjeta Facturación -->
+        <a href="facturacion.html" class="card">
+            <div class="icon-box bg-purple">💲</div>
+            <h2 class="card-title">Facturación</h2>
+            <p class="card-subtitle">Finanzas & Ventas</p>
+        </a>
+    </div>
+
+    <div class="footer">
+        © 2026 AUTOSOL VW · GESTIÓN PROFESIONAL DE CONCESIONARIOS
+    </div>
+
+</body>
+</html>
