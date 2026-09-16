@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Seguimiento Comercial</title>
+    <title>Seguimiento Comercial - Facturación</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800;900&display=swap');
         
         body { 
             font-family: 'Inter', sans-serif; 
@@ -15,57 +15,64 @@
             display: flex; flex-direction: column; align-items: center;
         }
         
-        /* Cabecera Azul VW */
-        .navbar { background: #001E50; width: 100%; padding: 15px 0; display: flex; justify-content: center; color: white; box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin-bottom: 25px; }
-        .nav-content { max-width: 1300px; width: 100%; display: flex; align-items: center; gap: 15px; padding: 0 20px; }
-        .back-btn { background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); width: 35px; height: 35px; border-radius: 8px; display: flex; align-items: center; justify-content: center; cursor: pointer; text-decoration: none; color: white; font-weight: bold; transition: all 0.2s; }
+        /* Cabecera Ultracompacta Azul VW (Idéntica a PPT) */
+        .navbar { background: #001E50; width: 100%; padding: 12px 0; display: flex; justify-content: center; color: white; box-shadow: 0 2px 5px rgba(0,0,0,0.1); margin-bottom: 15px; }
+        .nav-content { max-width: 1400px; width: 100%; display: flex; align-items: center; justify-content: space-between; padding: 0 20px; }
+        .nav-left { display: flex; align-items: center; gap: 12px; }
+        .back-btn { background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); width: 32px; height: 32px; border-radius: 6px; display: flex; align-items: center; justify-content: center; cursor: pointer; text-decoration: none; color: white; font-weight: bold; font-size: 0.9rem; transition: all 0.2s;}
         .back-btn:hover { background: rgba(255,255,255,0.2); }
-        .title-group { display: flex; flex-direction: column; }
-        .title { font-size: 1.1rem; font-weight: 700; letter-spacing: 0.5px; margin: 0; }
-        .subtitle { font-size: 0.75rem; color: #94a3b8; font-weight: 400; }
+        .title { font-size: 1rem; font-weight: 900; letter-spacing: 0.5px; margin: 0; text-transform: uppercase;}
+        .subtitle { font-size: 0.7rem; color: #94a3b8; font-weight: 500; }
 
-        .container { width: 100%; max-width: 1300px; padding: 0 20px; }
+        .container { width: 100%; max-width: 1400px; padding: 0 20px; }
         
-        /* Filtros: Solapas Desplegables Compactas */
-        .filters-container { background: white; border-radius: 12px; padding: 15px 25px; margin-bottom: 25px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); border: 1px solid #f1f5f9; display: flex; gap: 20px; align-items: center; flex-wrap: wrap; }
-        .filter-group { display: flex; align-items: center; gap: 10px; }
-        .filter-label { font-size: 0.7rem; font-weight: 700; color: #64748b; text-transform: uppercase; }
-        .filter-select { padding: 8px 12px; border-radius: 6px; border: 1px solid #cbd5e1; font-family: inherit; font-size: 0.8rem; font-weight: 600; color: #0f172a; background: #f8fafc; cursor: pointer; outline: none; transition: border-color 0.2s; }
-        .filter-select:focus { border-color: #001E50; }
+        /* Barra de Filtros Compacta en una sola línea (Idéntica a PPT) */
+        .filters-bar { background: white; border-radius: 8px; padding: 10px 20px; margin-bottom: 15px; box-shadow: 0 1px 2px rgba(0,0,0,0.05); border: 1px solid #f1f5f9; display: flex; gap: 15px; align-items: center; }
+        .filter-group { display: flex; align-items: center; gap: 8px; border-right: 1px solid #e2e8f0; padding-right: 15px; }
+        .filter-group:last-child { border-right: none; }
+        .filter-label { font-size: 0.65rem; font-weight: 800; color: #64748b; }
+        .filter-select { padding: 4px 8px; border-radius: 4px; border: 1px solid #cbd5e1; font-family: inherit; font-size: 0.75rem; font-weight: 600; color: #0f172a; background: #f8fafc; cursor: pointer; outline: none; }
 
-        /* Grilla de Tarjetas (Centro) */
-        .top-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-bottom: 25px; }
-        .data-card { background: white; border-radius: 12px; padding: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); border: 1px solid #f1f5f9; }
+        /* Grilla de Tarjetas - 3 Columnas para Facturación */
+        .top-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 15px; }
+        .data-card { background: white; border-radius: 12px; padding: 15px 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.03); border: 1px solid #f1f5f9; }
         
         .border-blue { border-left: 4px solid #001E50; }
         .border-cyan { border-left: 4px solid #00b0f0; }
         .border-red { border-left: 4px solid #ef4444; }
 
-        .card-header { font-size: 0.75rem; font-weight: 700; color: #64748b; text-transform: uppercase; margin-bottom: 15px; border-bottom: 1px solid #f1f5f9; padding-bottom: 8px; }
+        .card-header { font-size: 0.65rem; font-weight: 800; color: #64748b; text-transform: uppercase; margin-bottom: 12px; border-bottom: 1px solid #f1f5f9; padding-bottom: 6px; }
         
-        .list-item { display: flex; justify-content: space-between; align-items: center; padding: 6px 0; border-bottom: 1px dashed #f1f5f9; }
+        .list-item { display: flex; justify-content: space-between; align-items: center; padding: 4px 0; border-bottom: 1px dashed #f1f5f9; }
         .list-item:last-child { border-bottom: none; }
-        .list-label { font-size: 0.75rem; font-weight: 600; color: #475569; text-transform: uppercase;}
+        .list-label { font-size: 0.65rem; font-weight: 700; color: #475569; text-transform: uppercase;}
         
         .list-data { text-align: right; }
-        .list-val { font-size: 1rem; font-weight: 700; color: #0f172a; }
-        .list-subval { font-size: 0.65rem; color: #94a3b8; font-weight: 500; margin-top: 2px; }
+        .list-val { font-size: 0.9rem; font-weight: 800; color: #0f172a; font-style: italic; }
+        .list-subval { font-size: 0.6rem; color: #94a3b8; font-weight: 500; margin-top: 2px; }
         
-        .consolidado { background: #f8fafc; padding: 12px; border-radius: 8px; margin-top: 10px; border: 1px solid #e2e8f0; }
-        .consolidado .list-label { font-weight: 800; color: #001E50; }
-        .consolidado-val { font-size: 1.2rem; color: #001E50; font-weight: 800; }
+        .consolidado { background: #f8fafc; padding: 8px 12px; border-radius: 6px; margin-top: 8px; }
+        .consolidado .list-label { font-weight: 900; color: #001E50; }
+        .consolidado-val { font-size: 1.1rem; color: #001E50; font-weight: 900; font-style: italic; }
 
-        /* Sección de Relojes - Tarjetas Individuales */
-        .section-header { font-size: 0.8rem; font-weight: 700; color: #64748b; text-transform: uppercase; margin-bottom: 15px; }
-        .gauge-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 15px; margin-bottom: 30px;}
-        .gauge-card { background: white; border-radius: 12px; padding: 15px; text-align: center; box-shadow: 0 1px 3px rgba(0,0,0,0.05); border: 1px solid #f1f5f9; display: flex; flex-direction: column; align-items: center;}
-        .gauge-title { font-size: 0.7rem; font-weight: 700; color: #475569; margin-bottom: 10px; text-transform: uppercase; }
-        .chart-wrapper { position: relative; height: 60px; width: 100%; display: flex; justify-content: center; }
-        .gauge-pct { font-size: 1.1rem; font-weight: 800; margin-top: -10px; }
+        /* Relojes - Dark Mode Ultra Compactos (Fondo Azul Noche Idéntico a PPT) */
+        .gauges-container { background: #0b1121; border-radius: 12px; padding: 15px 20px; margin-bottom: 25px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); border: 1px solid rgba(255,255,255,0.05); }
+        .gauge-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+        .gauge-header-title { font-size: 0.8rem; font-weight: 900; color: white; text-transform: uppercase; font-style: italic; }
+        .gauge-legend { display: flex; gap: 10px; font-size: 0.55rem; font-weight: 700; color: #94a3b8; }
+        .legend-item { display: flex; align-items: center; gap: 4px; }
+        .dot { width: 6px; height: 6px; border-radius: 50%; }
 
-        /* Gráfico Interanual (Abajo) */
+        .gauge-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 10px; }
+        .gauge-card { background: rgba(30,41,59,0.5); border-radius: 8px; padding: 10px; text-align: center; border: 1px solid rgba(255,255,255,0.05); }
+        .gauge-title { font-size: 0.6rem; font-weight: 700; color: #94a3b8; margin-top: 5px; text-transform: uppercase; }
+        .chart-wrapper { position: relative; height: 50px; width: 100%; display: flex; justify-content: center; }
+        .gauge-pct { font-size: 1.1rem; font-weight: 900; margin-top: -10px; color: white; font-style: italic; }
+
+        /* Contenedor Gráfico Interanual */
         .chart-container { background: white; border-radius: 12px; padding: 20px; margin-bottom: 40px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); border: 1px solid #f1f5f9; }
-        .bar-wrapper { position: relative; height: 250px; width: 100%; margin-top: 15px; }
+        .chart-header { font-size: 0.75rem; font-weight: 800; color: #64748b; text-transform: uppercase; margin-bottom: 15px; }
+        .bar-wrapper { position: relative; height: 200px; width: 100%; }
 
         .text-green { color: #10b981 !important; }
         .text-yellow { color: #f59e0b !important; }
@@ -78,21 +85,23 @@
 
     <div class="navbar">
         <div class="nav-content">
-            <a href="index.html" class="back-btn">←</a>
-            <div class="title-group">
-                <h1 class="title">AUTOSOL VW - POSVENTA</h1>
-                <div class="subtitle">Seguimiento Comercial Gerencial</div>
+            <div class="nav-left">
+                <a href="index.html" class="back-btn">←</a>
+                <div class="title-group">
+                    <h1 class="title">AUTOSOL VW - POSVENTA</h1>
+                    <div class="subtitle">Módulo de Facturación</div>
+                </div>
             </div>
         </div>
     </div>
 
     <div class="container">
-        <div id="loading">Sincronizando Base de Datos... ⏳</div>
+        <div id="loading">Sincronizando Base de Datos Facturación... ⏳</div>
 
         <div id="dashboard" style="display: none;">
             
-            <!-- Filtros: Solapas Desplegables -->
-            <div class="filters-container">
+            <!-- Barra de Filtros Ultra Compacta -->
+            <div class="filters-bar">
                 <div class="filter-group">
                     <span class="filter-label">AÑO</span>
                     <select class="filter-select" id="filter-ano">
@@ -105,18 +114,18 @@
                     <span class="filter-label">MES</span>
                     <select class="filter-select" id="filter-meses">
                         <option value="TODOS">Anual</option>
-                        <option value="ENERO">Enero</option>
-                        <option value="FEBRERO">Febrero</option>
-                        <option value="MARZO">Marzo</option>
-                        <option value="ABRIL">Abril</option>
-                        <option value="MAYO">Mayo</option>
+                        <option value="ENERO">Ene</option>
+                        <option value="FEBRERO">Feb</option>
+                        <option value="MARZO">Mar</option>
+                        <option value="ABRIL">Abr</option>
+                        <option value="MAYO">May</option>
                         <option value="JUNIO">Junio</option>
                         <option value="JULIO">Julio</option>
-                        <option value="AGOSTO">Agosto</option>
-                        <option value="SEPTIEMBRE" selected>Septiembre</option>
-                        <option value="OCTUBRE">Octubre</option>
-                        <option value="NOVIEMBRE">Noviembre</option>
-                        <option value="DICIEMBRE">Diciembre</option>
+                        <option value="AGOSTO">Ago</option>
+                        <option value="SEPTIEMBRE" selected>Sep</option>
+                        <option value="OCTUBRE">Oct</option>
+                        <option value="NOVIEMBRE">Nov</option>
+                        <option value="DICIEMBRE">Dic</option>
                     </select>
                 </div>
                 <div class="filter-group">
@@ -148,13 +157,22 @@
                 <div class="data-card border-red"><div class="card-header">DESVÍO A LA FECHA</div><div id="des-list"></div></div>
             </div>
             
-            <!-- Relojes en Tarjetas Individuales -->
-            <div class="section-header">EFICIENCIA DE PERFORMANCE (KPI)</div>
-            <div class="gauge-grid" id="gauge-container"></div>
+            <!-- Relojes Oscuros (Mantiene la regla de negocio del 95% para facturación) -->
+            <div class="gauges-container">
+                <div class="gauge-header">
+                    <div class="gauge-header-title">EFICIENCIA DE PERFORMANCE (KPI)</div>
+                    <div class="gauge-legend">
+                        <div class="legend-item"><div class="dot" style="background:#ef4444;"></div> < 90%</div>
+                        <div class="legend-item"><div class="dot" style="background:#f59e0b;"></div> 90-95%</div>
+                        <div class="legend-item"><div class="dot" style="background:#10b981;"></div> > 95%</div>
+                    </div>
+                </div>
+                <div class="gauge-grid" id="gauge-container"></div>
+            </div>
 
-            <!-- Gráfico Interanual desplazado hacia abajo -->
+            <!-- Gráfico Interanual -->
             <div class="chart-container">
-                <div class="card-header" style="border-bottom:none; margin-bottom:5px;">COMPARATIVA INTERANUAL (2025 vs 2026)</div>
+                <div class="chart-header">COMPARATIVA INTERANUAL DE FACTURACIÓN (2025 VS 2026)</div>
                 <div class="bar-wrapper"><canvas id="interanualChart"></canvas></div>
             </div>
             
@@ -163,8 +181,7 @@
 
     <script>
         // PEGA AQUÍ TU ENLACE DE APPS SCRIPT
-        const scriptUrl ="https://script.google.com/macros/s/AKfycbyhWE1JG33AuYOcs_OEyRcLuIo0mo0jtTtSPGAFK_gCJb12yq3loteH7_Wvuqg2xjgD/exec"
-
+        const scriptUrl ="https://script.google.com/macros/s/AKfycbyG8JHUWrdFu_eorOcHKoTmD9vxziC4fueXPQgxjNDJQda1EUBcNUkLNK8tNwbe5pZh/exec"
         let rawData = [];
         let currentFilters = { ano: '2026', sucursal: 'TODAS', area: 'TODAS', mes: 'SEPTIEMBRE' };
         let interanualChart;
@@ -178,6 +195,7 @@
             return new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS', maximumFractionDigits: 0 }).format(n);
         };
 
+        // Regla estricta para Facturación (No PPT)
         const getStatusColor = (pct) => {
             if (pct >= 95) return '#10b981'; 
             if (pct >= 90) return '#f59e0b'; 
@@ -256,16 +274,16 @@
             
             let html = `
                 <div class="gauge-card">
-                    <div class="gauge-title">${name}</div>
                     <div class="chart-wrapper"><canvas id="gauge-${id}"></canvas></div>
                     <div class="gauge-pct ${colorClass}">${pct.toFixed(1)}%</div>
+                    <div class="gauge-title">${name}</div>
                 </div>`;
             document.getElementById('gauge-container').insertAdjacentHTML('beforeend', html);
 
             new Chart(document.getElementById(`gauge-${id}`).getContext('2d'), {
                 type: 'doughnut',
-                data: { datasets: [{ data: [pct > 100 ? 100 : pct, pct > 100 ? 0 : 100 - pct], backgroundColor: [color, '#e2e8f0'], borderWidth: 0, circumference: 180, rotation: 270 }] },
-                options: { responsive: true, maintainAspectRatio: false, cutout: '82%', plugins: { tooltip: { enabled: false } }, hover: { mode: null } }
+                data: { datasets: [{ data: [pct > 100 ? 100 : pct, pct > 100 ? 0 : 100 - pct], backgroundColor: [color, 'rgba(255,255,255,0.08)'], borderWidth: 0, circumference: 180, rotation: 270 }] },
+                options: { responsive: true, maintainAspectRatio: false, cutout: '75%', plugins: { tooltip: { enabled: false } }, hover: { mode: null } }
             });
         }
 
@@ -301,16 +319,15 @@
                 },
                 options: {
                     responsive: true, maintainAspectRatio: false,
-                    plugins: { legend: { position: 'bottom', labels: { font: { family: 'Inter', size: 11, weight: '600' }, color: '#475569' } } },
+                    plugins: { legend: { position: 'bottom', labels: { font: { family: 'Inter', size: 10, weight: '600' }, color: '#475569' } } },
                     scales: {
-                        y: { beginAtZero: true, ticks: { callback: function(value) { return '$' + (value / 1000000).toFixed(0) + 'M'; }, font: { family: 'Inter', size: 10 }, color: '#64748b' }, grid: { color: '#f1f5f9' }, border: { display: false } },
-                        x: { grid: { display: false }, ticks: { font: { family: 'Inter', size: 11, weight: '500' }, color: '#475569' }, border: { display: false } }
+                        y: { beginAtZero: true, ticks: { callback: function(value) { return '$' + (value / 1000000).toFixed(0) + 'M'; }, font: { family: 'Inter', size: 9 }, color: '#64748b' }, grid: { color: '#f1f5f9' }, border: { display: false } },
+                        x: { grid: { display: false }, ticks: { font: { family: 'Inter', size: 10, weight: '500' }, color: '#475569' }, border: { display: false } }
                     }
                 }
             });
         }
 
-        // Lógica actualizada para las Solapas Desplegables (<select>)
         document.querySelectorAll('.filter-select').forEach(select => {
             select.addEventListener('change', (e) => {
                 let id = e.target.id;
