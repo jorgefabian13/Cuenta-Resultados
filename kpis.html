@@ -90,7 +90,7 @@
         <div id="dashboard" style="display: none;">
             
             <div class="controls-wrapper">
-                <!-- Barra de Filtros -->
+                <!-- Barra de Filtros Actualizada (Salta y Jujuy) -->
                 <div class="filters-bar">
                     <div class="filter-group">
                         <span class="filter-label">AÑO</span>
@@ -102,12 +102,9 @@
                     <div class="filter-group">
                         <span class="filter-label">SUCURSAL</span>
                         <select class="filter-select" id="filter-sucursales">
-                            <option value="TODAS" selected>Todas las sucursales</option>
-                            <option value="SANTA FE">Santa Fe</option>
+                            <option value="TODAS" selected>Todas</option>
+                            <option value="SALTA">Salta</option>
                             <option value="JUJUY">Jujuy</option>
-                            <option value="EXPRESS">Express</option>
-                            <option value="MOVIL">Taller Móvil</option>
-                            <option value="TARTAGAL">Tartagal</option>
                         </select>
                     </div>
                 </div>
@@ -116,7 +113,7 @@
                 <div class="search-panel">
                     <div class="search-input-wrapper">
                         <span class="filter-label">BUSCADOR (MÁX 2)</span>
-                        <input type="text" class="search-input" id="kpi-search" placeholder="🔍 Escribe para filtrar métricas...">
+                        <input type="text" class="search-input" id="kpi-search" placeholder="🔍 Escribe para filtrar (ej. 'grado', 'ocupacion')...">
                     </div>
                     <div class="kpi-tray" id="kpi-tray">
                         <!-- Las píldoras se cargan por JS -->
@@ -162,13 +159,12 @@
 
         let dataGlobal = { defs: [], raw: [] };
         let currentFilters = { ano: '2026', sucursal: 'TODAS' };
-        let selectedKpis = []; // Guarda los IDs de los KPIs seleccionados (Max 2)
+        let selectedKpis = []; 
         let lineChart;
 
         const mesesList = ['ENERO', 'FEBRERO', 'MARZO', 'ABRIL', 'MAYO', 'JUNIO', 'JULIO', 'AGOSTO', 'SEPTIEMBRE', 'OCTUBRE', 'NOVIEMBRE', 'DICIEMBRE'];
         const formatVal = (n, isPct) => isPct ? n.toFixed(1) + '%' : new Intl.NumberFormat('es-AR', { maximumFractionDigits: 1 }).format(n);
 
-        // --- SISTEMA DE CACHÉ ---
         function loadData() {
             let cached = sessionStorage.getItem('autosolData');
             let cacheTime = sessionStorage.getItem('autosolTime');
@@ -197,7 +193,6 @@
             updateDashboard();
         }
 
-        // --- CONSTRUCTOR DE PÍLDORAS ---
         function buildKpiTray() {
             const tray = document.getElementById('kpi-tray');
             tray.innerHTML = '';
@@ -214,7 +209,6 @@
             });
         }
 
-        // --- BUSCADOR ---
         document.getElementById('kpi-search').addEventListener('input', (e) => {
             let term = e.target.value.toLowerCase();
             document.querySelectorAll('.kpi-pill').forEach(pill => {
@@ -223,24 +217,19 @@
             });
         });
 
-        // --- LÓGICA DE SELECCIÓN (MAX 2) ---
         function toggleKpi(id, element) {
             let index = selectedKpis.indexOf(id);
             if (index > -1) {
-                // Deseleccionar
                 selectedKpis.splice(index, 1);
                 element.className = 'kpi-pill';
             } else {
-                // Seleccionar
                 if (selectedKpis.length >= 2) {
-                    // Quita el primero si intentas elegir un tercero
                     let firstId = selectedKpis.shift();
                     document.querySelector(`.kpi-pill[data-id="${firstId}"]`).className = 'kpi-pill';
                 }
                 selectedKpis.push(id);
             }
             
-            // Reaplicar clases visuales
             document.querySelectorAll('.kpi-pill').forEach(p => p.classList.remove('selected', 'selected-2'));
             if (selectedKpis[0]) document.querySelector(`.kpi-pill[data-id="${selectedKpis[0]}"]`).classList.add('selected');
             if (selectedKpis[1]) document.querySelector(`.kpi-pill[data-id="${selectedKpis[1]}"]`).classList.add('selected-2');
@@ -248,7 +237,6 @@
             updateDashboard();
         }
 
-        // --- FILTROS BÁSICOS ---
         document.querySelectorAll('.filter-select').forEach(select => {
             select.addEventListener('change', (e) => {
                 currentFilters[e.target.id.replace('filter-', '')] = e.target.value;
@@ -256,7 +244,6 @@
             });
         });
 
-        // --- ACTUALIZADOR PRINCIPAL ---
         function updateDashboard() {
             if (selectedKpis.length === 0) {
                 document.querySelector('.empty-state').style.display = 'block';
@@ -270,7 +257,6 @@
             document.querySelector('.empty-state').style.display = 'none';
             document.getElementById('kpiChart').style.display = 'block';
 
-            // Filtrar datos base
             let rawFiltered = dataGlobal.raw.filter(row => {
                 let matchAno = row.ano === currentFilters.ano;
                 let matchSuc = currentFilters.sucursal === 'TODAS' || row.sucursal.includes(currentFilters.sucursal);
@@ -294,14 +280,11 @@
                     }
                 });
 
-                // Promedio por mes (ideal para KPIs al ver "Todas las sucursales")
                 let dataPoints = monthlyTotals.map((tot, i) => monthlyCounts[i] > 0 ? (tot / monthlyCounts[i]) : null);
                 
-                // Calcular YTD (Year To Date) para la tarjeta
                 let validPoints = dataPoints.filter(p => p !== null);
                 let ytdVal = validPoints.length > 0 ? validPoints.reduce((a,b)=>a+b,0) / validPoints.length : 0;
 
-                // Actualizar Tarjeta UI
                 let card = document.getElementById(`summary-card-${idx+1}`);
                 card.classList.add('active');
                 document.getElementById(`sc${idx+1}-name`).innerText = def.name;
@@ -309,17 +292,15 @@
                 document.getElementById(`sc${idx+1}-val`).innerText = formatVal(ytdVal, def.isPct);
                 document.getElementById(`sc${idx+1}-val`).style.color = idx === 0 ? '#001E50' : '#f59e0b';
 
-                // Configurar Eje Y dual si es necesario
                 let axisId = def.isPct ? 'y-pct' : 'y-num';
                 yAxesConfig[axisId] = {
                     type: 'linear',
                     display: true,
                     position: def.isPct ? 'right' : 'left',
-                    grid: { drawOnChartArea: Object.keys(yAxesConfig).length === 0 }, // Solo dibuja la grilla una vez
+                    grid: { drawOnChartArea: Object.keys(yAxesConfig).length === 0 }, 
                     ticks: { callback: function(v) { return formatVal(v, def.isPct); }, font: { family: 'Inter', size: 10 }, color: '#64748b' }
                 };
 
-                // Línea principal
                 chartDatasets.push({
                     label: def.name,
                     data: dataPoints,
@@ -334,7 +315,6 @@
                     pointRadius: 4
                 });
 
-                // Línea de Objetivo
                 if (def.obj > 0) {
                     chartDatasets.push({
                         label: `Meta ${def.name}`,
@@ -349,10 +329,8 @@
                 }
             });
 
-            // Ocultar tarjeta 2 si solo hay 1 seleccionado
             if (selectedKpis.length === 1) document.getElementById('summary-card-2').classList.remove('active');
 
-            // Dibujar Gráfico
             if (lineChart) lineChart.destroy();
             
             lineChart = new Chart(document.getElementById('kpiChart').getContext('2d'), {
@@ -381,7 +359,6 @@
             document.getElementById('chart-subtitle').innerText = subtitleStr;
         }
 
-        // Arrancar
         loadData();
     </script>
 </body>
