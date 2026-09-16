@@ -27,14 +27,14 @@
         /* Contenedor centralizado */
         .container { width: 100%; max-width: 1300px; padding: 0 20px; }
         
-        /* Filtros Solapas (Pill Buttons) */
-        .filters-container { background: white; border-radius: 12px; padding: 20px; margin-bottom: 25px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); border: 1px solid #f1f5f9; }
-        .filter-row { display: flex; align-items: center; gap: 15px; margin-bottom: 12px; }
+        /* Filtros Solapas (Pill Buttons) - Estilo en línea */
+        .filters-container { background: white; border-radius: 12px; padding: 25px; margin-bottom: 25px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); border: 1px solid #f1f5f9; }
+        .filter-row { display: flex; align-items: center; margin-bottom: 15px; }
         .filter-row:last-child { margin-bottom: 0; }
-        .filter-label { font-size: 0.7rem; font-weight: 700; color: #94a3b8; text-transform: uppercase; width: 80px; flex-shrink: 0; }
-        .filter-options { display: flex; gap: 8px; flex-wrap: wrap; }
+        .filter-label { font-size: 0.75rem; font-weight: 700; color: #94a3b8; text-transform: uppercase; width: 100px; flex-shrink: 0; }
+        .filter-options { display: flex; gap: 10px; flex-wrap: wrap; }
         
-        .pill-btn { background: white; border: 1px solid #cbd5e1; color: #475569; padding: 6px 16px; border-radius: 20px; font-family: inherit; font-size: 0.75rem; font-weight: 600; cursor: pointer; transition: all 0.2s; }
+        .pill-btn { background: white; border: 1px solid #cbd5e1; color: #475569; padding: 8px 18px; border-radius: 20px; font-family: inherit; font-size: 0.75rem; font-weight: 600; cursor: pointer; transition: all 0.2s; }
         .pill-btn:hover { border-color: #001E50; color: #001E50; }
         .pill-btn.active { background: #001E50; color: white; border-color: #001E50; box-shadow: 0 4px 6px rgba(0, 30, 80, 0.15); }
 
@@ -50,7 +50,7 @@
         
         .list-item { display: flex; justify-content: space-between; align-items: center; padding: 6px 0; border-bottom: 1px dashed #f1f5f9; }
         .list-item:last-child { border-bottom: none; }
-        .list-label { font-size: 0.75rem; font-weight: 600; color: #475569; }
+        .list-label { font-size: 0.75rem; font-weight: 600; color: #475569; text-transform: uppercase;}
         
         .list-data { text-align: right; }
         .list-val { font-size: 1rem; font-weight: 700; color: #0f172a; }
@@ -60,13 +60,13 @@
         .consolidado .list-label { font-weight: 800; color: #001E50; }
         .consolidado-val { font-size: 1.2rem; color: #001E50; font-weight: 800; }
 
-        /* Contenedor de Relojes (Fila completa) */
-        .gauges-container { background: white; border-radius: 12px; padding: 20px; margin-bottom: 30px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); border: 1px solid #f1f5f9; }
-        .gauge-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 15px; }
-        .gauge-card { text-align: center; }
-        .gauge-title { font-size: 0.7rem; font-weight: 700; color: #64748b; margin-bottom: 5px; text-transform: uppercase; }
-        .chart-wrapper { position: relative; height: 60px; display: flex; justify-content: center; }
-        .gauge-pct { font-size: 1.1rem; font-weight: 800; margin-top: -15px; }
+        /* Sección de Relojes - Tarjetas Individuales */
+        .section-header { font-size: 0.8rem; font-weight: 700; color: #64748b; text-transform: uppercase; margin-bottom: 15px; }
+        .gauge-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 15px; margin-bottom: 30px;}
+        .gauge-card { background: white; border-radius: 12px; padding: 15px; text-align: center; box-shadow: 0 1px 3px rgba(0,0,0,0.05); border: 1px solid #f1f5f9; display: flex; flex-direction: column; align-items: center;}
+        .gauge-title { font-size: 0.7rem; font-weight: 700; color: #475569; margin-bottom: 10px; text-transform: uppercase; }
+        .chart-wrapper { position: relative; height: 60px; width: 100%; display: flex; justify-content: center; }
+        .gauge-pct { font-size: 1.1rem; font-weight: 800; margin-top: -10px; }
 
         /* Gráfico Interanual (Abajo) */
         .chart-container { background: white; border-radius: 12px; padding: 20px; margin-bottom: 40px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); border: 1px solid #f1f5f9; }
@@ -96,7 +96,7 @@
 
         <div id="dashboard" style="display: none;">
             
-            <!-- Filtros Solapas -->
+            <!-- Filtros Solapas en línea -->
             <div class="filters-container">
                 <div class="filter-row">
                     <span class="filter-label">AÑO</span>
@@ -153,11 +153,9 @@
                 <div class="data-card border-red"><div class="card-header">DESVÍO A LA FECHA</div><div id="des-list"></div></div>
             </div>
             
-            <!-- Relojes en una sola fila para centrar la vista -->
-            <div class="gauges-container">
-                <div class="card-header" style="border-bottom:none; margin-bottom:5px;">EFICIENCIA DE PERFORMANCE (KPI)</div>
-                <div class="gauge-grid" id="gauge-container"></div>
-            </div>
+            <!-- Relojes en Tarjetas Individuales -->
+            <div class="section-header">EFICIENCIA DE PERFORMANCE (KPI)</div>
+            <div class="gauge-grid" id="gauge-container"></div>
 
             <!-- Gráfico Interanual desplazado hacia abajo -->
             <div class="chart-container">
@@ -239,14 +237,14 @@
             });
 
             let c = totals['CONSOLIDADO'];
-            document.getElementById('obj-list').innerHTML = objHtml + `<div class="list-item consolidado"><span class="list-label">TOTAL VW</span> <div class="list-data"><div class="consolidado-val">${formatMoney(c.obj)}</div><div class="list-subval">Diario: ${formatMoneySmall(c.objDia)}</div></div></div>`;
-            document.getElementById('ava-list').innerHTML = avaHtml + `<div class="list-item consolidado"><span class="list-label">TOTAL VW</span> <div class="list-data"><div class="consolidado-val">${formatMoney(c.ava)}</div><div class="list-subval">Promedio: ${formatMoneySmall(c.promDia)}</div></div></div>`;
+            document.getElementById('obj-list').innerHTML = objHtml + `<div class="list-item consolidado"><span class="list-label">TOTAL AUTOSOL</span> <div class="list-data"><div class="consolidado-val">${formatMoney(c.obj)}</div><div class="list-subval">Diario: ${formatMoneySmall(c.objDia)}</div></div></div>`;
+            document.getElementById('ava-list').innerHTML = avaHtml + `<div class="list-item consolidado"><span class="list-label">TOTAL AUTOSOL</span> <div class="list-data"><div class="consolidado-val">${formatMoney(c.ava)}</div><div class="list-subval">Promedio: ${formatMoneySmall(c.promDia)}</div></div></div>`;
             let colorEstiloCons = c.des < 0 ? 'color: #ef4444;' : 'color: #10b981;';
-            document.getElementById('des-list').innerHTML = desHtml + `<div class="list-item consolidado"><span class="list-label">TOTAL VW</span> <div class="consolidado-val" style="${colorEstiloCons}">${formatMoney(c.des)}</div></div>`;
+            document.getElementById('des-list').innerHTML = desHtml + `<div class="list-item consolidado"><span class="list-label">TOTAL AUTOSOL</span> <div class="consolidado-val" style="${colorEstiloCons}">${formatMoney(c.des)}</div></div>`;
 
             document.getElementById('gauge-container').innerHTML = '';
             
-            // Renderizamos los gauges en orden, finalizando con el Total VW
+            // Renderizamos los gauges en orden, finalizando con el Total Autosol
             sucursales.forEach(suc => {
                 let count = totals[suc].count;
                 let avgPctG = count > 0 ? (totals[suc].pctG_sum / count) : 0;
@@ -255,7 +253,7 @@
                 }
             });
             let cAvgPctG = c.count > 0 ? (c.pctG_sum / c.count) : 0;
-            createGauge('total', 'TOTAL VW', cAvgPctG);
+            createGauge('total', 'TOTAL AUTOSOL', cAvgPctG);
         }
 
         function createGauge(id, name, pct) {
