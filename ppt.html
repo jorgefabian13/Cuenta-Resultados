@@ -15,17 +15,19 @@
             display: flex; flex-direction: column; align-items: center;
         }
         
-        /* Cabecera Ultracompacta Azul VW */
-        .navbar { background: #001E50; width: 100%; padding: 8px 0; display: flex; justify-content: center; color: white; box-shadow: 0 2px 5px rgba(0,0,0,0.1); margin-bottom: 15px; }
+        /* Cabecera Ultracompacta Azul VW (con un poco más de aire) */
+        .navbar { background: #001E50; width: 100%; padding: 12px 0; display: flex; justify-content: center; color: white; box-shadow: 0 2px 5px rgba(0,0,0,0.1); margin-bottom: 15px; }
         .nav-content { max-width: 1400px; width: 100%; display: flex; align-items: center; justify-content: space-between; padding: 0 20px; }
-        .nav-left { display: flex; align-items: center; gap: 10px; }
-        .back-btn { background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); width: 28px; height: 28px; border-radius: 6px; display: flex; align-items: center; justify-content: center; cursor: pointer; text-decoration: none; color: white; font-weight: bold; font-size: 0.8rem; }
-        .title { font-size: 0.9rem; font-weight: 800; letter-spacing: 0.5px; margin: 0; }
-        .subtitle { font-size: 0.65rem; color: #94a3b8; font-weight: 400; }
+        .nav-left { display: flex; align-items: center; gap: 12px; }
+        .back-btn { background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); width: 32px; height: 32px; border-radius: 6px; display: flex; align-items: center; justify-content: center; cursor: pointer; text-decoration: none; color: white; font-weight: bold; font-size: 0.9rem; transition: all 0.2s;}
+        .back-btn:hover { background: rgba(255,255,255,0.2); }
+        .title { font-size: 1rem; font-weight: 900; letter-spacing: 0.5px; margin: 0; text-transform: uppercase;}
+        .subtitle { font-size: 0.7rem; color: #94a3b8; font-weight: 500; }
 
-        .days-badge { display: flex; align-items: center; gap: 8px; background: rgba(255,255,255,0.1); padding: 3px 12px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.2); }
-        .days-label { font-size: 0.6rem; font-weight: 600; color: #cbd5e1; text-transform: uppercase; }
-        .days-val { font-size: 1rem; font-weight: 800; color: #ccff00; }
+        /* Insignia de Días Hábiles (AGRANDADA Y DESTACADA) */
+        .days-badge { display: flex; align-items: center; gap: 12px; background: rgba(255,255,255,0.15); padding: 6px 20px; border-radius: 30px; border: 1px solid rgba(255,255,255,0.3); box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
+        .days-label { font-size: 0.75rem; font-weight: 700; color: #f8fafc; text-transform: uppercase; letter-spacing: 1px; }
+        .days-val { font-size: 1.5rem; font-weight: 900; color: #ccff00; text-shadow: 0 0 10px rgba(204, 255, 0, 0.4); }
 
         .container { width: 100%; max-width: 1400px; padding: 0 20px; }
         
@@ -89,7 +91,7 @@
                 </div>
             </div>
             <div class="days-badge">
-                <span class="days-label">DÍAS HÁBILES</span>
+                <span class="days-label">Días Hábiles</span>
                 <span class="days-val" id="dias-text">-</span>
             </div>
         </div>
@@ -120,7 +122,7 @@
                         <option value="ABRIL">Abr</option>
                         <option value="MAYO">May</option>
                         <option value="JUNIO">Jun</option>
-                        <option value="JULIO">Jul</option>
+                        <option value="JULIO">Julio</option>
                         <option value="AGOSTO">Ago</option>
                         <option value="SEPTIEMBRE" selected>Sep</option>
                         <option value="OCTUBRE">Oct</option>
@@ -191,7 +193,6 @@
             return new Intl.NumberFormat('es-AR', { maximumFractionDigits: 1 }).format(n);
         };
 
-        // Regla estricta del 60% que discutimos
         const getPptColor = (pct) => {
             if (pct >= 60) return '#10b981'; 
             if (pct >= 50) return '#f59e0b'; 
@@ -350,11 +351,11 @@
                     datasets: [{
                         label: 'Avance PPT Semanal',
                         data: semData,
-                        borderColor: '#f97316', // Naranja vibrante
-                        backgroundColor: 'rgba(249, 115, 22, 0.15)', // Relleno naranja translúcido
+                        borderColor: '#f97316', 
+                        backgroundColor: 'rgba(249, 115, 22, 0.15)', 
                         borderWidth: 2,
                         fill: true,
-                        tension: 0.3, // Suaviza las curvas
+                        tension: 0.3, 
                         pointBackgroundColor: '#ffffff',
                         pointBorderColor: '#f97316',
                         pointRadius: 4
