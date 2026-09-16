@@ -160,8 +160,8 @@
     </div>
 
     <script>
-        // PEGA AQUÍ TU ENLACE DE APPS SCRIPT
-        const scriptUrl ="https://script.google.com/macros/s/AKfycbxPq-hBNXnoVv2zdmKx-oBVPRpM2vfKc6ZlsnWDtSvb49V0tkx6bEX-36KyLG_zdH5M/exec"
+        // PEGA AQUÍ TU NUEVO ENLACE DE APPS SCRIPT (NUEVA IMPLEMENTACIÓN)
+        const scriptUrl ="https://script.google.com/macros/s/AKfycbwzKCS9behx4HGf-j9VFThZvjRGVTMFE9SPsZMfuOF-VbgKv0I5SMNX3jGnPshc-R3n/exec"
 
         let dataGlobal = { defs: [], raw: [] };
         let currentFilters = { ano: '2026', sucursal: 'TODAS' };
@@ -172,9 +172,9 @@
         const formatVal = (n, isPct) => isPct ? n.toFixed(1) + '%' : new Intl.NumberFormat('es-AR', { maximumFractionDigits: 1 }).format(n);
 
         function loadData() {
-            // CAMBIAMOS LA LLAVE A V3 PARA FORZAR LA DESCARGA NUEVA
-            let cached = sessionStorage.getItem('autosolDataV3');
-            let cacheTime = sessionStorage.getItem('autosolTimeV3');
+            // Cambié la llave de la memoria a V4 para forzar que tu compu descargue los datos nuevos hoy
+            let cached = sessionStorage.getItem('autosolDataV4');
+            let cacheTime = sessionStorage.getItem('autosolTimeV4');
             let now = new Date().getTime();
             let cacheValido = cacheTime && (now - cacheTime < (5 * 60 * 1000));
 
@@ -183,8 +183,8 @@
                 initSystem(data);
             } else {
                 fetch(scriptUrl).then(res => res.json()).then(data => {
-                    sessionStorage.setItem('autosolDataV3', JSON.stringify(data));
-                    sessionStorage.setItem('autosolTimeV3', now.toString());
+                    sessionStorage.setItem('autosolDataV4', JSON.stringify(data));
+                    sessionStorage.setItem('autosolTimeV4', now.toString());
                     initSystem(data);
                 });
             }
@@ -193,8 +193,18 @@
         function initSystem(data) {
             document.getElementById('loading').style.display = 'none';
             document.getElementById('dashboard').style.display = 'block';
-            dataGlobal.defs = data.kpiDefs;
-            dataGlobal.raw = data.kpiRaw;
+            
+            dataGlobal.defs = data.kpiDefs || [];
+            dataGlobal.raw = data.kpiRaw || [];
+            
+            // Si la lista sigue vacía, lanzamos la alerta visual para saber qué pasa
+            if (dataGlobal.defs.length === 0) {
+                let errorMsg = document.querySelector('.empty-state');
+                errorMsg.innerHTML = '⚠️ <b>No se encontraron KPIs.</b><br><br>Asegúrate de haber hecho clic en <b>"Nueva Implementación"</b> en Apps Script y haber pegado el nuevo enlace aquí.';
+                errorMsg.style.display = 'block';
+                errorMsg.style.color = '#ef4444';
+                return;
+            }
             
             buildKpiControls();
             updateDashboard();
@@ -207,16 +217,15 @@
             dropdown.innerHTML = '<option value="">-- Selecciona un KPI para graficar --</option>';
             
             dataGlobal.defs.forEach(def => {
-                // Crear Píldora
                 let pill = document.createElement('div');
                 pill.className = 'kpi-pill';
                 pill.innerText = def.name;
                 pill.dataset.id = def.id;
                 pill.dataset.name = def.name.toLowerCase();
+                
                 pill.addEventListener('click', () => toggleKpi(def.id));
                 tray.appendChild(pill);
 
-                // Crear Opción en Desplegable
                 let opt = document.createElement('option');
                 opt.value = def.id;
                 opt.innerText = def.name;
@@ -224,15 +233,13 @@
             });
         }
 
-        // Lógica del Desplegable
         document.getElementById('kpi-dropdown').addEventListener('change', (e) => {
             if (e.target.value) {
                 toggleKpi(e.target.value);
-                e.target.value = ''; // Resetea el desplegable tras seleccionar
+                e.target.value = ''; 
             }
         });
 
-        // Lógica del Buscador
         document.getElementById('kpi-search').addEventListener('input', (e) => {
             let term = e.target.value.toLowerCase();
             document.querySelectorAll('.kpi-pill').forEach(pill => {
@@ -246,11 +253,10 @@
             if (index > -1) {
                 selectedKpis.splice(index, 1);
             } else {
-                if (selectedKpis.length >= 2) selectedKpis.shift(); // Quita el más antiguo si ya hay 2
+                if (selectedKpis.length >= 2) selectedKpis.shift(); 
                 selectedKpis.push(id);
             }
             
-            // Actualizar estilo visual de las píldoras
             document.querySelectorAll('.kpi-pill').forEach(p => p.classList.remove('selected', 'selected-2'));
             if (selectedKpis[0]) document.querySelector(`.kpi-pill[data-id="${selectedKpis[0]}"]`).classList.add('selected');
             if (selectedKpis[1]) document.querySelector(`.kpi-pill[data-id="${selectedKpis[1]}"]`).classList.add('selected-2');
@@ -258,7 +264,6 @@
             updateDashboard();
         }
 
-        // Filtros Superiores (Año y Sucursal)
         document.querySelectorAll('.filter-select:not(#kpi-dropdown)').forEach(select => {
             select.addEventListener('change', (e) => {
                 currentFilters[e.target.id.replace('filter-', '')] = e.target.value;
