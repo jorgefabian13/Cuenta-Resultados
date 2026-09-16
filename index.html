@@ -3,106 +3,175 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Autosol VW - Posventa</title>
+    <title>Autosol Posventa - Sistema Gerencial</title>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,700;0,900;1,900&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,400;0,600;0,700;0,800;0,900;1,800;1,900&display=swap');
         
-       body, html {
-            margin: 0; padding: 0; height: 100%; font-family: 'Montserrat', sans-serif;
-            background-color: #f4f7f6; color: #1e293b;
-            /* Imagen limpia y abstracta plateada/blanca (sin logos de otras marcas) con un degradado sutil */
-            background-image: linear-gradient(135deg, rgba(244, 247, 246, 0.90) 0%, rgba(255, 255, 255, 0.40) 100%), url('https://images.unsplash.com/photo-1493238792000-8113da705763?q=80&w=2070&auto=format&fit=crop');
-            background-size: cover; background-position: center; display: flex; flex-direction: column; align-items: center; justify-content: center;
+        body, html {
+            margin: 0; padding: 0; height: 100%; font-family: 'Inter', sans-serif;
+            background-color: #f4f7f9;
         }
-        
-        .header { text-align: center; margin-bottom: 40px; display: flex; flex-direction: column; align-items: center; }
-        
-        .vw-logo { width: 90px; margin-bottom: 15px; }
-        
-        .logo-title { font-size: 4.5rem; font-weight: 900; font-style: italic; letter-spacing: -2px; margin: 0; text-transform: uppercase; line-height: 1.1; }
-        .text-dark { color: #001e50; } /* Azul oscuro corporativo VW */
-        .text-blue { color: #00b0f0; } /* Azul claro vibrante */
-        
-        .subtitle { font-size: 1rem; letter-spacing: 6px; color: #64748b; text-transform: uppercase; border-top: 1px solid rgba(0,0,0,0.1); border-bottom: 1px solid rgba(0,0,0,0.1); padding: 8px 0; margin-top: 15px; display: inline-block; font-weight: 700; }
 
-        .cards-container { display: flex; gap: 30px; flex-wrap: wrap; justify-content: center; max-width: 1200px; padding: 20px; }
+        /* Contenedor principal con imagen de fondo (puedes reemplazar la URL por la tuya si tenías una específica) */
+        .bg-image {
+            background: linear-gradient(rgba(244, 247, 249, 0.75), rgba(244, 247, 249, 0.95)), url('https://images.unsplash.com/photo-1562426509-5044a121aa49?auto=format&fit=crop&q=80') center/cover;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        /* Logo VW simulado */
+        .logo-box {
+            width: 70px; height: 70px; border-radius: 50%; border: 3px solid #001E50;
+            display: flex; align-items: center; justify-content: center;
+            margin-bottom: 15px;
+        }
+        .logo-box svg { width: 45px; height: 45px; fill: #001E50; }
+
+        .title-container { text-align: center; margin-bottom: 50px; }
+        .main-title {
+            font-size: 3.5rem; font-weight: 900; font-style: italic; margin: 0; letter-spacing: -1.5px; text-transform: uppercase;
+        }
+        .text-dark { color: #001E50; }
+        .text-light { color: #00b0f0; }
         
+        .subtitle {
+            font-size: 0.9rem; font-weight: 700; color: #475569; letter-spacing: 4px; text-transform: uppercase;
+            border-top: 1px solid rgba(0, 30, 80, 0.15); border-bottom: 1px solid rgba(0, 30, 80, 0.15);
+            display: inline-block; padding: 6px 25px; margin-top: 10px;
+        }
+        
+        /* Grilla de 4 tarjetas */
+        .cards-container {
+            display: grid; 
+            grid-template-columns: repeat(4, 1fr); 
+            gap: 25px; 
+            max-width: 1200px; 
+            width: 100%; 
+        }
+
         .card {
-            background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
-            border: 1px solid rgba(0, 0, 0, 0.05); border-radius: 20px; padding: 40px 30px; width: 300px;
-            text-decoration: none; color: #1e293b; transition: all 0.3s ease; display: flex; flex-direction: column; box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+            background: white; border-radius: 16px; padding: 30px 25px;
+            text-decoration: none; color: inherit; box-shadow: 0 4px 15px rgba(0,0,0,0.03);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex; flex-direction: column; align-items: flex-start;
+            border: 1px solid #f1f5f9;
         }
-        .card:hover { transform: translateY(-10px); background: #ffffff; border-color: #00b0f0; box-shadow: 0 20px 40px rgba(0, 176, 240, 0.15); }
-        
-        /* Nuevo estilo para los íconos: Cuadrado, fondo blanco, borde negro */
+
+        .card:hover {
+            transform: translateY(-8px); 
+            box-shadow: 0 15px 35px rgba(0, 30, 80, 0.1);
+            border-color: #cbd5e1;
+        }
+
         .icon-box {
-            width: 55px; height: 55px; background-color: #ffffff; border: 2px solid #1e293b; border-radius: 12px; 
+            width: 45px; height: 45px; border-radius: 12px; border: 2px solid #001E50;
             display: flex; align-items: center; justify-content: center; margin-bottom: 20px;
+            transition: all 0.3s;
+        }
+
+        .card:hover .icon-box {
+            background: #001E50;
+        }
+
+        .icon-box svg { 
+            width: 22px; height: 22px; stroke: #001E50; stroke-width: 2; fill: none; transition: stroke 0.3s;
+        }
+
+        .card:hover .icon-box svg {
+            stroke: white;
         }
         
-        /* Estilo del dibujo del ícono */
-        .icon-box svg { width: 30px; height: 30px; stroke: #1e293b; stroke-width: 2; fill: none; stroke-linecap: round; stroke-linejoin: round; }
+        .card-title {
+            font-size: 1.15rem; font-weight: 900; color: #001E50; font-style: italic; margin: 0 0 6px 0; text-transform: uppercase;
+        }
         
-        .card-title { font-size: 1.5rem; font-weight: 900; font-style: italic; margin: 0 0 5px 0; text-transform: uppercase; color: #001e50; }
-        .card-subtitle { font-size: 0.8rem; color: #64748b; text-transform: uppercase; font-weight: 700; letter-spacing: 1px; margin: 0; }
-        
-        .footer { position: absolute; bottom: 20px; font-size: 0.7rem; color: #94a3b8; letter-spacing: 2px; }
+        .card-desc {
+            font-size: 0.7rem; font-weight: 700; color: #94a3b8; text-transform: uppercase; margin: 0;
+        }
+
+        /* Responsividad para pantallas más chicas */
+        @media (max-width: 1024px) {
+            .cards-container { grid-template-columns: repeat(2, 1fr); max-width: 600px; }
+            .main-title { font-size: 2.8rem; }
+        }
+        @media (max-width: 600px) {
+            .cards-container { grid-template-columns: 1fr; }
+        }
     </style>
 </head>
 <body>
 
-    <div class="header">
-        <!-- Logo VW oficial actualizado -->
-        <img src="https://upload.wikimedia.org/wikipedia/commons/6/6d/Volkswagen_logo_2019.svg" alt="Volkswagen Logo" class="vw-logo">
+    <div class="bg-image">
         
-        <h1 class="logo-title"><span class="text-dark">AUTOSOL</span> <span class="text-blue">POSVENTA</span></h1>
-        <div class="subtitle">SISTEMA DE GESTIÓN GERENCIAL</div>
-    </div>
+        <!-- Logo VW (SVG Simple) -->
+        <div class="logo-box">
+            <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                <path d="M50 5 C25 5 5 25 5 50 C5 75 25 95 50 95 C75 95 95 75 95 50 C95 25 75 5 50 5 Z M50 11 C71.5 11 89 28.5 89 50 C89 71.5 71.5 89 50 89 C28.5 89 11 71.5 11 50 C11 28.5 28.5 11 50 11 Z"/>
+                <path d="M19 32 L34 85 L44 55 L38 32 Z M81 32 L66 85 L56 55 L62 32 Z M50 78 L41 45 L50 15 L59 45 Z M28 15 L43 65 L50 40 L45 15 Z M72 15 L57 65 L50 40 L55 15 Z" fill="none" stroke="#001E50" stroke-width="3"/>
+            </svg>
+        </div>
 
-    <div class="cards-container">
-        <!-- Tarjeta Operación -->
-        <a href="ppt.html" class="card">
-            <div class="icon-box">
-                <!-- Ícono SVG (Dibujo Tuerca/Engranaje) -->
-                <svg viewBox="0 0 24 24">
-                    <circle cx="12" cy="12" r="3"></circle>
-                    <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1Z"></path>
-                </svg>
-            </div>
-            <h2 class="card-title">Operación</h2>
-            <p class="card-subtitle">PPT & Performance</p>
-        </a>
+        <div class="title-container">
+            <h1 class="main-title"><span class="text-dark">AUTOSOL</span> <span class="text-light">POSVENTA</span></h1>
+            <div class="subtitle">SISTEMA DE GESTIÓN GERENCIAL</div>
+        </div>
 
-        <!-- Tarjeta Costos -->
-        <a href="costos.html" class="card">
-            <div class="icon-box">
-                <!-- Ícono SVG (Dibujo Gráfico) -->
-                <svg viewBox="0 0 24 24">
-                    <path d="M3 3v18h18"></path>
-                    <path d="m19 9-5 5-4-4-3 3"></path>
-                </svg>
-            </div>
-            <h2 class="card-title">Costos</h2>
-            <p class="card-subtitle">Utilidad & Gastos</p>
-        </a>
+        <div class="cards-container">
+            
+            <!-- TARJETA 1: OPERACIÓN (PPT) -->
+            <a href="ppt.html" class="card">
+                <div class="icon-box">
+                    <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="3"></circle>
+                        <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+                    </svg>
+                </div>
+                <h2 class="card-title">OPERACIÓN</h2>
+                <p class="card-desc">PPT & PERFORMANCE</p>
+            </a>
 
-        <!-- Tarjeta Facturación -->
-        <a href="facturacion.html" class="card">
-            <div class="icon-box">
-                <!-- Ícono SVG (Dibujo Moneda/Dólar) -->
-                <svg viewBox="0 0 24 24">
-                    <line x1="12" y1="1" x2="12" y2="23"></line>
-                    <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
-                </svg>
-            </div>
-            <h2 class="card-title">Facturación</h2>
-            <p class="card-subtitle">Finanzas & Ventas</p>
-        </a>
-    </div>
+            <!-- TARJETA 2: GESTIÓN DE KPIs (NUEVO) -->
+            <a href="kpis.html" class="card">
+                <div class="icon-box">
+                    <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
+                    </svg>
+                </div>
+                <h2 class="card-title">GESTIÓN KPIs</h2>
+                <p class="card-desc">TENDENCIAS & ANÁLISIS</p>
+            </a>
 
-    <div class="footer">
-        © 2026 AUTOSOL VW · GESTIÓN PROFESIONAL DE CONCESIONARIOS
+            <!-- TARJETA 3: COSTOS -->
+            <a href="costos.html" class="card">
+                <div class="icon-box">
+                    <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline>
+                        <polyline points="17 6 23 6 23 12"></polyline>
+                    </svg>
+                </div>
+                <h2 class="card-title">COSTOS</h2>
+                <p class="card-desc">UTILIDAD & GASTOS</p>
+            </a>
+
+            <!-- TARJETA 4: FACTURACIÓN -->
+            <a href="facturacion.html" class="card">
+                <div class="icon-box">
+                    <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="12" y1="1" x2="12" y2="23"></line>
+                        <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+                    </svg>
+                </div>
+                <h2 class="card-title">FACTURACIÓN</h2>
+                <p class="card-desc">FINANZAS & VENTAS</p>
+            </a>
+
+        </div>
     </div>
 
 </body>
 </html>
+
