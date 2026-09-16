@@ -6,48 +6,64 @@
     <title>Facturación Posventa</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,700;0,900;1,900&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,700;0,900;1,800;1,900&display=swap');
         
         body { font-family: 'Montserrat', sans-serif; background: #f4f7f6; margin: 0; padding: 20px; color: #1e293b; }
         .container { max-width: 1400px; margin: auto; }
         
-        .header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 30px; }
-        .header-title { display: flex; align-items: center; gap: 15px; font-size: 1.5rem; font-weight: 900; font-style: italic; text-transform: uppercase; }
-        .back-btn { background: white; border: none; width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.05); text-decoration: none; color: #1e293b; font-weight: bold; }
+        .header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
+        .header-title { display: flex; align-items: center; gap: 15px; font-size: 1.8rem; font-weight: 900; font-style: italic; text-transform: uppercase; letter-spacing: -1px; }
+        .back-btn { background: white; border: 1px solid #e2e8f0; width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; text-decoration: none; color: #1e293b; font-weight: bold; transition: all 0.2s; }
+        .back-btn:hover { background: #f8fafc; }
         
+        /* Panel de Filtros Estilo BI */
+        .filters-panel { background: white; border-radius: 20px; padding: 25px 30px; margin-bottom: 30px; box-shadow: 0 4px 6px rgba(0,0,0,0.02); }
+        .filter-row { display: flex; flex-wrap: wrap; gap: 40px; margin-bottom: 25px; }
+        .filter-row:last-child { margin-bottom: 0; border-top: 1px solid #f1f5f9; padding-top: 20px; }
+        
+        .filter-group { display: flex; flex-direction: column; gap: 10px; }
+        .filter-label { font-size: 0.7rem; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: 1px; display: flex; align-items: center; gap: 5px; }
+        .filter-options { display: flex; gap: 8px; flex-wrap: wrap; }
+        
+        .f-btn { background: transparent; border: none; padding: 8px 16px; border-radius: 20px; font-family: 'Montserrat', sans-serif; font-size: 0.75rem; font-weight: 700; color: #64748b; cursor: pointer; transition: all 0.2s; text-transform: uppercase; }
+        .f-btn:hover { background: #f1f5f9; color: #1e293b; }
+        .f-btn.active-dark { background: #0f172a; color: white; }
+        .f-btn.active-blue { background: #2563eb; color: white; }
+
         /* Grid Superior: Objetivo, Avance, Desvío */
         .top-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-bottom: 30px; }
         
-        .data-card { background: white; border-radius: 20px; padding: 30px; box-shadow: 0 10px 20px rgba(0,0,0,0.03); position: relative; overflow: hidden; }
+        .data-card { background: white; border-radius: 20px; padding: 30px; box-shadow: 0 10px 20px rgba(0,0,0,0.03); }
         .data-card.dark { background: #1e293b; color: white; }
         
-        .card-header { display: flex; align-items: center; gap: 10px; font-size: 0.8rem; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 20px; }
+        .card-header { display: flex; align-items: center; gap: 8px; font-size: 0.75rem; font-weight: 800; color: #64748b; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 25px; }
         .dark .card-header { color: #94a3b8; }
         
-        .list-item { display: flex; justify-content: space-between; margin-bottom: 15px; font-size: 0.85rem; font-weight: 700; color: #64748b; }
-        .dark .list-item { color: #94a3b8; }
-        .list-val { font-size: 1.1rem; font-weight: 900; font-style: italic; color: #1e293b; }
+        .list-item { display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; font-size: 0.8rem; font-weight: 700; color: #64748b; }
+        .dark .list-item { color: #cbd5e1; }
+        
+        /* Tipografía de números estilo Dashboard */
+        .list-val { font-size: 1.25rem; font-weight: 900; font-style: italic; color: #0f172a; letter-spacing: -0.5px; }
         .dark .list-val { color: white; }
         
-        .consolidado { border-top: 1px solid #e2e8f0; padding-top: 15px; margin-top: 15px; }
-        .dark .consolidado { border-top: 1px solid rgba(255,255,255,0.1); }
-        .consolidado-val { font-size: 1.5rem; }
+        .consolidado { border-top: 2px solid #f1f5f9; padding-top: 20px; margin-top: 20px; }
+        .dark .consolidado { border-top: 2px solid rgba(255,255,255,0.1); }
+        .consolidado-val { font-size: 1.8rem; }
         
         /* Grid Inferior: Semáforos de Cumplimiento */
         .gauge-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
-        .gauge-card { background: #0b1121; border-radius: 20px; padding: 25px; color: white; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 10px 20px rgba(0,0,0,0.1); }
+        .gauge-card { background: #0f172a; border-radius: 20px; padding: 25px; color: white; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 10px 20px rgba(0,0,0,0.1); }
         
-        .gauge-info h3 { font-size: 0.7rem; color: #64748b; text-transform: uppercase; letter-spacing: 2px; margin: 0 0 10px 0; }
-        .gauge-pct { font-size: 3rem; font-weight: 900; font-style: italic; margin: 0; line-height: 1; }
+        .gauge-info h3 { font-size: 0.7rem; color: #94a3b8; text-transform: uppercase; letter-spacing: 1.5px; margin: 0 0 5px 0; font-weight: 700; }
+        .gauge-pct { font-size: 3.5rem; font-weight: 900; font-style: italic; margin: 0; line-height: 1; letter-spacing: -2px; }
         
-        .chart-wrapper { width: 90px; height: 45px; position: relative; }
+        .chart-wrapper { width: 100px; height: 50px; position: relative; }
         
-        /* Colores dinámicos */
         .text-green { color: #2ecc71 !important; }
         .text-yellow { color: #f1c40f !important; }
         .text-red { color: #e74c3c !important; }
         
-        #loading { text-align: center; padding: 50px; font-weight: bold; color: #3b82f6; }
+        #loading { text-align: center; padding: 50px; font-weight: bold; color: #2563eb; }
     </style>
 </head>
 <body>
@@ -56,7 +72,63 @@
         <div class="header">
             <div class="header-title">
                 <a href="index.html" class="back-btn">←</a>
-                <span>📊 Facturación Posventa</span>
+                <span>📊 FACTURACIÓN POSVENTA</span>
+            </div>
+        </div>
+
+        <!-- Nueva Botonera de Filtros -->
+        <div class="filters-panel">
+            <div class="filter-row">
+                <div class="filter-group">
+                    <span class="filter-label">📅 AÑO</span>
+                    <div class="filter-options">
+                        <button class="f-btn">2025</button>
+                        <button class="f-btn active-dark">2026</button>
+                    </div>
+                </div>
+                
+                <div class="filter-group" style="margin-left: 40px;">
+                    <span class="filter-label">📍 SUCURSALES</span>
+                    <div class="filter-options">
+                        <button class="f-btn active-blue">TODAS</button>
+                        <button class="f-btn">Jujuy</button>
+                        <button class="f-btn">Express</button>
+                        <button class="f-btn">MOVIL</button>
+                        <button class="f-btn">Santa Fe</button>
+                        <button class="f-btn">Tartagal</button>
+                    </div>
+                </div>
+
+                <div class="filter-group" style="margin-left: auto;">
+                    <span class="filter-label">💼 ÁREAS</span>
+                    <div class="filter-options">
+                        <button class="f-btn active-blue">TODAS</button>
+                        <button class="f-btn">ACCESORIOS</button>
+                        <button class="f-btn">REPUESTOS</button>
+                        <button class="f-btn">SERVICIOS</button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="filter-row">
+                <div class="filter-group">
+                    <span class="filter-label">🕒 MESES</span>
+                    <div class="filter-options">
+                        <button class="f-btn">ANUAL</button>
+                        <button class="f-btn">Ene</button>
+                        <button class="f-btn">Feb</button>
+                        <button class="f-btn active-blue">Mar</button>
+                        <button class="f-btn">Abr</button>
+                        <button class="f-btn">May</button>
+                        <button class="f-btn">Jun</button>
+                        <button class="f-btn">Jul</button>
+                        <button class="f-btn">Ago</button>
+                        <button class="f-btn">Sep</button>
+                        <button class="f-btn">Oct</button>
+                        <button class="f-btn">Nov</button>
+                        <button class="f-btn">Dic</button>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -65,44 +137,40 @@
         <div id="dashboard" style="display: none;">
             
             <div class="top-grid">
-                <!-- Tarjeta Objetivo -->
                 <div class="data-card">
                     <div class="card-header">🎯 OBJETIVO FACTURACIÓN</div>
                     <div id="obj-list"></div>
                 </div>
 
-                <!-- Tarjeta Avance -->
                 <div class="data-card">
                     <div class="card-header">💲 AVANCE A FECHA</div>
                     <div id="ava-list"></div>
                 </div>
 
-                <!-- Tarjeta Desvío -->
                 <div class="data-card dark">
                     <div class="card-header">⚠️ DESVÍO A FECHA</div>
                     <div id="des-list"></div>
                 </div>
             </div>
 
-            <div class="gauge-grid" id="gauge-container">
-                <!-- Los medidores de cumplimiento se inyectan aquí -->
-            </div>
-
+            <div class="gauge-grid" id="gauge-container"></div>
         </div>
     </div>
 
     <script>
         // PEGA AQUÍ TU ENLACE DE APPS SCRIPT
         const scriptUrl ="https://script.google.com/macros/s/AKfycbyQl9HqhxTz-lowrEi62c3rEE7CoLtpFWewgbu0CCLg9rxfNbtn_QIeoAM6OBNB_39c/exec"
+        // Nuevo formateador visual: Convierte los números a formato "Millones" ($ 1286.1M)
         const formatMoney = (n) => {
-            if (n >= 1000000 || n <= -1000000) return '$ ' + (n / 1000000).toFixed(1) + 'M';
-            return new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS', maximumFractionDigits: 0 }).format(n);
+            let isNeg = n < 0;
+            let val = Math.abs(n) / 1000000;
+            return (isNeg ? '-$ ' : '$ ') + val.toFixed(1) + 'M';
         };
 
         const getStatusColor = (pct) => {
-            if (pct >= 95) return '#2ecc71'; // Verde
-            if (pct >= 90) return '#f1c40f'; // Amarillo
-            return '#e74c3c'; // Rojo
+            if (pct >= 95) return '#2ecc71'; 
+            if (pct >= 90) return '#f1c40f'; 
+            return '#e74c3c'; 
         };
 
         const renderList = (data, type) => {
@@ -146,7 +214,7 @@
                 data: {
                     datasets: [{
                         data: [pct > 100 ? 100 : pct, pct > 100 ? 0 : 100 - pct],
-                        backgroundColor: [color, '#1e293b'],
+                        backgroundColor: [color, 'rgba(255,255,255,0.1)'],
                         borderWidth: 0,
                         circumference: 180,
                         rotation: 270
@@ -164,12 +232,10 @@
 
                 let fac = data.facturacion;
 
-                // Llenar listas superiores
                 document.getElementById('obj-list').innerHTML = renderList(fac, 'obj');
                 document.getElementById('ava-list').innerHTML = renderList(fac, 'ava');
                 document.getElementById('des-list').innerHTML = renderList(fac, 'des');
 
-                // Crear medidores
                 const sucursales = ['SANTA FE', 'JUJUY', 'EXPRESS', 'MOVIL', 'TARTAGAL'];
                 sucursales.forEach((suc, idx) => {
                     let obj = fac.sucursales[suc].objetivo;
@@ -178,7 +244,6 @@
                     createGauge(idx, suc, pct);
                 });
 
-                // Consolidado Total
                 let cPct = fac.consolidado.objetivo > 0 ? (fac.consolidado.avance / fac.consolidado.objetivo) * 100 : 0;
                 createGauge('total', 'TOTAL', cPct);
             });
