@@ -6,157 +6,167 @@
     <title>Seguimiento Comercial</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
         
         body { 
             font-family: 'Inter', sans-serif; 
-            background: #f4f7f9; 
-            margin: 0; padding: 0; color: #334155; 
+            background: #f8f9fa; /* Fondo extra claro y limpio */
+            margin: 0; padding: 20px; color: #334155; 
+            display: flex; flex-direction: column; align-items: center;
         }
         
-        /* Barra de Navegación Azul VW */
-        .navbar { background: #001E50; padding: 15px 30px; display: flex; align-items: center; justify-content: space-between; color: white; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
-        .nav-brand { display: flex; align-items: center; gap: 15px; }
-        .back-btn { background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); width: 35px; height: 35px; border-radius: 8px; display: flex; align-items: center; justify-content: center; cursor: pointer; text-decoration: none; color: white; font-weight: bold; transition: all 0.2s; }
-        .back-btn:hover { background: rgba(255,255,255,0.2); }
-        .title { font-size: 1.1rem; font-weight: 600; letter-spacing: 0.5px; margin: 0; }
-        .subtitle { font-size: 0.75rem; color: #94a3b8; font-weight: 400; }
+        /* Contenedor centralizado y compacto */
+        .container { width: 100%; max-width: 1250px; }
+        
+        /* Cabecera Minimalista */
+        .header { display: flex; align-items: center; gap: 15px; margin-bottom: 20px; padding-bottom: 15px; border-bottom: 1px solid #e2e8f0; }
+        .back-btn { font-size: 1.2rem; cursor: pointer; text-decoration: none; color: #001E50; font-weight: 800; }
+        .title-group { display: flex; flex-direction: column; }
+        .title { font-size: 1.2rem; font-weight: 800; color: #0f172a; margin: 0; text-transform: uppercase; }
+        .subtitle { font-size: 0.75rem; color: #64748b; }
 
-        .container { max-width: 1400px; margin: 30px auto; padding: 0 20px; }
+        /* Filtros Píldora (Estilo Autociel) */
+        .filters-container { display: flex; flex-direction: column; gap: 12px; margin-bottom: 25px; }
+        .filter-row { display: flex; align-items: center; gap: 15px; flex-wrap: wrap; }
+        .filter-label { font-size: 0.65rem; font-weight: 700; color: #94a3b8; text-transform: uppercase; width: 80px; }
+        .filter-options { display: flex; gap: 8px; flex-wrap: wrap; }
         
-        /* Filtros Compactos */
-        .filters-panel { background: white; border-radius: 12px; padding: 15px 25px; margin-bottom: 30px; box-shadow: 0 2px 8px rgba(0,0,0,0.04); border: 1px solid #e2e8f0; display: flex; gap: 20px; align-items: center; flex-wrap: wrap; }
-        .filter-group { display: flex; align-items: center; gap: 10px; }
-        .filter-label { font-size: 0.7rem; font-weight: 600; color: #64748b; text-transform: uppercase; }
-        .filter-select { padding: 8px 12px; border-radius: 6px; border: 1px solid #cbd5e1; font-family: inherit; font-size: 0.8rem; font-weight: 500; color: #0f172a; background: #f8fafc; cursor: pointer; outline: none; }
-        .filter-select:focus { border-color: #00b0f0; }
+        .pill-btn { background: white; border: 1px solid #cbd5e1; color: #475569; padding: 6px 14px; border-radius: 20px; font-family: inherit; font-size: 0.7rem; font-weight: 600; cursor: pointer; transition: all 0.2s; }
+        .pill-btn:hover { border-color: #001E50; color: #001E50; }
+        .pill-btn.active { background: #001E50; color: white; border-color: #001E50; box-shadow: 0 4px 6px rgba(0, 30, 80, 0.15); }
 
-        /* Tarjetas Principales */
-        .top-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-bottom: 30px; }
-        .data-card { background: white; border-radius: 12px; padding: 20px 25px; box-shadow: 0 2px 8px rgba(0,0,0,0.04); border: 1px solid #e2e8f0; }
-        .card-header { font-size: 0.75rem; font-weight: 700; color: #475569; text-transform: uppercase; margin-bottom: 20px; border-bottom: 1px solid #f1f5f9; padding-bottom: 10px; }
+        /* Grilla de Tarjetas Compactas */
+        .top-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 20px; }
+        .data-card { background: white; border-radius: 8px; padding: 15px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); border: 1px solid #f1f5f9; }
         
-        /* Filas de Datos */
-        .list-item { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px dashed #f1f5f9; }
-        .list-item:last-child { border-bottom: none; }
-        .list-label { font-size: 0.8rem; font-weight: 500; color: #64748b; }
-        
-        .list-data { text-align: right; }
-        .list-val { font-size: 1.05rem; font-weight: 700; color: #1e293b; }
-        .list-subval { font-size: 0.65rem; color: #94a3b8; font-weight: 400; margin-top: 2px; } /* Información secundaria (Diaria) */
-        
-        .consolidado { background: #f8fafc; padding: 15px; border-radius: 8px; margin-top: 15px; border: 1px solid #e2e8f0; }
-        .consolidado .list-label { font-weight: 700; color: #001E50; }
-        .consolidado-val { font-size: 1.25rem; color: #001E50; font-weight: 700; }
+        /* Bordes laterales estilo Autociel */
+        .border-blue { border-left: 4px solid #001E50; }
+        .border-cyan { border-left: 4px solid #00b0f0; }
+        .border-red { border-left: 4px solid #ef4444; }
 
-        /* Relojes de Performance */
-        .gauge-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 15px; margin-bottom: 30px; }
-        .gauge-card { background: white; border-radius: 12px; padding: 15px; text-align: center; box-shadow: 0 2px 8px rgba(0,0,0,0.04); border: 1px solid #e2e8f0; }
-        .gauge-info h3 { font-size: 0.7rem; color: #475569; text-transform: uppercase; margin: 0 0 10px 0; font-weight: 600; }
-        .chart-wrapper { width: 100%; height: 80px; position: relative; display: flex; justify-content: center; }
-        .gauge-pct { font-size: 1.5rem; font-weight: 700; margin-top: -20px; }
+        .card-header { font-size: 0.7rem; font-weight: 700; color: #64748b; text-transform: uppercase; margin-bottom: 12px; }
+        
+        .list-item { display: flex; justify-content: space-between; align-items: center; padding: 4px 0; }
+        .list-label { font-size: 0.75rem; font-weight: 600; color: #475569; }
+        .list-val { font-size: 0.9rem; font-weight: 700; color: #0f172a; }
+        
+        .consolidado { border-top: 1px solid #f1f5f9; padding-top: 8px; margin-top: 8px; }
+        .consolidado .list-label { font-weight: 800; color: #0f172a; }
+        .consolidado-val { font-size: 1.1rem; color: #001E50; font-weight: 800; }
+
+        /* Sección Inferior: Gauges y Gráfico */
+        .bottom-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        
+        .gauges-container { background: white; border-radius: 8px; padding: 15px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); border: 1px solid #f1f5f9; }
+        .gauge-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 10px; }
+        .gauge-card { text-align: center; }
+        .gauge-title { font-size: 0.65rem; font-weight: 700; color: #64748b; margin-bottom: 5px; }
+        .chart-wrapper { position: relative; height: 50px; display: flex; justify-content: center; }
+        .gauge-pct { font-size: 1rem; font-weight: 800; margin-top: -15px; }
+
+        .chart-container { background: white; border-radius: 8px; padding: 15px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); border: 1px solid #f1f5f9; }
+        .bar-wrapper { position: relative; height: 160px; width: 100%; margin-top: 10px; }
 
         .text-green { color: #10b981 !important; }
         .text-yellow { color: #f59e0b !important; }
         .text-red { color: #ef4444 !important; }
 
-        #loading { text-align: center; padding: 50px; font-size: 1rem; color: #64748b; }
+        #loading { text-align: center; padding: 50px; font-size: 0.9rem; font-weight: 600; color: #64748b; }
     </style>
 </head>
 <body>
 
-    <div class="navbar">
-        <div class="nav-brand">
+    <div class="container">
+        <div class="header">
             <a href="index.html" class="back-btn">←</a>
-            <div>
-                <h1 class="title">AUTOSOL VW - POSVENTA</h1>
-                <div class="subtitle">Seguimiento Comercial Gerencial</div>
+            <div class="title-group">
+                <h1 class="title">POSVENTA SEGUIMIENTO COMERCIAL</h1>
+                <div class="subtitle">GESTIÓN UNIFICADA - AUTOSOL VW</div>
             </div>
         </div>
-    </div>
 
-    <div class="container">
         <div id="loading">Sincronizando Base de Datos... ⏳</div>
 
         <div id="dashboard" style="display: none;">
             
-            <!-- Filtros Compactos Desplegables -->
-            <div class="filters-panel">
-                <div class="filter-group">
+            <div class="filters-container">
+                <div class="filter-row">
                     <span class="filter-label">AÑO</span>
-                    <select class="filter-select" id="filter-ano">
-                        <option value="TODOS">Histórico</option>
-                        <option value="2025">2025</option>
-                        <option value="2026" selected>2026</option>
-                    </select>
+                    <div class="filter-options" id="filter-ano">
+                        <button class="pill-btn" data-val="TODOS">Histórico</button>
+                        <button class="pill-btn" data-val="2025">2025</button>
+                        <button class="pill-btn active" data-val="2026">2026</button>
+                    </div>
                 </div>
-                <div class="filter-group">
-                    <span class="filter-label">MES</span>
-                    <select class="filter-select" id="filter-meses">
-                        <option value="TODOS">Anual</option>
-                        <option value="ENERO">Enero</option>
-                        <option value="FEBRERO">Febrero</option>
-                        <option value="MARZO">Marzo</option>
-                        <option value="ABRIL">Abril</option>
-                        <option value="MAYO">Mayo</option>
-                        <option value="JUNIO">Junio</option>
-                        <option value="JULIO">Julio</option>
-                        <option value="AGOSTO">Agosto</option>
-                        <option value="SEPTIEMBRE" selected>Septiembre</option>
-                        <option value="OCTUBRE">Octubre</option>
-                        <option value="NOVIEMBRE">Noviembre</option>
-                        <option value="DICIEMBRE">Diciembre</option>
-                    </select>
-                </div>
-                <div class="filter-group">
-                    <span class="filter-label">ÁREA</span>
-                    <select class="filter-select" id="filter-areas">
-                        <option value="TODAS" selected>Todas las Áreas</option>
-                        <option value="ACCESORIOS">Accesorios</option>
-                        <option value="REPUESTOS">Repuestos</option>
-                        <option value="SERVICIOS">Servicios</option>
-                    </select>
-                </div>
-                <div class="filter-group">
+                <div class="filter-row">
                     <span class="filter-label">SUCURSAL</span>
-                    <select class="filter-select" id="filter-sucursales">
-                        <option value="TODAS" selected>Todas</option>
-                        <option value="JUJUY">Jujuy</option>
-                        <option value="EXPRESS">Express</option>
-                        <option value="MOVIL">Movil</option>
-                        <option value="SANTA FE">Santa Fe</option>
-                        <option value="TARTAGAL">Tartagal</option>
-                    </select>
+                    <div class="filter-options" id="filter-sucursales">
+                        <button class="pill-btn active" data-val="TODAS">Todas</button>
+                        <button class="pill-btn" data-val="SANTA FE">Santa Fe</button>
+                        <button class="pill-btn" data-val="JUJUY">Jujuy</button>
+                        <button class="pill-btn" data-val="EXPRESS">Express</button>
+                        <button class="pill-btn" data-val="MOVIL">Taller Móvil</button>
+                        <button class="pill-btn" data-val="TARTAGAL">Tartagal</button>
+                    </div>
+                </div>
+                <div class="filter-row">
+                    <span class="filter-label">ÁREA</span>
+                    <div class="filter-options" id="filter-areas">
+                        <button class="pill-btn active" data-val="TODAS">Todas</button>
+                        <button class="pill-btn" data-val="ACCESORIOS">Accesorios</button>
+                        <button class="pill-btn" data-val="REPUESTOS">Repuestos</button>
+                        <button class="pill-btn" data-val="SERVICIOS">Servicios</button>
+                    </div>
+                </div>
+                <div class="filter-row">
+                    <span class="filter-label">MES</span>
+                    <div class="filter-options" id="filter-meses">
+                        <button class="pill-btn" data-val="TODOS">Anual</button>
+                        <button class="pill-btn" data-val="ENERO">Ene</button>
+                        <button class="pill-btn" data-val="FEBRERO">Feb</button>
+                        <button class="pill-btn" data-val="MARZO">Mar</button>
+                        <button class="pill-btn" data-val="ABRIL">Abr</button>
+                        <button class="pill-btn" data-val="MAYO">May</button>
+                        <button class="pill-btn" data-val="JUNIO">Jun</button>
+                        <button class="pill-btn" data-val="JULIO">Jul</button>
+                        <button class="pill-btn" data-val="AGOSTO">Ago</button>
+                        <button class="pill-btn active" data-val="SEPTIEMBRE">Sep</button>
+                        <button class="pill-btn" data-val="OCTUBRE">Oct</button>
+                        <button class="pill-btn" data-val="NOVIEMBRE">Nov</button>
+                        <button class="pill-btn" data-val="DICIEMBRE">Dic</button>
+                    </div>
                 </div>
             </div>
 
-            <!-- Grilla de Resultados Principales y Secundarios -->
             <div class="top-grid">
-                <div class="data-card"><div class="card-header">OBJETIVO MENSUAL</div><div id="obj-list"></div></div>
-                <div class="data-card"><div class="card-header">AVANCE A LA FECHA</div><div id="ava-list"></div></div>
-                <div class="data-card"><div class="card-header">DESVÍO A LA FECHA</div><div id="des-list"></div></div>
+                <div class="data-card border-blue"><div class="card-header">OBJETIVO MENSUAL</div><div id="obj-list"></div></div>
+                <div class="data-card border-cyan"><div class="card-header">AVANCE A LA FECHA</div><div id="ava-list"></div></div>
+                <div class="data-card border-red"><div class="card-header">DESVÍO A LA FECHA</div><div id="des-list"></div></div>
             </div>
             
-            <!-- Relojes Velocímetro -->
-            <div class="card-header" style="margin-bottom: 15px; border-bottom:none;">EFICIENCIA DE PERFORMANCE (KPI)</div>
-            <div class="gauge-grid" id="gauge-container"></div>
+            <div class="bottom-grid">
+                <div class="gauges-container">
+                    <div class="card-header">EFICIENCIA DE PERFORMANCE (KPI)</div>
+                    <div class="gauge-grid" id="gauge-container"></div>
+                </div>
+                <div class="chart-container">
+                    <div class="card-header">COMPARATIVA INTERANUAL (2025 vs 2026)</div>
+                    <div class="bar-wrapper"><canvas id="interanualChart"></canvas></div>
+                </div>
+            </div>
         </div>
     </div>
 
     <script>
         // PEGA AQUÍ TU ENLACE DE APPS SCRIPT
         const scriptUrl ="https://script.google.com/macros/s/AKfycbyhWE1JG33AuYOcs_OEyRcLuIo0mo0jtTtSPGAFK_gCJb12yq3loteH7_Wvuqg2xjgD/exec"
-
         let rawData = [];
         let currentFilters = { ano: '2026', sucursal: 'TODAS', area: 'TODAS', mes: 'SEPTIEMBRE' };
+        let interanualChart;
 
         const formatMoney = (n) => {
             let isNeg = n < 0; let val = Math.abs(n) / 1000000;
             return (isNeg ? '-$ ' : '$ ') + val.toFixed(1) + 'M';
-        };
-        
-        const formatMoneySmall = (n) => {
-            return new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS', maximumFractionDigits: 0 }).format(n);
         };
 
         const getStatusColor = (pct) => {
@@ -166,6 +176,7 @@
         };
 
         function processData() {
+            // 1. Filtrado para las tarjetas superiores y relojes (Respeta todos los filtros)
             let filtered = rawData.filter(row => {
                 let matchAno = currentFilters.ano === 'TODOS' || row.ano === currentFilters.ano;
                 let matchSucursal = currentFilters.sucursal === 'TODAS' || row.sucursal.includes(currentFilters.sucursal);
@@ -175,35 +186,23 @@
             });
 
             let totals = {
-                'SANTA FE': { obj: 0, ava: 0, des: 0, pctG_sum: 0, objDia: 0, promDia: 0, count: 0 }, 
-                'JUJUY': { obj: 0, ava: 0, des: 0, pctG_sum: 0, objDia: 0, promDia: 0, count: 0 },
-                'EXPRESS': { obj: 0, ava: 0, des: 0, pctG_sum: 0, objDia: 0, promDia: 0, count: 0 }, 
-                'MOVIL': { obj: 0, ava: 0, des: 0, pctG_sum: 0, objDia: 0, promDia: 0, count: 0 }, 
-                'TARTAGAL': { obj: 0, ava: 0, des: 0, pctG_sum: 0, objDia: 0, promDia: 0, count: 0 },
-                'CONSOLIDADO': { obj: 0, ava: 0, des: 0, pctG_sum: 0, objDia: 0, promDia: 0, count: 0 }
+                'SANTA FE': { obj: 0, ava: 0, des: 0, pctG_sum: 0, count: 0 }, 
+                'JUJUY': { obj: 0, ava: 0, des: 0, pctG_sum: 0, count: 0 },
+                'EXPRESS': { obj: 0, ava: 0, des: 0, pctG_sum: 0, count: 0 }, 
+                'MOVIL': { obj: 0, ava: 0, des: 0, pctG_sum: 0, count: 0 }, 
+                'TARTAGAL': { obj: 0, ava: 0, des: 0, pctG_sum: 0, count: 0 },
+                'CONSOLIDADO': { obj: 0, ava: 0, des: 0, pctG_sum: 0, count: 0 }
             };
 
             filtered.forEach(r => {
                 let sucKey = Object.keys(totals).find(k => r.sucursal.includes(k));
                 if (sucKey) {
-                    totals[sucKey].obj += r.objetivo; 
-                    totals[sucKey].ava += r.avance;
-                    totals[sucKey].des += r.desvio; 
-                    totals[sucKey].pctG_sum += r.pctG;
-                    totals[sucKey].objDia += r.objDiario;
-                    totals[sucKey].promDia += r.promDiario;
-                    totals[sucKey].count += 1;
-                    
-                    totals['CONSOLIDADO'].obj += r.objetivo; 
-                    totals['CONSOLIDADO'].ava += r.avance;
-                    totals['CONSOLIDADO'].des += r.desvio; 
-                    totals['CONSOLIDADO'].pctG_sum += r.pctG;
-                    totals['CONSOLIDADO'].objDia += r.objDiario;
-                    totals['CONSOLIDADO'].promDia += r.promDiario;
-                    totals['CONSOLIDADO'].count += 1;
+                    totals[sucKey].obj += r.objetivo; totals[sucKey].ava += r.avance; totals[sucKey].des += r.desvio; totals[sucKey].pctG_sum += r.pctG; totals[sucKey].count += 1;
+                    totals['CONSOLIDADO'].obj += r.objetivo; totals['CONSOLIDADO'].ava += r.avance; totals['CONSOLIDADO'].des += r.desvio; totals['CONSOLIDADO'].pctG_sum += r.pctG; totals['CONSOLIDADO'].count += 1;
                 }
             });
             renderDashboard(totals);
+            processChartData();
         }
 
         function renderDashboard(totals) {
@@ -213,48 +212,39 @@
             sucursales.forEach(suc => {
                 let d = totals[suc];
                 if (d.obj > 0 || d.ava > 0 || currentFilters.sucursal === 'TODAS') {
-                    // Diseño con información secundaria diaria debajo del monto principal
-                    objHtml += `<div class="list-item"><span class="list-label">${suc}</span> <div class="list-data"><div class="list-val">${formatMoney(d.obj)}</div><div class="list-subval">Diario: ${formatMoneySmall(d.objDia)}</div></div></div>`;
-                    avaHtml += `<div class="list-item"><span class="list-label">${suc}</span> <div class="list-data"><div class="list-val">${formatMoney(d.ava)}</div><div class="list-subval">Promedio: ${formatMoneySmall(d.promDia)}</div></div></div>`;
-                    
+                    let nom = suc === 'MOVIL' ? 'TALLER MÓVIL' : suc;
+                    objHtml += `<div class="list-item"><span class="list-label">${nom}</span> <span class="list-val">${formatMoney(d.obj)}</span></div>`;
+                    avaHtml += `<div class="list-item"><span class="list-label">${nom}</span> <span class="list-val">${formatMoney(d.ava)}</span></div>`;
                     let colorEstilo = d.des < 0 ? 'color: #ef4444;' : 'color: #10b981;';
-                    desHtml += `<div class="list-item"><span class="list-label">${suc}</span> <div class="list-val" style="${colorEstilo}">${formatMoney(d.des)}</div></div>`;
+                    desHtml += `<div class="list-item"><span class="list-label">${nom}</span> <span class="list-val" style="${colorEstilo}">${formatMoney(d.des)}</span></div>`;
                 }
             });
 
             let c = totals['CONSOLIDADO'];
-            let consObjHtml = `<div class="list-item consolidado"><span class="list-label">TOTAL VW</span> <div class="list-data"><div class="consolidado-val">${formatMoney(c.obj)}</div><div class="list-subval">Diario: ${formatMoneySmall(c.objDia)}</div></div></div>`;
-            let consAvaHtml = `<div class="list-item consolidado"><span class="list-label">TOTAL VW</span> <div class="list-data"><div class="consolidado-val">${formatMoney(c.ava)}</div><div class="list-subval">Promedio: ${formatMoneySmall(c.promDia)}</div></div></div>`;
-            
+            document.getElementById('obj-list').innerHTML = objHtml + `<div class="list-item consolidado"><span class="list-label">TOTAL VW</span> <span class="consolidado-val">${formatMoney(c.obj)}</span></div>`;
+            document.getElementById('ava-list').innerHTML = avaHtml + `<div class="list-item consolidado"><span class="list-label">TOTAL VW</span> <span class="consolidado-val">${formatMoney(c.ava)}</span></div>`;
             let colorEstiloCons = c.des < 0 ? 'color: #ef4444;' : 'color: #10b981;';
-            let consDesHtml = `<div class="list-item consolidado"><span class="list-label">TOTAL VW</span> <div class="consolidado-val" style="${colorEstiloCons}">${formatMoney(c.des)}</div></div>`;
-            
-            document.getElementById('obj-list').innerHTML = objHtml + consObjHtml;
-            document.getElementById('ava-list').innerHTML = avaHtml + consAvaHtml;
-            document.getElementById('des-list').innerHTML = desHtml + consDesHtml;
+            document.getElementById('des-list').innerHTML = desHtml + `<div class="list-item consolidado"><span class="list-label">TOTAL VW</span> <span class="consolidado-val" style="${colorEstiloCons}">${formatMoney(c.des)}</span></div>`;
 
-            // Renderizar Relojes
             document.getElementById('gauge-container').innerHTML = '';
             sucursales.forEach(suc => {
                 let count = totals[suc].count;
                 let avgPctG = count > 0 ? (totals[suc].pctG_sum / count) : 0;
                 if (totals[suc].obj > 0 || totals[suc].ava > 0 || currentFilters.sucursal === 'TODAS') {
-                    createGauge(suc.replace(/\s+/g, ''), suc, avgPctG);
+                    createGauge(suc.replace(/\s+/g, ''), suc === 'MOVIL' ? 'MÓVIL' : suc, avgPctG);
                 }
             });
-            
             let cAvgPctG = c.count > 0 ? (c.pctG_sum / c.count) : 0;
             createGauge('total', 'TOTAL VW', cAvgPctG);
         }
 
-        // Diseño del Reloj de Performance
         function createGauge(id, name, pct) {
             let color = getStatusColor(pct);
             let colorClass = pct >= 95 ? 'text-green' : pct >= 90 ? 'text-yellow' : 'text-red';
             
             let html = `
                 <div class="gauge-card">
-                    <div class="gauge-info"><h3>${name}</h3></div>
+                    <div class="gauge-title">${name}</div>
                     <div class="chart-wrapper"><canvas id="gauge-${id}"></canvas></div>
                     <div class="gauge-pct ${colorClass}">${pct.toFixed(1)}%</div>
                 </div>`;
@@ -262,21 +252,66 @@
 
             new Chart(document.getElementById(`gauge-${id}`).getContext('2d'), {
                 type: 'doughnut',
-                data: { datasets: [{ data: [pct > 100 ? 100 : pct, pct > 100 ? 0 : 100 - pct], backgroundColor: [color, '#e2e8f0'], borderWidth: 0, circumference: 180, rotation: 270 }] },
-                // Cutout más grande para simular una aguja/borde delgado de velocímetro
-                options: { responsive: true, maintainAspectRatio: false, cutout: '85%', plugins: { tooltip: { enabled: false } }, hover: { mode: null } }
+                data: { datasets: [{ data: [pct > 100 ? 100 : pct, pct > 100 ? 0 : 100 - pct], backgroundColor: [color, '#f1f5f9'], borderWidth: 0, circumference: 180, rotation: 270 }] },
+                options: { responsive: true, maintainAspectRatio: false, cutout: '80%', plugins: { tooltip: { enabled: false } }, hover: { mode: null } }
             });
         }
 
-        // Eventos de los Selectores (Filtros Compactos)
-        document.querySelectorAll('.filter-select').forEach(select => {
-            select.addEventListener('change', (e) => {
-                let id = e.target.id;
-                let val = e.target.value;
-                if (id === 'filter-ano') currentFilters.ano = val;
-                if (id === 'filter-sucursales') currentFilters.sucursal = val;
-                if (id === 'filter-areas') currentFilters.area = val;
-                if (id === 'filter-meses') currentFilters.mes = val;
+        // Gráfico Interanual
+        function processChartData() {
+            // Ignoramos el filtro de mes y año, pero respetamos sucursal y área
+            let chartFiltered = rawData.filter(row => {
+                let matchSucursal = currentFilters.sucursal === 'TODAS' || row.sucursal.includes(currentFilters.sucursal);
+                let matchArea = currentFilters.area === 'TODAS' || row.area === currentFilters.area;
+                return matchSucursal && matchArea;
+            });
+
+            let data25 = Array(12).fill(0);
+            let data26 = Array(12).fill(0);
+            const mesesList = ['ENERO', 'FEBRERO', 'MARZO', 'ABRIL', 'MAYO', 'JUNIO', 'JULIO', 'AGOSTO', 'SEPTIEMBRE', 'OCTUBRE', 'NOVIEMBRE', 'DICIEMBRE'];
+
+            chartFiltered.forEach(r => {
+                let mIdx = mesesList.indexOf(r.mes);
+                if (mIdx !== -1) {
+                    if (r.ano === '2025') data25[mIdx] += r.avance;
+                    if (r.ano === '2026') data26[mIdx] += r.avance;
+                }
+            });
+
+            if (interanualChart) interanualChart.destroy();
+            
+            interanualChart = new Chart(document.getElementById('interanualChart').getContext('2d'), {
+                type: 'bar',
+                data: {
+                    labels: ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'],
+                    datasets: [
+                        { label: '2025', data: data25, backgroundColor: '#cbd5e1', borderRadius: 4 },
+                        { label: '2026', data: data26, backgroundColor: '#eab308', borderRadius: 4 } // Amarillo mostaza como en la foto
+                    ]
+                },
+                options: {
+                    responsive: true, maintainAspectRatio: false,
+                    plugins: { legend: { position: 'bottom', labels: { boxWidth: 12, font: { size: 10 } } } },
+                    scales: {
+                        y: { beginAtZero: true, ticks: { callback: function(value) { return '$' + (value / 1000000).toFixed(0) + 'M'; }, font: { size: 9 } }, grid: { color: '#f1f5f9' }, border: { display: false } },
+                        x: { grid: { display: false }, ticks: { font: { size: 9 } }, border: { display: false } }
+                    }
+                }
+            });
+        }
+
+        document.querySelectorAll('.pill-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                let val = e.target.getAttribute('data-val');
+                let parentId = e.target.parentElement.id;
+                document.querySelectorAll(`#${parentId} .pill-btn`).forEach(b => b.classList.remove('active'));
+                e.target.classList.add('active');
+
+                if (parentId === 'filter-ano') currentFilters.ano = val;
+                if (parentId === 'filter-sucursales') currentFilters.sucursal = val;
+                if (parentId === 'filter-areas') currentFilters.area = val;
+                if (parentId === 'filter-meses') currentFilters.mes = val;
+
                 processData();
             });
         });
