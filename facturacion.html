@@ -24,19 +24,14 @@
         .title { font-size: 1.1rem; font-weight: 700; letter-spacing: 0.5px; margin: 0; }
         .subtitle { font-size: 0.75rem; color: #94a3b8; font-weight: 400; }
 
-        /* Contenedor centralizado */
         .container { width: 100%; max-width: 1300px; padding: 0 20px; }
         
-        /* Filtros Solapas (Pill Buttons) - Estilo en línea */
-        .filters-container { background: white; border-radius: 12px; padding: 25px; margin-bottom: 25px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); border: 1px solid #f1f5f9; }
-        .filter-row { display: flex; align-items: center; margin-bottom: 15px; }
-        .filter-row:last-child { margin-bottom: 0; }
-        .filter-label { font-size: 0.75rem; font-weight: 700; color: #94a3b8; text-transform: uppercase; width: 100px; flex-shrink: 0; }
-        .filter-options { display: flex; gap: 10px; flex-wrap: wrap; }
-        
-        .pill-btn { background: white; border: 1px solid #cbd5e1; color: #475569; padding: 8px 18px; border-radius: 20px; font-family: inherit; font-size: 0.75rem; font-weight: 600; cursor: pointer; transition: all 0.2s; }
-        .pill-btn:hover { border-color: #001E50; color: #001E50; }
-        .pill-btn.active { background: #001E50; color: white; border-color: #001E50; box-shadow: 0 4px 6px rgba(0, 30, 80, 0.15); }
+        /* Filtros: Solapas Desplegables Compactas */
+        .filters-container { background: white; border-radius: 12px; padding: 15px 25px; margin-bottom: 25px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); border: 1px solid #f1f5f9; display: flex; gap: 20px; align-items: center; flex-wrap: wrap; }
+        .filter-group { display: flex; align-items: center; gap: 10px; }
+        .filter-label { font-size: 0.7rem; font-weight: 700; color: #64748b; text-transform: uppercase; }
+        .filter-select { padding: 8px 12px; border-radius: 6px; border: 1px solid #cbd5e1; font-family: inherit; font-size: 0.8rem; font-weight: 600; color: #0f172a; background: #f8fafc; cursor: pointer; outline: none; transition: border-color 0.2s; }
+        .filter-select:focus { border-color: #001E50; }
 
         /* Grilla de Tarjetas (Centro) */
         .top-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-bottom: 25px; }
@@ -96,53 +91,53 @@
 
         <div id="dashboard" style="display: none;">
             
-            <!-- Filtros Solapas en línea -->
+            <!-- Filtros: Solapas Desplegables -->
             <div class="filters-container">
-                <div class="filter-row">
+                <div class="filter-group">
                     <span class="filter-label">AÑO</span>
-                    <div class="filter-options" id="filter-ano">
-                        <button class="pill-btn" data-val="TODOS">Histórico</button>
-                        <button class="pill-btn" data-val="2025">2025</button>
-                        <button class="pill-btn active" data-val="2026">2026</button>
-                    </div>
+                    <select class="filter-select" id="filter-ano">
+                        <option value="TODOS">Histórico</option>
+                        <option value="2025">2025</option>
+                        <option value="2026" selected>2026</option>
+                    </select>
                 </div>
-                <div class="filter-row">
-                    <span class="filter-label">SUCURSAL</span>
-                    <div class="filter-options" id="filter-sucursales">
-                        <button class="pill-btn active" data-val="TODAS">Todas</button>
-                        <button class="pill-btn" data-val="SANTA FE">Santa Fe</button>
-                        <button class="pill-btn" data-val="JUJUY">Jujuy</button>
-                        <button class="pill-btn" data-val="EXPRESS">Express</button>
-                        <button class="pill-btn" data-val="MOVIL">Taller Móvil</button>
-                        <button class="pill-btn" data-val="TARTAGAL">Tartagal</button>
-                    </div>
-                </div>
-                <div class="filter-row">
-                    <span class="filter-label">ÁREA</span>
-                    <div class="filter-options" id="filter-areas">
-                        <button class="pill-btn active" data-val="TODAS">Todas</button>
-                        <button class="pill-btn" data-val="ACCESORIOS">Accesorios</button>
-                        <button class="pill-btn" data-val="REPUESTOS">Repuestos</button>
-                        <button class="pill-btn" data-val="SERVICIOS">Servicios</button>
-                    </div>
-                </div>
-                <div class="filter-row">
+                <div class="filter-group">
                     <span class="filter-label">MES</span>
-                    <div class="filter-options" id="filter-meses">
-                        <button class="pill-btn" data-val="TODOS">Anual</button>
-                        <button class="pill-btn" data-val="ENERO">Ene</button>
-                        <button class="pill-btn" data-val="FEBRERO">Feb</button>
-                        <button class="pill-btn" data-val="MARZO">Mar</button>
-                        <button class="pill-btn" data-val="ABRIL">Abr</button>
-                        <button class="pill-btn" data-val="MAYO">May</button>
-                        <button class="pill-btn" data-val="JUNIO">Jun</button>
-                        <button class="pill-btn" data-val="JULIO">Jul</button>
-                        <button class="pill-btn" data-val="AGOSTO">Ago</button>
-                        <button class="pill-btn active" data-val="SEPTIEMBRE">Sep</button>
-                        <button class="pill-btn" data-val="OCTUBRE">Oct</button>
-                        <button class="pill-btn" data-val="NOVIEMBRE">Nov</button>
-                        <button class="pill-btn" data-val="DICIEMBRE">Dic</button>
-                    </div>
+                    <select class="filter-select" id="filter-meses">
+                        <option value="TODOS">Anual</option>
+                        <option value="ENERO">Enero</option>
+                        <option value="FEBRERO">Febrero</option>
+                        <option value="MARZO">Marzo</option>
+                        <option value="ABRIL">Abril</option>
+                        <option value="MAYO">Mayo</option>
+                        <option value="JUNIO">Junio</option>
+                        <option value="JULIO">Julio</option>
+                        <option value="AGOSTO">Agosto</option>
+                        <option value="SEPTIEMBRE" selected>Septiembre</option>
+                        <option value="OCTUBRE">Octubre</option>
+                        <option value="NOVIEMBRE">Noviembre</option>
+                        <option value="DICIEMBRE">Diciembre</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <span class="filter-label">ÁREA</span>
+                    <select class="filter-select" id="filter-areas">
+                        <option value="TODAS" selected>Todas las áreas</option>
+                        <option value="ACCESORIOS">Accesorios</option>
+                        <option value="REPUESTOS">Repuestos</option>
+                        <option value="SERVICIOS">Servicios</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <span class="filter-label">SUCURSAL</span>
+                    <select class="filter-select" id="filter-sucursales">
+                        <option value="TODAS" selected>Todas las sucursales</option>
+                        <option value="SANTA FE">Santa Fe</option>
+                        <option value="JUJUY">Jujuy</option>
+                        <option value="EXPRESS">Express</option>
+                        <option value="MOVIL">Taller Móvil</option>
+                        <option value="TARTAGAL">Tartagal</option>
+                    </select>
                 </div>
             </div>
 
@@ -244,7 +239,6 @@
 
             document.getElementById('gauge-container').innerHTML = '';
             
-            // Renderizamos los gauges en orden, finalizando con el Total Autosol
             sucursales.forEach(suc => {
                 let count = totals[suc].count;
                 let avgPctG = count > 0 ? (totals[suc].pctG_sum / count) : 0;
@@ -316,18 +310,15 @@
             });
         }
 
-        document.querySelectorAll('.pill-btn').forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                let val = e.target.getAttribute('data-val');
-                let parentId = e.target.parentElement.id;
-                document.querySelectorAll(`#${parentId} .pill-btn`).forEach(b => b.classList.remove('active'));
-                e.target.classList.add('active');
-
-                if (parentId === 'filter-ano') currentFilters.ano = val;
-                if (parentId === 'filter-sucursales') currentFilters.sucursal = val;
-                if (parentId === 'filter-areas') currentFilters.area = val;
-                if (parentId === 'filter-meses') currentFilters.mes = val;
-
+        // Lógica actualizada para las Solapas Desplegables (<select>)
+        document.querySelectorAll('.filter-select').forEach(select => {
+            select.addEventListener('change', (e) => {
+                let id = e.target.id;
+                let val = e.target.value;
+                if (id === 'filter-ano') currentFilters.ano = val;
+                if (id === 'filter-sucursales') currentFilters.sucursal = val;
+                if (id === 'filter-areas') currentFilters.area = val;
+                if (id === 'filter-meses') currentFilters.mes = val;
                 processData();
             });
         });
