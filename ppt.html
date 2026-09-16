@@ -383,12 +383,37 @@
             });
         });
 
-        fetch(scriptUrl).then(res => res.json()).then(data => {
-            document.getElementById('loading').style.display = 'none';
-            document.getElementById('dashboard').style.display = 'block';
-            rawData = data.pptRaw; 
-            processData(); 
-        });
+       // --- NUEVO MOTOR DE CARGA CON MEMORIA (Para PPT) ---
+        function loadData() {
+            let cached = sessionStorage.getItem('autosolData');
+            let cacheTime = sessionStorage.getItem('autosolTime');
+            let now = new Date().getTime();
+            
+            // La memoria dura 5 minutos
+            let cacheValido = cacheTime && (now - cacheTime < (5 * 60 * 1000));
+
+            if (cached && cacheValido) {
+                // ⚡ CARGA INSTANTÁNEA (Desde la memoria del navegador)
+                let data = JSON.parse(cached);
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('dashboard').style.display = 'block';
+                rawData = data.pptRaw; // <-- Apunta a PPT
+                processData();
+            } else {
+                // ⏳ CARGA DESDE GOOGLE (Solo la primera vez)
+                fetch(scriptUrl).then(res => res.json()).then(data => {
+                    sessionStorage.setItem('autosolData', JSON.stringify(data));
+                    sessionStorage.setItem('autosolTime', now.toString());
+                    document.getElementById('loading').style.display = 'none';
+                    document.getElementById('dashboard').style.display = 'block';
+                    rawData = data.pptRaw; // <-- Apunta a PPT
+                    processData(); 
+                });
+            }
+        }
+        
+        // Iniciar el sistema
+        loadData();
     </script>
 </body>
 </html>
