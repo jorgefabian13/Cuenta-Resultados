@@ -160,7 +160,7 @@
     </div>
 
     <script>
-        // PEGA AQUÍ TU NUEVO ENLACE DE APPS SCRIPT (NUEVA IMPLEMENTACIÓN)
+        // PEGA AQUÍ TU ENLACE DE APPS SCRIPT
         const scriptUrl ="https://script.google.com/macros/s/AKfycbwzKCS9behx4HGf-j9VFThZvjRGVTMFE9SPsZMfuOF-VbgKv0I5SMNX3jGnPshc-R3n/exec"
 
         let dataGlobal = { defs: [], raw: [] };
@@ -172,7 +172,6 @@
         const formatVal = (n, isPct) => isPct ? n.toFixed(1) + '%' : new Intl.NumberFormat('es-AR', { maximumFractionDigits: 1 }).format(n);
 
         function loadData() {
-            // Cambié la llave de la memoria a V4 para forzar que tu compu descargue los datos nuevos hoy
             let cached = sessionStorage.getItem('autosolDataV4');
             let cacheTime = sessionStorage.getItem('autosolTimeV4');
             let now = new Date().getTime();
@@ -197,7 +196,6 @@
             dataGlobal.defs = data.kpiDefs || [];
             dataGlobal.raw = data.kpiRaw || [];
             
-            // Si la lista sigue vacía, lanzamos la alerta visual para saber qué pasa
             if (dataGlobal.defs.length === 0) {
                 let errorMsg = document.querySelector('.empty-state');
                 errorMsg.innerHTML = '⚠️ <b>No se encontraron KPIs.</b><br><br>Asegúrate de haber hecho clic en <b>"Nueva Implementación"</b> en Apps Script y haber pegado el nuevo enlace aquí.';
@@ -264,9 +262,12 @@
             updateDashboard();
         }
 
+        // CORRECCIÓN APLICADA AQUÍ: Asignación explícita para evitar confusiones de singular/plural
         document.querySelectorAll('.filter-select:not(#kpi-dropdown)').forEach(select => {
             select.addEventListener('change', (e) => {
-                currentFilters[e.target.id.replace('filter-', '')] = e.target.value;
+                let id = e.target.id;
+                if (id === 'filter-ano') currentFilters.ano = e.target.value;
+                if (id === 'filter-sucursales') currentFilters.sucursal = e.target.value;
                 updateDashboard();
             });
         });
