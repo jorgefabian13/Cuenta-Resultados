@@ -65,7 +65,7 @@
         .chart-wrapper { position: relative; height: 50px; width: 100%; display: flex; justify-content: center; }
         .gauge-pct { font-size: 1.1rem; font-weight: 900; margin-top: -10px; color: white; font-style: italic; }
 
-        /* MÓDULO NUEVO: BARRAS HORIZONTALES DE IMPUTACIÓN */
+        /* BARRAS HORIZONTALES DE IMPUTACIÓN */
         .imputacion-container { background: white; border-radius: 12px; padding: 25px; margin-bottom: 25px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); border: 1px solid #f1f5f9; display: none; }
         .imputacion-title { font-size: 0.85rem; font-weight: 800; color: #0f172a; margin-bottom: 20px; }
         
@@ -180,7 +180,7 @@
                 <div class="gauge-grid" id="gauge-container"></div>
             </div>
 
-            <!-- MÓDULO NUEVO: IMPUTACIÓN DE MANO DE OBRA (Se muestra solo si Área = Servicios) -->
+            <!-- IMPUTACIÓN DE MANO DE OBRA (Se muestra solo si Área = Servicios) -->
             <div class="imputacion-container" id="imputacion-section">
                 <div class="imputacion-title">Distribución de la Facturación de Mano de Obra (Imputaciones)</div>
                 
@@ -218,8 +218,8 @@
     </div>
 
     <script>
-        // PEGA AQUÍ TU NUEVO ENLACE DE APPS SCRIPT
-        const scriptUrl ="https://script.google.com/macros/s/AKfycbwj4IbLShChGwkhlzjBUw2SoYCtjiT_ABJq-xooGTzHJHwQL1x2TSo4LYwXlxGpeiU5/exec"
+        // PEGA AQUÍ TU ENLACE DE APPS SCRIPT
+        const scriptUrl ="https://script.google.com/macros/s/AKfycbz0vJN9zTuZPlnO5OhAuumqEuyJLU7ol5T5UAw8dyO-YbSTJwnJPY7iQKbEzg8c3qq5/exec"
 
         let rawData = [];
         let rawCargos = [];
@@ -231,8 +231,8 @@
         const getStatusColor = (pct) => { if (pct >= 95) return '#10b981'; if (pct >= 90) return '#f59e0b'; return '#ef4444'; };
 
         function loadData() {
-            let cached = sessionStorage.getItem('autosolDataV5');
-            let cacheTime = sessionStorage.getItem('autosolTimeV5');
+            let cached = sessionStorage.getItem('autosolDataV6');
+            let cacheTime = sessionStorage.getItem('autosolTimeV6');
             let now = new Date().getTime();
             let cacheValido = cacheTime && (now - cacheTime < (5 * 60 * 1000));
 
@@ -241,8 +241,8 @@
                 initSystem(data);
             } else {
                 fetch(scriptUrl).then(res => res.json()).then(data => {
-                    sessionStorage.setItem('autosolDataV5', JSON.stringify(data));
-                    sessionStorage.setItem('autosolTimeV5', now.toString());
+                    sessionStorage.setItem('autosolDataV6', JSON.stringify(data));
+                    sessionStorage.setItem('autosolTimeV6', now.toString());
                     initSystem(data);
                 });
             }
@@ -257,7 +257,6 @@
         }
 
         function processData() {
-            // 1. LÓGICA TARJETAS Y RELOJES (Original)
             let filtered = rawData.filter(row => {
                 let matchAno = currentFilters.ano === 'TODOS' || row.ano === currentFilters.ano;
                 let matchSuc = currentFilters.sucursal === 'TODAS' || row.sucursal.includes(currentFilters.sucursal);
@@ -288,7 +287,6 @@
             renderDashboard(totals);
             processChartData();
 
-            // 2. LÓGICA DISTRIBUCIÓN DE CARGOS (Mano de Obra $)
             let secCargos = document.getElementById('imputacion-section');
             if (currentFilters.area === 'SERVICIOS') {
                 secCargos.style.display = 'block';
@@ -435,21 +433,7 @@
             });
         });
 
-       function loadData() {
-    // Cambiado a V6 para forzar la actualización de caché
-    let cached = sessionStorage.getItem('autosolDataV6');
-    let cacheTime = sessionStorage.getItem('autosolTimeV6');
-    let now = new Date().getTime();
-    let cacheValido = cacheTime && (now - cacheTime < (5 * 60 * 1000));
-
-    if (cached && cacheValido) {
-        let data = JSON.parse(cached);
-        initSystem(data);
-    } else {
-        fetch(scriptUrl).then(res => res.json()).then(data => {
-            sessionStorage.setItem('autosolDataV6', JSON.stringify(data));
-            sessionStorage.setItem('autosolTimeV6', now.toString());
-            initSystem(data);
-        });
-    }
-}
+        loadData();
+    </script>
+</body>
+</html>
