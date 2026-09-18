@@ -205,6 +205,230 @@
 
         document.querySelectorAll('.filter-select').forEach(select => { select.addEventListener('change', (e) => { let id = e.target.id; if (id === 'filter-ano') currentFilters.ano = e.target.value; if (id === 'filter-sucursales') currentFilters.sucursal = e.target.value; if (id === 'filter-areas') currentFilters.area = e.target.value; if (id === 'filter-meses') currentFilters.mes = e.target.value; processData(); }); });
         loadData();
+    <script>
+        // 1. PEGA AQUÍ TU ENLACE NUEVO DE APPS SCRIPT (Con acceso para "Cualquier persona")
+        const scriptUrl ="https://script.google.com/macros/s/AKfycbwKka7XPcfVA9bRe_Iw3nGrmqTR7PIdFf41JptcszTjVniXAzknOpMRCv7frCS_egmw/exec"
+
+        let rawData = []; let rawCargos = []; let currentFilters = { ano: '2026', sucursal: 'TODAS', area: 'TODAS', mes: 'SEPTIEMBRE' }; let interanualChart;
+        const formatMoney = (n) => { let isNeg = n < 0; let val = Math.abs(n) / 1000000; return (isNeg ? '-$' : '$ ') + val.toFixed(1) + 'M'; };
+        const formatMoneySmall = (n) => { return new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS', maximumFractionDigits: 0 }).format(n); };
+        const getStatusColor = (pct) => { if (pct >= 95) return '#10b981'; if (pct >= 90) return '#f59e0b'; return '#ef4444'; };
+
+        function loadData() {
+            let cached = sessionStorage.getItem('autosolDataV10');
+            let cacheTime = sessionStorage.getItem('autosolTimeV10');
+            let now = new Date().getTime();
+            let cacheValido = cacheTime && (now - cacheTime < (5 * 60 * 1000));
+
+            if (cached && cacheValido) {
+                initSystem(JSON.parse(cached));
+            } else {
+                // ESCUDO ANTICONGELAMIENTO
+                fetch(scriptUrl)
+                .then(res => {
+                    if (!res.ok) throw new Error("Error de permisos de Google");
+                    return res.json();
+                })
+                .then(data => {
+                    sessionStorage.setItem('autosolDataV10', JSON.stringify(data));
+                    sessionStorage.setItem('autosolTimeV10', now.toString());
+                    initSystem(data);
+                })
+                .catch(error => {
+                    document.getElementById('loading').innerHTML = `⚠️ <b>Error de Conexión:</b><br><br>No se pudo conectar con Google.<br><br>1. Verifica que pegaste el enlace correcto en el código.<br>2. En Apps Script, asegúrate de que "Quién tiene acceso" esté en <b>"Cualquier persona"</b>.`;
+                    document.getElementById('loading').style.color = '#ef4444';
+                });
+            }
+        }
+
+        function initSystem(data) {
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('dashboard').style.display = 'block';
+            rawData = data.facturacionRaw || []; rawCargos = data.cargosRaw || [];
+            
+            let debug = document.getElementById('debug-panel');
+            if (data.error) { debug.innerHTML = "<b>Apps Script Error:</b> " + data.error; debug.style.display = 'block'; }
+            else if (rawCargos.length === 0) { debug.innerHTML = "<b>Cargos Vacíos:</b> Apps Script no detectó datos en el nuevo Excel. Verifica que el archivo no esté vacío."; debug.style.display = 'block'; }
+            else { debug.style.display = 'none'; }
+            processData(); 
+        }
+
+        function processData() {
+            let filtered = rawData.filter(row => {
+                let matchAno = currentFilters.ano === 'TODOS' || row.ano === currentFilters.ano;
+                let matchSuc = currentFilters.sucursal === 'TODAS' || row.sucursal.includes(currentFilters.sucursal);
+                let matchArea = currentFilters.area === 'TODAS' || row.area === currentFilters.area;
+                let matchMes = currentFilters.mes === 'TODOS' || row.mes === currentFilters.mes;
+                return matchAno && matchSuc && matchArea && matchMes;
+            });
+
+            let totals = { 'SANTA FE': { obj: 0, ava: 0, des: 0, pctG_sum: 0, objDia: 0, promDia: 0, count: 0 }, 'JUJUY': { obj: 0, ava: 0, des: 0, pctG_sum: 0, objDia: 0, promDia: 0, count: 0 }, 'EXPRESS': { obj: 0, ava: 0, des: 0, pctG_sum: 0, objDia: 0, promDia: 0, count: 0 }, 'MOVIL': { obj: 0, ava: 0, des: 0, pctG_sum: 0, objDia: 0, promDia: 0, count: 0 }, 'TARTAGAL': { obj: 0, ava: 0, des: 0, pctG_sum: 0, objDia: 0, promDia: 0, count: 0 }, 'CONSOLIDADO': { obj: 0, ava: 0, des: 0, pctG_sum: 0, objDia: 0, promDia: 0, count: 0 } };
+            filtered.forEach(r => { let sucKey = Object.keys(totals).find(k => r.sucursal.includes(k)); if (sucKey) { totals[sucKey].obj += r.objetivo; totals[sucKey].ava += r.avance; totals[sucKey].des += r.desvio; totals[sucKey].pctG_sum += r.pctG; totals[sucKey].objDia += r.objDiario; totals[sucKey].promDia += r.promDiario; totals[sucKey].count += 1; totals['CONSOLIDADO'].obj += r.objetivo; totals['CONSOLIDADO'].ava += r.avance; totals['CONSOLIDADO'].des += r.desvio; totals['CONSOLIDADO'].pctG_sum += r.pctG; totals['CONSOLIDADO'].objDia += r.objDiario; totals['CONSOLIDADO'].promDia += r.promDiario; totals['CONSOLIDADO'].count += 1; } });
+            renderDashboard(totals); processChartData();
+
+            let secCargos = document.getElementById('imputacion-section');
+            if (currentFilters.area === 'SERVICIOS') {
+                secCargos.style.display = 'block';
+                let valCli = 0, valGar = 0, valIn = 0;
+                rawCargos.forEach(r => {
+                    let matchAno = currentFilters.ano === 'TODOS' || r.ano === currentFilters.ano;
+                    let matchSuc = currentFilters.sucursal === 'TODAS' || r.sucursal.includes(currentFilters.sucursal);
+                    let matchMes = currentFilters.mes === 'TODOS' || r.mes === currentFilters.mes;
+                    if (matchAno && matchSuc && matchMes) {
+                        if (r.cargo === 'CLIENTE') valCli += r.mo; else if (r.cargo === 'GARANTIA') valGar += r.mo; else if (r.cargo === 'INTERNO') valIn += r.mo;
+                    }
+                });
+
+                let totalMO = valCli + valGar + valIn;
+                let debug = document.getElementById('debug-panel');
+                if (rawCargos.length > 0 && totalMO === 0) { debug.innerHTML = `<b>Filtro Vacío:</b> La lectura del Excel es correcta, pero la suma da $0 para: ${currentFilters.mes} - ${currentFilters.sucursal}.`; debug.style.display = 'block'; }
+                else if (rawCargos.length > 0) { debug.style.display = 'none'; }
+
+                let pctCli = totalMO > 0 ? (valCli / totalMO) * 100 : 0; let pctGar = totalMO > 0 ? (valGar / totalMO) * 100 : 0; let pctIn = totalMO > 0 ? (valIn / totalMO) * 100 : 0;
+                document.getElementById('mo-val-cli').innerText = `(${formatMoneySmall(valCli)})`; document.getElementById('mo-pct-cli').innerText = `${pctCli.toFixed(1)}%`; document.getElementById('mo-bar-cli').style.width = `${pctCli}%`;
+                document.getElementById('mo-val-gar').innerText = `(${formatMoneySmall(valGar)})`; document.getElementById('mo-pct-gar').innerText = `${pctGar.toFixed(1)}%`; document.getElementById('mo-bar-gar').style.width = `${pctGar}%`;
+                document.getElementById('mo-val-in').innerText = `(${formatMoneySmall(valIn)})`; document.getElementById('mo-pct-in').innerText = `${pctIn.toFixed(1)}%`; document.getElementById('mo-bar-in').style.width = `${pctIn}%`;
+            } else { secCargos.style.display = 'none'; }
+        }
+
+        function renderDashboard(totals) {
+            let objHtml = '', avaHtml = '', desHtml = ''; const sucursales = ['SANTA FE', 'JUJUY', 'EXPRESS', 'MOVIL', 'TARTAGAL'];
+            sucursales.forEach(suc => { let d = totals[suc]; if (d.obj > 0 || d.ava > 0 || currentFilters.sucursal === 'TODAS') { let nom = suc === 'MOVIL' ? 'MÓVIL' : suc; objHtml += `<div class="list-item"><span class="list-label">${nom}</span> <div class="list-data"><div class="list-val">${formatMoney(d.obj)}</div><div class="list-subval">Diario: ${formatMoneySmall(d.objDia)}</div></div></div>`; avaHtml += `<div class="list-item"><span class="list-label">${nom}</span> <div class="list-data"><div class="list-val">${formatMoney(d.ava)}</div><div class="list-subval">Promedio: ${formatMoneySmall(d.promDia)}</div></div></div>`; let colorEstilo = d.des < 0 ? 'color: #ef4444;' : 'color: #10b981;'; desHtml += `<div class="list-item"><span class="list-label">${nom}</span> <div class="list-val" style="${colorEstilo}">${formatMoney(d.des)}</div></div>`; } });
+            let c = totals['CONSOLIDADO'];
+            document.getElementById('obj-list').innerHTML = objHtml + `<div class="list-item consolidado"><span class="list-label">TOTAL AUTOSOL</span> <div class="list-data"><div class="consolidado-val">${formatMoney(c.obj)}</div><div class="list-subval">Diario: ${formatMoneySmall(c.objDia)}</div></div></div>`; document.getElementById('ava-list').innerHTML = avaHtml + `<div class="list-item consolidado"><span class="list-label">TOTAL AUTOSOL</span> <div class="list-data"><div class="consolidado-val">${formatMoney(c.ava)}</div><div class="list-subval">Promedio: ${formatMoneySmall(c.promDia)}</div></div></div>`; let colorEstiloCons = c.des < 0 ? 'color: #ef4444;' : 'color: #10b981;'; document.getElementById('des-list').innerHTML = desHtml + `<div class="list-item consolidado"><span class="list-label">TOTAL AUTOSOL</span> <div class="consolidado-val" style="${colorEstiloCons}">${formatMoney(c.des)}</div></div>`;
+            document.getElementById('gauge-container').innerHTML = '';
+            sucursales.forEach(suc => { let count = totals[suc].count; let avgPctG = count > 0 ? (totals[suc].pctG_sum / count) : 0; if (totals[suc].obj > 0 || totals[suc].ava > 0 || currentFilters.sucursal === 'TODAS') { createGauge(suc.replace(/\s+/g, ''), suc === 'MOVIL' ? 'MÓVIL' : suc, avgPctG); } });
+            let cAvgPctG = c.count > 0 ? (c.pctG_sum / c.count) : 0; createGauge('total', 'TOTAL AUTOSOL', cAvgPctG);
+        }
+
+        function createGauge(id, name, pct) {
+            let color = getStatusColor(pct); let colorClass = pct >= 95 ? 'text-green' : pct >= 90 ? 'text-yellow' : 'text-red';
+            let html = `<div class="gauge-card"><div class="chart-wrapper"><canvas id="gauge-${id}"></canvas></div><div class="gauge-pct ${colorClass}">${pct.toFixed(1)}%</div><div class="gauge-title">${name}</div></div>`;
+            document.getElementById('gauge-container').insertAdjacentHTML('beforeend', html);
+            new Chart(document.getElementById(`gauge-${id}`).getContext('2d'), { type: 'doughnut', data: { datasets: [{ data: [pct > 100 ? 100 : pct, pct > 100 ? 0 : 100 - pct], backgroundColor: [color, 'rgba(255,255,255,0.08)'], borderWidth: 0, circumference: 180, rotation: 270 }] }, options: { responsive: true, maintainAspectRatio: false, cutout: '75%', plugins: { tooltip: { enabled: false } }, hover: { mode: null } } });
+        }
+
+        function processChartData() {
+            let chartFiltered = rawData.filter(row => { return (currentFilters.sucursal === 'TODAS' || row.sucursal.includes(currentFilters.sucursal)) && (currentFilters.area === 'TODAS' || row.area === currentFilters.area); });
+            let data25 = Array(12).fill(0), data26 = Array(12).fill(0); const mesesList = ['ENERO', 'FEBRERO', 'MARZO', 'ABRIL', 'MAYO', 'JUNIO', 'JULIO', 'AGOSTO', 'SEPTIEMBRE', 'OCTUBRE', 'NOVIEMBRE', 'DICIEMBRE'];
+            chartFiltered.forEach(r => { let mIdx = mesesList.indexOf(r.mes); if (mIdx !== -1) { if (r.ano === '2025') data25[mIdx] += r.avance; if (r.ano === '2026') data26[mIdx] += r.avance; } });
+            if (interanualChart) interanualChart.destroy();
+            interanualChart = new Chart(document.getElementById('interanualChart').getContext('2d'), { type: 'bar', data: { labels: ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'], datasets: [ { label: '2025', data: data25, backgroundColor: '#cbd5e1', borderRadius: 4 }, { label: '2026', data: data26, backgroundColor: '#eab308', borderRadius: 4 } ] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { font: { family: 'Inter', size: 10, weight: '600' }, color: '#475569' } } }, scales: { y: { beginAtZero: true, ticks: { callback: function(value) { return '$' + (value / 1000000).toFixed(0) + 'M'; }, font: { family: 'Inter', size: 9 }, color: '#64748b' }, grid: { color: '#f1f5f9' }, border: { display: false } }, x: { grid: { display: false }, ticks: { font: { family: 'Inter', size: 10, weight: '500' }, color: '#475569' }, border: { display: false } } } });
+        }
+
+        document.querySelectorAll('.filter-select').forEach(select => { select.addEventListener('change', (e) => { let id = e.target.id; if (id === 'filter-ano') currentFilters.ano = e.target.value; if (id === 'filter-sucursales') currentFilters.sucursal = e.target.value; if (id === 'filter-areas') currentFilters.area = e.target.value; if (id === 'filter-meses') currentFilters.mes = e.target.value; processData(); }); });
+        loadData();
+<script>
+        // 1. PEGA AQUÍ TU ENLACE NUEVO DE APPS SCRIPT (Con acceso para "Cualquier persona")
+        const scriptUrl = 'URL_DE_TU_APPS_SCRIPT_AQUI';
+
+        let rawData = []; let rawCargos = []; let currentFilters = { ano: '2026', sucursal: 'TODAS', area: 'TODAS', mes: 'SEPTIEMBRE' }; let interanualChart;
+        const formatMoney = (n) => { let isNeg = n < 0; let val = Math.abs(n) / 1000000; return (isNeg ? '-$' : '$ ') + val.toFixed(1) + 'M'; };
+        const formatMoneySmall = (n) => { return new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS', maximumFractionDigits: 0 }).format(n); };
+        const getStatusColor = (pct) => { if (pct >= 95) return '#10b981'; if (pct >= 90) return '#f59e0b'; return '#ef4444'; };
+
+        function loadData() {
+            let cached = sessionStorage.getItem('autosolDataV10');
+            let cacheTime = sessionStorage.getItem('autosolTimeV10');
+            let now = new Date().getTime();
+            let cacheValido = cacheTime && (now - cacheTime < (5 * 60 * 1000));
+
+            if (cached && cacheValido) {
+                initSystem(JSON.parse(cached));
+            } else {
+                // ESCUDO ANTICONGELAMIENTO
+                fetch(scriptUrl)
+                .then(res => {
+                    if (!res.ok) throw new Error("Error de permisos de Google");
+                    return res.json();
+                })
+                .then(data => {
+                    sessionStorage.setItem('autosolDataV10', JSON.stringify(data));
+                    sessionStorage.setItem('autosolTimeV10', now.toString());
+                    initSystem(data);
+                })
+                .catch(error => {
+                    document.getElementById('loading').innerHTML = `⚠️ <b>Error de Conexión:</b><br><br>No se pudo conectar con Google.<br><br>1. Verifica que pegaste el enlace correcto en el código.<br>2. En Apps Script, asegúrate de que "Quién tiene acceso" esté en <b>"Cualquier persona"</b>.`;
+                    document.getElementById('loading').style.color = '#ef4444';
+                });
+            }
+        }
+
+        function initSystem(data) {
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('dashboard').style.display = 'block';
+            rawData = data.facturacionRaw || []; rawCargos = data.cargosRaw || [];
+            
+            let debug = document.getElementById('debug-panel');
+            if (data.error) { debug.innerHTML = "<b>Apps Script Error:</b> " + data.error; debug.style.display = 'block'; }
+            else if (rawCargos.length === 0) { debug.innerHTML = "<b>Cargos Vacíos:</b> Apps Script no detectó datos en el nuevo Excel. Verifica que el archivo no esté vacío."; debug.style.display = 'block'; }
+            else { debug.style.display = 'none'; }
+            processData(); 
+        }
+
+        function processData() {
+            let filtered = rawData.filter(row => {
+                let matchAno = currentFilters.ano === 'TODOS' || row.ano === currentFilters.ano;
+                let matchSuc = currentFilters.sucursal === 'TODAS' || row.sucursal.includes(currentFilters.sucursal);
+                let matchArea = currentFilters.area === 'TODAS' || row.area === currentFilters.area;
+                let matchMes = currentFilters.mes === 'TODOS' || row.mes === currentFilters.mes;
+                return matchAno && matchSuc && matchArea && matchMes;
+            });
+
+            let totals = { 'SANTA FE': { obj: 0, ava: 0, des: 0, pctG_sum: 0, objDia: 0, promDia: 0, count: 0 }, 'JUJUY': { obj: 0, ava: 0, des: 0, pctG_sum: 0, objDia: 0, promDia: 0, count: 0 }, 'EXPRESS': { obj: 0, ava: 0, des: 0, pctG_sum: 0, objDia: 0, promDia: 0, count: 0 }, 'MOVIL': { obj: 0, ava: 0, des: 0, pctG_sum: 0, objDia: 0, promDia: 0, count: 0 }, 'TARTAGAL': { obj: 0, ava: 0, des: 0, pctG_sum: 0, objDia: 0, promDia: 0, count: 0 }, 'CONSOLIDADO': { obj: 0, ava: 0, des: 0, pctG_sum: 0, objDia: 0, promDia: 0, count: 0 } };
+            filtered.forEach(r => { let sucKey = Object.keys(totals).find(k => r.sucursal.includes(k)); if (sucKey) { totals[sucKey].obj += r.objetivo; totals[sucKey].ava += r.avance; totals[sucKey].des += r.desvio; totals[sucKey].pctG_sum += r.pctG; totals[sucKey].objDia += r.objDiario; totals[sucKey].promDia += r.promDiario; totals[sucKey].count += 1; totals['CONSOLIDADO'].obj += r.objetivo; totals['CONSOLIDADO'].ava += r.avance; totals['CONSOLIDADO'].des += r.desvio; totals['CONSOLIDADO'].pctG_sum += r.pctG; totals['CONSOLIDADO'].objDia += r.objDiario; totals['CONSOLIDADO'].promDia += r.promDiario; totals['CONSOLIDADO'].count += 1; } });
+            renderDashboard(totals); processChartData();
+
+            let secCargos = document.getElementById('imputacion-section');
+            if (currentFilters.area === 'SERVICIOS') {
+                secCargos.style.display = 'block';
+                let valCli = 0, valGar = 0, valIn = 0;
+                rawCargos.forEach(r => {
+                    let matchAno = currentFilters.ano === 'TODOS' || r.ano === currentFilters.ano;
+                    let matchSuc = currentFilters.sucursal === 'TODAS' || r.sucursal.includes(currentFilters.sucursal);
+                    let matchMes = currentFilters.mes === 'TODOS' || r.mes === currentFilters.mes;
+                    if (matchAno && matchSuc && matchMes) {
+                        if (r.cargo === 'CLIENTE') valCli += r.mo; else if (r.cargo === 'GARANTIA') valGar += r.mo; else if (r.cargo === 'INTERNO') valIn += r.mo;
+                    }
+                });
+
+                let totalMO = valCli + valGar + valIn;
+                let debug = document.getElementById('debug-panel');
+                if (rawCargos.length > 0 && totalMO === 0) { debug.innerHTML = `<b>Filtro Vacío:</b> La lectura del Excel es correcta, pero la suma da $0 para: ${currentFilters.mes} - ${currentFilters.sucursal}.`; debug.style.display = 'block'; }
+                else if (rawCargos.length > 0) { debug.style.display = 'none'; }
+
+                let pctCli = totalMO > 0 ? (valCli / totalMO) * 100 : 0; let pctGar = totalMO > 0 ? (valGar / totalMO) * 100 : 0; let pctIn = totalMO > 0 ? (valIn / totalMO) * 100 : 0;
+                document.getElementById('mo-val-cli').innerText = `(${formatMoneySmall(valCli)})`; document.getElementById('mo-pct-cli').innerText = `${pctCli.toFixed(1)}%`; document.getElementById('mo-bar-cli').style.width = `${pctCli}%`;
+                document.getElementById('mo-val-gar').innerText = `(${formatMoneySmall(valGar)})`; document.getElementById('mo-pct-gar').innerText = `${pctGar.toFixed(1)}%`; document.getElementById('mo-bar-gar').style.width = `${pctGar}%`;
+                document.getElementById('mo-val-in').innerText = `(${formatMoneySmall(valIn)})`; document.getElementById('mo-pct-in').innerText = `${pctIn.toFixed(1)}%`; document.getElementById('mo-bar-in').style.width = `${pctIn}%`;
+            } else { secCargos.style.display = 'none'; }
+        }
+
+        function renderDashboard(totals) {
+            let objHtml = '', avaHtml = '', desHtml = ''; const sucursales = ['SANTA FE', 'JUJUY', 'EXPRESS', 'MOVIL', 'TARTAGAL'];
+            sucursales.forEach(suc => { let d = totals[suc]; if (d.obj > 0 || d.ava > 0 || currentFilters.sucursal === 'TODAS') { let nom = suc === 'MOVIL' ? 'MÓVIL' : suc; objHtml += `<div class="list-item"><span class="list-label">${nom}</span> <div class="list-data"><div class="list-val">${formatMoney(d.obj)}</div><div class="list-subval">Diario: ${formatMoneySmall(d.objDia)}</div></div></div>`; avaHtml += `<div class="list-item"><span class="list-label">${nom}</span> <div class="list-data"><div class="list-val">${formatMoney(d.ava)}</div><div class="list-subval">Promedio: ${formatMoneySmall(d.promDia)}</div></div></div>`; let colorEstilo = d.des < 0 ? 'color: #ef4444;' : 'color: #10b981;'; desHtml += `<div class="list-item"><span class="list-label">${nom}</span> <div class="list-val" style="${colorEstilo}">${formatMoney(d.des)}</div></div>`; } });
+            let c = totals['CONSOLIDADO'];
+            document.getElementById('obj-list').innerHTML = objHtml + `<div class="list-item consolidado"><span class="list-label">TOTAL AUTOSOL</span> <div class="list-data"><div class="consolidado-val">${formatMoney(c.obj)}</div><div class="list-subval">Diario: ${formatMoneySmall(c.objDia)}</div></div></div>`; document.getElementById('ava-list').innerHTML = avaHtml + `<div class="list-item consolidado"><span class="list-label">TOTAL AUTOSOL</span> <div class="list-data"><div class="consolidado-val">${formatMoney(c.ava)}</div><div class="list-subval">Promedio: ${formatMoneySmall(c.promDia)}</div></div></div>`; let colorEstiloCons = c.des < 0 ? 'color: #ef4444;' : 'color: #10b981;'; document.getElementById('des-list').innerHTML = desHtml + `<div class="list-item consolidado"><span class="list-label">TOTAL AUTOSOL</span> <div class="consolidado-val" style="${colorEstiloCons}">${formatMoney(c.des)}</div></div>`;
+            document.getElementById('gauge-container').innerHTML = '';
+            sucursales.forEach(suc => { let count = totals[suc].count; let avgPctG = count > 0 ? (totals[suc].pctG_sum / count) : 0; if (totals[suc].obj > 0 || totals[suc].ava > 0 || currentFilters.sucursal === 'TODAS') { createGauge(suc.replace(/\s+/g, ''), suc === 'MOVIL' ? 'MÓVIL' : suc, avgPctG); } });
+            let cAvgPctG = c.count > 0 ? (c.pctG_sum / c.count) : 0; createGauge('total', 'TOTAL AUTOSOL', cAvgPctG);
+        }
+
+        function createGauge(id, name, pct) {
+            let color = getStatusColor(pct); let colorClass = pct >= 95 ? 'text-green' : pct >= 90 ? 'text-yellow' : 'text-red';
+            let html = `<div class="gauge-card"><div class="chart-wrapper"><canvas id="gauge-${id}"></canvas></div><div class="gauge-pct ${colorClass}">${pct.toFixed(1)}%</div><div class="gauge-title">${name}</div></div>`;
+            document.getElementById('gauge-container').insertAdjacentHTML('beforeend', html);
+            new Chart(document.getElementById(`gauge-${id}`).getContext('2d'), { type: 'doughnut', data: { datasets: [{ data: [pct > 100 ? 100 : pct, pct > 100 ? 0 : 100 - pct], backgroundColor: [color, 'rgba(255,255,255,0.08)'], borderWidth: 0, circumference: 180, rotation: 270 }] }, options: { responsive: true, maintainAspectRatio: false, cutout: '75%', plugins: { tooltip: { enabled: false } }, hover: { mode: null } } });
+        }
+
+        function processChartData() {
+            let chartFiltered = rawData.filter(row => { return (currentFilters.sucursal === 'TODAS' || row.sucursal.includes(currentFilters.sucursal)) && (currentFilters.area === 'TODAS' || row.area === currentFilters.area); });
+            let data25 = Array(12).fill(0), data26 = Array(12).fill(0); const mesesList = ['ENERO', 'FEBRERO', 'MARZO', 'ABRIL', 'MAYO', 'JUNIO', 'JULIO', 'AGOSTO', 'SEPTIEMBRE', 'OCTUBRE', 'NOVIEMBRE', 'DICIEMBRE'];
+            chartFiltered.forEach(r => { let mIdx = mesesList.indexOf(r.mes); if (mIdx !== -1) { if (r.ano === '2025') data25[mIdx] += r.avance; if (r.ano === '2026') data26[mIdx] += r.avance; } });
+            if (interanualChart) interanualChart.destroy();
+            interanualChart = new Chart(document.getElementById('interanualChart').getContext('2d'), { type: 'bar', data: { labels: ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'], datasets: [ { label: '2025', data: data25, backgroundColor: '#cbd5e1', borderRadius: 4 }, { label: '2026', data: data26, backgroundColor: '#eab308', borderRadius: 4 } ] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { font: { family: 'Inter', size: 10, weight: '600' }, color: '#475569' } } }, scales: { y: { beginAtZero: true, ticks: { callback: function(value) { return '$' + (value / 1000000).toFixed(0) + 'M'; }, font: { family: 'Inter', size: 9 }, color: '#64748b' }, grid: { color: '#f1f5f9' }, border: { display: false } }, x: { grid: { display: false }, ticks: { font: { family: 'Inter', size: 10, weight: '500' }, color: '#475569' }, border: { display: false } } } });
+        }
+
+        document.querySelectorAll('.filter-select').forEach(select => { select.addEventListener('change', (e) => { let id = e.target.id; if (id === 'filter-ano') currentFilters.ano = e.target.value; if (id === 'filter-sucursales') currentFilters.sucursal = e.target.value; if (id === 'filter-areas') currentFilters.area = e.target.value; if (id === 'filter-meses') currentFilters.mes = e.target.value; processData(); }); });
+        loadData();
     </script>
-</body>
-</html>
