@@ -16,6 +16,12 @@
         .back-btn:hover { background: rgba(255,255,255,0.2); }
         .title { font-size: 1rem; font-weight: 900; letter-spacing: 0.5px; margin: 0; text-transform: uppercase;}
         .subtitle { font-size: 0.7rem; color: #94a3b8; font-weight: 500; }
+        
+        /* Botón Días Hábil Arriba a la Derecha */
+        .header-right { display: flex; align-items: center; gap: 15px; }
+        .dias-badge { background: #0b1121; color: white; padding: 6px 14px; border-radius: 8px; font-size: 0.7rem; font-weight: 800; display: flex; align-items: center; gap: 6px; border: 1px solid rgba(255,255,255,0.1); }
+        .dias-badge span { color: #f59e0b; font-size: 0.85rem; font-weight: 900; }
+
         .container { width: 100%; max-width: 1400px; padding: 0 20px; }
         
         .filters-bar { background: white; border-radius: 8px; padding: 10px 20px; margin-bottom: 15px; box-shadow: 0 1px 2px rgba(0,0,0,0.05); border: 1px solid #f1f5f9; display: flex; gap: 15px; align-items: center; }
@@ -24,29 +30,18 @@
         .filter-label { font-size: 0.65rem; font-weight: 800; color: #64748b; }
         .filter-select { padding: 4px 8px; border-radius: 4px; border: 1px solid #cbd5e1; font-family: inherit; font-size: 0.75rem; font-weight: 600; color: #0f172a; background: #f8fafc; cursor: pointer; outline: none; }
 
-        /* NUEVO: 4 TARJETAS BLANCAS (Foto 3) */
-        .top-grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; margin-bottom: 25px; }
-        .data-card-white { background: white; border-radius: 12px; padding: 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.03); border: 1px solid #f1f5f9; display: flex; flex-direction: column;}
-        
-        .card-header-icon { display: flex; align-items: center; gap: 10px; margin-bottom: 20px; }
-        .icon-circle { width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
-        .icon-circle svg { width: 16px; height: 16px; stroke-width: 2.5; fill: none; }
-        .card-header-title { font-size: 0.7rem; font-weight: 900; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px;}
-
-        /* Colores de íconos */
-        .icon-green { background: rgba(16, 185, 129, 0.1); } .icon-green svg { stroke: #10b981; }
-        .icon-blue { background: rgba(59, 130, 246, 0.1); } .icon-blue svg { stroke: #3b82f6; }
-        .icon-slate { background: rgba(100, 116, 139, 0.1); } .icon-slate svg { stroke: #64748b; }
-        .icon-dark { background: rgba(15, 23, 42, 0.1); } .icon-dark svg { stroke: #0f172a; }
-
-        /* Filas de la tarjeta */
-        .list-item-clean { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid #f1f5f9; }
-        .list-item-clean:last-child { border-bottom: none; border-top: 2px dashed #e2e8f0; margin-top: 5px; padding-top: 12px; }
-        .list-label-clean { font-size: 0.7rem; font-weight: 800; color: #475569; text-transform: uppercase;}
-        .list-val-clean { font-size: 1.1rem; font-weight: 900; color: #0f172a; font-style: italic; }
-        
-        .val-green { color: #10b981 !important; font-size: 1.25rem !important;}
-        .val-blue { color: #3b82f6 !important; font-size: 1.25rem !important;}
+        /* Las 3 Tarjetas Originales */
+        .top-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 25px; }
+        .data-card { background: white; border-radius: 12px; padding: 15px 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.03); border: 1px solid #f1f5f9; }
+        .border-blue { border-left: 4px solid #001E50; } .border-cyan { border-left: 4px solid #00b0f0; } .border-red { border-left: 4px solid #ef4444; }
+        .card-header { font-size: 0.65rem; font-weight: 800; color: #64748b; text-transform: uppercase; margin-bottom: 12px; border-bottom: 1px solid #f1f5f9; padding-bottom: 6px; }
+        .list-item { display: flex; justify-content: space-between; align-items: center; padding: 4px 0; border-bottom: 1px dashed #f1f5f9; }
+        .list-item:last-child { border-bottom: none; }
+        .list-label { font-size: 0.65rem; font-weight: 700; color: #475569; text-transform: uppercase;}
+        .list-val { font-size: 0.9rem; font-weight: 800; color: #0f172a; font-style: italic; }
+        .consolidado { background: #f8fafc; padding: 8px 12px; border-radius: 6px; margin-top: 8px; }
+        .consolidado .list-label { font-weight: 900; color: #001E50; }
+        .consolidado-val { font-size: 1.1rem; color: #001E50; font-weight: 900; font-style: italic; }
 
         /* RELOJES DE PERFORMANCE */
         .gauges-container { background: #0b1121; border-radius: 12px; padding: 15px 20px; margin-bottom: 25px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); border: 1px solid rgba(255,255,255,0.05); }
@@ -61,20 +56,20 @@
         .chart-wrapper { position: relative; height: 50px; width: 100%; display: flex; justify-content: center; }
         .gauge-pct { font-size: 1.1rem; font-weight: 900; margin-top: -10px; color: white; font-style: italic; }
 
-        /* GRILLA DE GRÁFICOS (Más angostos) */
+        /* GRILLA DE GRÁFICOS (Más angostos de alto) */
         .charts-grid-top { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px; }
         .chart-container { background: white; border-radius: 12px; padding: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); border: 1px solid #f1f5f9; }
         .chart-header { font-size: 0.75rem; font-weight: 800; color: #64748b; text-transform: uppercase; margin-bottom: 15px; }
         
-        /* Reducimos la altura a 180px para que no sean tan altos (toscos) */
-        .bar-wrapper-chart { position: relative; height: 180px; width: 100%; display: flex; justify-content: center; align-items: center;}
+        /* Altura reducida a 170px para que no sean toscos */
+        .bar-wrapper-chart { position: relative; height: 170px; width: 100%; display: flex; justify-content: center; align-items: center;}
         
-        /* BARRAS HORIZONTALES (Abajo ocupando todo) */
+        /* BARRAS HORIZONTALES ORs ABAJO */
         .full-width { grid-column: 1 / -1; margin-bottom: 40px; }
         .bars-wrapper { width: 100%; padding-top: 5px; display: flex; flex-direction: column; justify-content: space-around;}
-        .bar-row { margin-bottom: 18px; }
+        .bar-row { margin-bottom: 15px; }
         .bar-row:last-child { margin-bottom: 0; }
-        .bar-labels { display: flex; justify-content: space-between; margin-bottom: 6px; align-items: flex-end; }
+        .bar-labels { display: flex; justify-content: space-between; margin-bottom: 5px; align-items: flex-end; }
         .bar-title { font-size: 0.75rem; font-weight: 700; color: #475569; }
         .bar-money { font-size: 0.75rem; font-weight: 500; color: #94a3b8; margin-left: 5px; }
         .bar-pct { font-size: 0.85rem; font-weight: 800; color: #0f172a; }
@@ -87,11 +82,7 @@
         #debug-panel { display: none; background: #fee2e2; border: 1px solid #fca5a5; padding: 15px; border-radius: 8px; color: #991b1b; font-size: 0.85rem; margin-bottom: 20px; font-weight: 500; text-align: left; }
 
         @media (max-width: 1024px) {
-            .top-grid-4 { grid-template-columns: repeat(2, 1fr); }
             .charts-grid-top { grid-template-columns: 1fr; }
-        }
-        @media (max-width: 600px) {
-            .top-grid-4 { grid-template-columns: 1fr; }
         }
     </style>
 </head>
@@ -105,6 +96,9 @@
                     <h1 class="title">AUTOSOL VW - POSVENTA</h1>
                     <div class="subtitle">Módulo de Operación (PPT y ORs)</div>
                 </div>
+            </div>
+            <div class="header-right">
+                <div class="dias-badge">DÍAS HÁBILES <span id="lbl-dias">-</span></div>
             </div>
         </div>
     </div>
@@ -156,41 +150,11 @@
                 </div>
             </div>
 
-            <!-- NUEVAS TARJETAS SUPERIORES (4 COLUMNAS BLANCAS) -->
-            <div class="top-grid-4">
-                
-                <div class="data-card-white">
-                    <div class="card-header-icon">
-                        <div class="icon-circle icon-green"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><circle cx="12" cy="12" r="6"></circle><circle cx="12" cy="12" r="2"></circle></svg></div>
-                        <span class="card-header-title">OBJETIVO PPT</span>
-                    </div>
-                    <div id="card-obj"></div>
-                </div>
-
-                <div class="data-card-white">
-                    <div class="card-header-icon">
-                        <div class="icon-circle icon-blue"><svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg></div>
-                        <span class="card-header-title">AVANCE DE PPT</span>
-                    </div>
-                    <div id="card-ava"></div>
-                </div>
-
-                <div class="data-card-white">
-                    <div class="card-header-icon">
-                        <div class="icon-circle icon-slate"><svg viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg></div>
-                        <span class="card-header-title">PPT DIARIOS (COL K)</span>
-                    </div>
-                    <div id="card-pptd"></div>
-                </div>
-
-                <div class="data-card-white">
-                    <div class="card-header-icon">
-                        <div class="icon-circle icon-dark"><svg viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg></div>
-                        <span class="card-header-title">SERVIS DIARIOS (COL M)</span>
-                    </div>
-                    <div id="card-servd"></div>
-                </div>
-
+            <!-- LAS 3 TARJETAS ORIGINALES -->
+            <div class="top-grid">
+                <div class="data-card border-blue"><div class="card-header">OBJETIVO PPT</div><div id="obj-list"></div></div>
+                <div class="data-card border-cyan"><div class="card-header">AVANCE PPT (REAL)</div><div id="ava-list"></div></div>
+                <div class="data-card border-red"><div class="card-header">DESVÍO PPT</div><div id="des-list"></div></div>
             </div>
             
             <!-- RELOJES DE EFICIENCIA -->
@@ -206,7 +170,7 @@
                 <div class="gauge-grid" id="gauge-container"></div>
             </div>
 
-            <!-- GRÁFICOS MEDIOS (Evolución Semanal + Interanual) -->
+            <!-- SECCIÓN DE GRÁFICOS MEDIOS (Evolución Semanal + Interanual Más Angostos) -->
             <div class="charts-grid-top">
                 <div class="chart-container">
                     <div class="chart-header">EVOLUCIÓN SEMANAL DE PPT (MES ACTUAL)</div>
@@ -219,7 +183,7 @@
                 </div>
             </div>
 
-            <!-- BARRAS HORIZONTALES ORs ABAJO -->
+            <!-- BARRAS HORIZONTALES ORs (ABAJO) -->
             <div class="chart-container full-width">
                 <div class="chart-header">DISTRIBUCIÓN DE O.R. (CANTIDAD FÍSICA)</div>
                 <div class="bars-wrapper">
@@ -325,12 +289,12 @@
             });
 
             let totals = { 
-                'SANTA FE': { obj: 0, ava: 0, ppd: 0, srvd: 0, conv_sum: 0, count: 0 }, 
-                'JUJUY': { obj: 0, ava: 0, ppd: 0, srvd: 0, conv_sum: 0, count: 0 }, 
-                'EXPRESS': { obj: 0, ava: 0, ppd: 0, srvd: 0, conv_sum: 0, count: 0 }, 
-                'MOVIL': { obj: 0, ava: 0, ppd: 0, srvd: 0, conv_sum: 0, count: 0 }, 
-                'TARTAGAL': { obj: 0, ava: 0, ppd: 0, srvd: 0, conv_sum: 0, count: 0 }, 
-                'CONSOLIDADO': { obj: 0, ava: 0, ppd: 0, srvd: 0, conv_sum: 0, count: 0 } 
+                'SANTA FE': { obj: 0, ava: 0, dias: 0, conv_sum: 0, count: 0 }, 
+                'JUJUY': { obj: 0, ava: 0, dias: 0, conv_sum: 0, count: 0 }, 
+                'EXPRESS': { obj: 0, ava: 0, dias: 0, conv_sum: 0, count: 0 }, 
+                'MOVIL': { obj: 0, ava: 0, dias: 0, conv_sum: 0, count: 0 }, 
+                'TARTAGAL': { obj: 0, ava: 0, dias: 0, conv_sum: 0, count: 0 }, 
+                'CONSOLIDADO': { obj: 0, ava: 0, dias: 0, conv_sum: 0, count: 0 } 
             };
 
             filteredPpt.forEach(r => { 
@@ -338,15 +302,13 @@
                 if (sucKey) { 
                     totals[sucKey].obj += r.objetivo; 
                     totals[sucKey].ava += r.avance; 
-                    totals[sucKey].ppd += r.pptDia; 
-                    totals[sucKey].srvd += r.servDia; 
+                    totals[sucKey].dias = r.dias; // Días hábiles
                     totals[sucKey].conv_sum += r.conversion; 
                     totals[sucKey].count += 1; 
 
                     totals['CONSOLIDADO'].obj += r.objetivo; 
                     totals['CONSOLIDADO'].ava += r.avance; 
-                    totals['CONSOLIDADO'].ppd += r.pptDia; 
-                    totals['CONSOLIDADO'].srvd += r.servDia; 
+                    totals['CONSOLIDADO'].dias = r.dias;
                     totals['CONSOLIDADO'].conv_sum += r.conversion; 
                     totals['CONSOLIDADO'].count += 1; 
                 } 
@@ -357,26 +319,35 @@
         }
 
         function renderDashboard(totals) {
-            let objHtml = '', avaHtml = '', ppdHtml = '', srvdHtml = ''; 
+            let objHtml = '', avaHtml = '', desHtml = ''; 
             const sucursales = ['SANTA FE', 'JUJUY', 'EXPRESS', 'MOVIL', 'TARTAGAL'];
             
+            let diasHabilitados = 0;
+
             sucursales.forEach(suc => { 
                 let d = totals[suc]; 
                 if (d.obj > 0 || d.ava > 0 || currentFilters.sucursal === 'TODAS') { 
                     let nom = suc === 'MOVIL' ? 'MÓVIL' : suc; 
-                    objHtml += `<div class="list-item-clean"><span class="list-label-clean">${nom}</span> <div class="list-val-clean">${d.obj.toFixed(0)}</div></div>`; 
-                    avaHtml += `<div class="list-item-clean"><span class="list-label-clean">${nom}</span> <div class="list-val-clean">${d.ava.toFixed(0)}</div></div>`; 
-                    ppdHtml += `<div class="list-item-clean"><span class="list-label-clean">${nom}</span> <div class="list-val-clean">${(d.count>0 ? d.ppd/d.count : 0).toFixed(2).replace('.',',')}</div></div>`; 
-                    srvdHtml += `<div class="list-item-clean"><span class="list-label-clean">${nom}</span> <div class="list-val-clean">${(d.count>0 ? d.srvd/d.count : 0).toFixed(2).replace('.',',')}</div></div>`; 
+                    let desvio = d.ava - d.obj;
+                    if (d.dias > 0) diasHabilitados = d.dias;
+
+                    objHtml += `<div class="list-item"><span class="list-label">${nom}</span> <div class="list-val">${d.obj.toFixed(0)}</div></div>`; 
+                    avaHtml += `<div class="list-item"><span class="list-label">${nom}</span> <div class="list-val">${d.ava.toFixed(0)}</div></div>`; 
+                    let colorEstilo = desvio < 0 ? 'color: #ef4444;' : 'color: #10b981;'; 
+                    desHtml += `<div class="list-item"><span class="list-label">${nom}</span> <div class="list-val" style="${colorEstilo}">${desvio > 0 ? '+'+desvio.toFixed(0) : desvio.toFixed(0)}</div></div>`; 
                 } 
             });
 
-            let c = totals['CONSOLIDADO'];
-            document.getElementById('card-obj').innerHTML = objHtml + `<div class="list-item-clean"><span class="list-label-clean">TOTAL CONSOLIDADO</span> <div class="list-val-clean val-green">${c.obj.toFixed(0)}</div></div>`; 
-            document.getElementById('card-ava').innerHTML = avaHtml + `<div class="list-item-clean"><span class="list-label-clean">TOTAL CONSOLIDADO</span> <div class="list-val-clean val-blue">${c.ava.toFixed(0)}</div></div>`; 
-            document.getElementById('card-pptd').innerHTML = ppdHtml + `<div class="list-item-clean"><span class="list-label-clean">TOTAL CONSOLIDADO</span> <div class="list-val-clean">${(c.count>0 ? c.ppd/c.count : 0).toFixed(2).replace('.',',')}</div></div>`; 
-            document.getElementById('card-servd').innerHTML = srvdHtml + `<div class="list-item-clean"><span class="list-label-clean">TOTAL CONSOLIDADO</span> <div class="list-val-clean">${(c.count>0 ? c.srvd/c.count : 0).toFixed(2).replace('.',',')}</div></div>`; 
+            // Actualizar badge de días hábiles arriba a la derecha
+            document.getElementById('lbl-dias').innerText = diasHabilitados > 0 ? diasHabilitados : '-';
 
+            let c = totals['CONSOLIDADO'];
+            let desCons = c.ava - c.obj;
+            document.getElementById('obj-list').innerHTML = objHtml + `<div class="list-item consolidado"><span class="list-label">TOTAL AUTOSOL</span> <div class="consolidado-val">${c.obj.toFixed(0)}</div></div>`; 
+            document.getElementById('ava-list').innerHTML = avaHtml + `<div class="list-item consolidado"><span class="list-label">TOTAL AUTOSOL</span> <div class="consolidado-val">${c.ava.toFixed(0)}</div></div>`; 
+            let colorEstiloCons = desCons < 0 ? 'color: #ef4444;' : 'color: #10b981;'; 
+            document.getElementById('des-list').innerHTML = desHtml + `<div class="list-item consolidado"><span class="list-label">TOTAL AUTOSOL</span> <div class="consolidado-val" style="${colorEstiloCons}">${desCons > 0 ? '+'+desCons.toFixed(0) : desCons.toFixed(0)}</div></div>`;
+            
             // RELOJES
             document.getElementById('gauge-container').innerHTML = '';
             sucursales.forEach(suc => { 
@@ -420,7 +391,7 @@
                 options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, grid: { color: '#f1f5f9' }, border: { display: false } }, x: { grid: { display: false }, border: { display: false } } } }
             });
 
-            // 2. GRÁFICO INTERANUAL (SUBIDO A LA DERECHA)
+            // 2. GRÁFICO INTERANUAL (Arriba a la derecha)
             let chartFiltered = rawPpt.filter(row => { return (currentFilters.sucursal === 'TODAS' || row.sucursal.includes(currentFilters.sucursal)); });
             let data25 = Array(12).fill(0), data26 = Array(12).fill(0); 
             const mesesList = ['ENERO', 'FEBRERO', 'MARZO', 'ABRIL', 'MAYO', 'JUNIO', 'JULIO', 'AGOSTO', 'SEPTIEMBRE', 'OCTUBRE', 'NOVIEMBRE', 'DICIEMBRE'];
@@ -447,7 +418,7 @@
                 } 
             });
 
-            // 3. BARRAS HORIZONTALES ORs (ABAJO)
+            // 3. BARRAS HORIZONTALES ORs (Abajo)
             let orCli = 0, orGar = 0, orIn = 0;
             rawCargos.forEach(r => {
                 let matchAno = currentFilters.ano === 'TODOS' || r.ano === currentFilters.ano;
