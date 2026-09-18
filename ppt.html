@@ -38,7 +38,7 @@
         .consolidado .list-label { font-weight: 900; color: #001E50; }
         .consolidado-val { font-size: 1.1rem; color: #001E50; font-weight: 900; font-style: italic; }
 
-        /* RELOJES DE PERFORMANCE (60% Threshold) */
+        /* RELOJES DE PERFORMANCE */
         .gauges-container { background: #0b1121; border-radius: 12px; padding: 15px 20px; margin-bottom: 25px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); border: 1px solid rgba(255,255,255,0.05); }
         .gauge-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
         .gauge-header-title { font-size: 0.8rem; font-weight: 900; color: white; text-transform: uppercase; font-style: italic; }
@@ -57,8 +57,19 @@
         .chart-header { font-size: 0.75rem; font-weight: 800; color: #64748b; text-transform: uppercase; margin-bottom: 15px; }
         .bar-wrapper-chart { position: relative; height: 220px; width: 100%; display: flex; justify-content: center; align-items: center;}
         
-        .full-width { grid-column: 1 / -1; margin-bottom: 40px; }
+        /* ESTILOS DE BARRAS HORIZONTALES */
+        .bars-wrapper { width: 100%; padding-top: 10px; display: flex; flex-direction: column; justify-content: space-around; height: 100%; }
+        .bar-row { margin-bottom: 20px; }
+        .bar-row:last-child { margin-bottom: 0; }
+        .bar-labels { display: flex; justify-content: space-between; margin-bottom: 6px; align-items: flex-end; }
+        .bar-title { font-size: 0.75rem; font-weight: 700; color: #475569; }
+        .bar-money { font-size: 0.75rem; font-weight: 500; color: #94a3b8; margin-left: 5px; }
+        .bar-pct { font-size: 0.85rem; font-weight: 800; color: #0f172a; }
+        .bar-track { width: 100%; height: 8px; background: #f1f5f9; border-radius: 10px; overflow: hidden; }
+        .bar-fill { height: 100%; border-radius: 10px; transition: width 0.8s ease-out; }
+        .bg-green { background-color: #10b981; } .bg-yellow { background-color: #f59e0b; } .bg-red { background-color: #ef4444; }
 
+        .full-width { grid-column: 1 / -1; margin-bottom: 40px; }
         .text-green { color: #10b981 !important; } .text-yellow { color: #f59e0b !important; } .text-red { color: #ef4444 !important; }
 
         #loading { text-align: center; padding: 50px; font-size: 0.9rem; font-weight: 600; color: #64748b; }
@@ -150,16 +161,44 @@
                 <div class="gauge-grid" id="gauge-container"></div>
             </div>
 
-            <!-- SECCIÓN DE GRÁFICOS: SEMANAL VS ORs -->
+            <!-- SECCIÓN DE GRÁFICOS: SEMANAL VS BARRAS ORs -->
             <div class="charts-grid-top">
+                <!-- GRÁFICO SEMANAL -->
                 <div class="chart-container">
                     <div class="chart-header">EVOLUCIÓN SEMANAL DE PPT (MES ACTUAL)</div>
                     <div class="bar-wrapper-chart"><canvas id="semanalChart"></canvas></div>
                 </div>
                 
+                <!-- BARRAS HORIZONTALES ORs -->
                 <div class="chart-container">
                     <div class="chart-header">DISTRIBUCIÓN DE O.R. (CANTIDAD FÍSICA)</div>
-                    <div class="bar-wrapper-chart"><canvas id="orDoughnutChart"></canvas></div>
+                    <div class="bars-wrapper">
+                        
+                        <div class="bar-row">
+                            <div class="bar-labels">
+                                <div><span class="bar-title">Cargo Cliente</span><span class="bar-money" id="or-val-cli">(0 ORs)</span></div>
+                                <span class="bar-pct" id="or-pct-cli">0.0%</span>
+                            </div>
+                            <div class="bar-track"><div class="bar-fill bg-green" id="or-bar-cli" style="width: 0%;"></div></div>
+                        </div>
+                        
+                        <div class="bar-row">
+                            <div class="bar-labels">
+                                <div><span class="bar-title">Cargo Garantía (Fábrica)</span><span class="bar-money" id="or-val-gar">(0 ORs)</span></div>
+                                <span class="bar-pct" id="or-pct-gar">0.0%</span>
+                            </div>
+                            <div class="bar-track"><div class="bar-fill bg-yellow" id="or-bar-gar" style="width: 0%;"></div></div>
+                        </div>
+                        
+                        <div class="bar-row">
+                            <div class="bar-labels">
+                                <div><span class="bar-title">Cargo Interno</span><span class="bar-money" id="or-val-in">(0 ORs)</span></div>
+                                <span class="bar-pct" id="or-pct-in">0.0%</span>
+                            </div>
+                            <div class="bar-track"><div class="bar-fill bg-red" id="or-bar-in" style="width: 0%;"></div></div>
+                        </div>
+
+                    </div>
                 </div>
             </div>
 
@@ -177,13 +216,11 @@
         // PEGA AQUÍ TU ENLACE DE APPS SCRIPT
         // ----------------------------------------------------
         const scriptUrl ="https://script.google.com/macros/s/AKfycbwKka7XPcfVA9bRe_Iw3nGrmqTR7PIdFf41JptcszTjVniXAzknOpMRCv7frCS_egmw/exec"
-
         let rawPpt = [];
         let rawCargos = [];
         let currentFilters = { ano: '2026', sucursal: 'TODAS', mes: 'SEPTIEMBRE' };
         
         let semanalChart;
-        let orDoughnutChart;
         let interanualChart;
 
         // Regla de color para PPT: >60 Verde, >50 Amarillo, <50 Rojo
@@ -194,7 +231,6 @@
         };
 
         function loadData() {
-            // Usamos V12, ¡la misma memoria que Facturación para que cargue al instante!
             let cached = sessionStorage.getItem('autosolDataV12');
             let cacheTime = sessionStorage.getItem('autosolTimeV12');
             let now = new Date().getTime();
@@ -346,7 +382,7 @@
                     datasets: [{
                         label: 'Evolución PPT',
                         data: semData,
-                        borderColor: '#f97316', // Naranja
+                        borderColor: '#f97316', 
                         backgroundColor: 'rgba(249, 115, 22, 0.1)',
                         tension: 0.4,
                         borderWidth: 3,
@@ -367,7 +403,7 @@
             });
 
             // ----------------------------------------------------
-            // 2. GRÁFICO DE O.R. (Doughnut) - NUEVO
+            // 2. BARRAS HORIZONTALES ORs (Remplaza la dona)
             // ----------------------------------------------------
             let orCli = 0, orGar = 0, orIn = 0;
             rawCargos.forEach(r => {
@@ -381,26 +417,22 @@
                 }
             });
 
-            if (orDoughnutChart) orDoughnutChart.destroy();
-            orDoughnutChart = new Chart(document.getElementById('orDoughnutChart').getContext('2d'), {
-                type: 'doughnut',
-                data: {
-                    labels: ['Cliente', 'Garantía', 'Interno'],
-                    datasets: [{
-                        data: [orCli, orGar, orIn],
-                        backgroundColor: ['#10b981', '#f59e0b', '#ef4444'], // Verde, Amarillo, Rojo
-                        borderWidth: 2,
-                        borderColor: '#ffffff'
-                    }]
-                },
-                options: {
-                    responsive: true, maintainAspectRatio: false,
-                    cutout: '65%',
-                    plugins: {
-                        legend: { position: 'right', labels: { font: { family: 'Inter', weight: '600' }, color: '#475569', padding: 15 } }
-                    }
-                }
-            });
+            let totalOR = orCli + orGar + orIn;
+            let pctCli = totalOR > 0 ? (orCli / totalOR) * 100 : 0;
+            let pctGar = totalOR > 0 ? (orGar / totalOR) * 100 : 0;
+            let pctIn = totalOR > 0 ? (orIn / totalOR) * 100 : 0;
+
+            document.getElementById('or-val-cli').innerText = `(${orCli} ORs)`;
+            document.getElementById('or-pct-cli').innerText = `${pctCli.toFixed(1)}%`;
+            document.getElementById('or-bar-cli').style.width = `${pctCli}%`;
+
+            document.getElementById('or-val-gar').innerText = `(${orGar} ORs)`;
+            document.getElementById('or-pct-gar').innerText = `${pctGar.toFixed(1)}%`;
+            document.getElementById('or-bar-gar').style.width = `${pctGar}%`;
+
+            document.getElementById('or-val-in').innerText = `(${orIn} ORs)`;
+            document.getElementById('or-pct-in').innerText = `${pctIn.toFixed(1)}%`;
+            document.getElementById('or-bar-in').style.width = `${pctIn}%`;
 
             // ----------------------------------------------------
             // 3. GRÁFICO INTERANUAL (Barras - Abajo)
@@ -424,7 +456,7 @@
                     labels: ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'], 
                     datasets: [ 
                         { label: 'PPT 2025', data: data25, backgroundColor: '#cbd5e1', borderRadius: 4 }, 
-                        { label: 'PPT 2026', data: data26, backgroundColor: '#3b82f6', borderRadius: 4 } // Azul para PPT
+                        { label: 'PPT 2026', data: data26, backgroundColor: '#3b82f6', borderRadius: 4 } 
                     ] 
                 }, 
                 options: { 
