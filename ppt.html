@@ -3,19 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Operación PPT</title>
+    <title>Operación - PPT y Performance</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800;900&display=swap');
         
-        body { 
-            font-family: 'Inter', sans-serif; 
-            background: #f8f9fa; 
-            margin: 0; padding: 0; color: #334155; 
-            display: flex; flex-direction: column; align-items: center;
-        }
-        
-        /* Cabecera Ultracompacta Azul VW (con un poco más de aire) */
+        body { font-family: 'Inter', sans-serif; background: #f8f9fa; margin: 0; padding: 0; color: #334155; display: flex; flex-direction: column; align-items: center; }
         .navbar { background: #001E50; width: 100%; padding: 12px 0; display: flex; justify-content: center; color: white; box-shadow: 0 2px 5px rgba(0,0,0,0.1); margin-bottom: 15px; }
         .nav-content { max-width: 1400px; width: 100%; display: flex; align-items: center; justify-content: space-between; padding: 0 20px; }
         .nav-left { display: flex; align-items: center; gap: 12px; }
@@ -23,60 +16,57 @@
         .back-btn:hover { background: rgba(255,255,255,0.2); }
         .title { font-size: 1rem; font-weight: 900; letter-spacing: 0.5px; margin: 0; text-transform: uppercase;}
         .subtitle { font-size: 0.7rem; color: #94a3b8; font-weight: 500; }
-
-        /* Insignia de Días Hábiles (AGRANDADA Y DESTACADA) */
-        .days-badge { display: flex; align-items: center; gap: 12px; background: rgba(255,255,255,0.15); padding: 6px 20px; border-radius: 30px; border: 1px solid rgba(255,255,255,0.3); box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
-        .days-label { font-size: 0.75rem; font-weight: 700; color: #f8fafc; text-transform: uppercase; letter-spacing: 1px; }
-        .days-val { font-size: 1.5rem; font-weight: 900; color: #ccff00; text-shadow: 0 0 10px rgba(204, 255, 0, 0.4); }
-
         .container { width: 100%; max-width: 1400px; padding: 0 20px; }
         
-        /* Barra de Filtros Compacta en una sola línea */
         .filters-bar { background: white; border-radius: 8px; padding: 10px 20px; margin-bottom: 15px; box-shadow: 0 1px 2px rgba(0,0,0,0.05); border: 1px solid #f1f5f9; display: flex; gap: 15px; align-items: center; }
         .filter-group { display: flex; align-items: center; gap: 8px; border-right: 1px solid #e2e8f0; padding-right: 15px; }
         .filter-group:last-child { border-right: none; }
         .filter-label { font-size: 0.65rem; font-weight: 800; color: #64748b; }
         .filter-select { padding: 4px 8px; border-radius: 4px; border: 1px solid #cbd5e1; font-family: inherit; font-size: 0.75rem; font-weight: 600; color: #0f172a; background: #f8fafc; cursor: pointer; outline: none; }
 
-        /* Grilla de Tarjetas - 4 Columnas Compactas */
-        .top-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; margin-bottom: 15px; }
+        .top-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 25px; }
         .data-card { background: white; border-radius: 12px; padding: 15px 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.03); border: 1px solid #f1f5f9; }
-        
+        .border-blue { border-left: 4px solid #001E50; } .border-cyan { border-left: 4px solid #00b0f0; } .border-red { border-left: 4px solid #ef4444; }
         .card-header { font-size: 0.65rem; font-weight: 800; color: #64748b; text-transform: uppercase; margin-bottom: 12px; border-bottom: 1px solid #f1f5f9; padding-bottom: 6px; }
-        
         .list-item { display: flex; justify-content: space-between; align-items: center; padding: 4px 0; border-bottom: 1px dashed #f1f5f9; }
         .list-item:last-child { border-bottom: none; }
         .list-label { font-size: 0.65rem; font-weight: 700; color: #475569; text-transform: uppercase;}
+        .list-data { text-align: right; }
         .list-val { font-size: 0.9rem; font-weight: 800; color: #0f172a; font-style: italic; }
         
         .consolidado { background: #f8fafc; padding: 8px 12px; border-radius: 6px; margin-top: 8px; }
         .consolidado .list-label { font-weight: 900; color: #001E50; }
         .consolidado-val { font-size: 1.1rem; color: #001E50; font-weight: 900; font-style: italic; }
-        .color-green { color: #10b981; }
-        .color-blue { color: #2563eb; }
 
-        /* Relojes - Dark Mode Ultra Compactos */
+        /* RELOJES DE PERFORMANCE (60% Threshold) */
         .gauges-container { background: #0b1121; border-radius: 12px; padding: 15px 20px; margin-bottom: 25px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); border: 1px solid rgba(255,255,255,0.05); }
         .gauge-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
         .gauge-header-title { font-size: 0.8rem; font-weight: 900; color: white; text-transform: uppercase; font-style: italic; }
         .gauge-legend { display: flex; gap: 10px; font-size: 0.55rem; font-weight: 700; color: #94a3b8; }
         .legend-item { display: flex; align-items: center; gap: 4px; }
         .dot { width: 6px; height: 6px; border-radius: 50%; }
-
         .gauge-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 10px; }
         .gauge-card { background: rgba(30,41,59,0.5); border-radius: 8px; padding: 10px; text-align: center; border: 1px solid rgba(255,255,255,0.05); }
         .gauge-title { font-size: 0.6rem; font-weight: 700; color: #94a3b8; margin-top: 5px; text-transform: uppercase; }
         .chart-wrapper { position: relative; height: 50px; width: 100%; display: flex; justify-content: center; }
         .gauge-pct { font-size: 1.1rem; font-weight: 900; margin-top: -10px; color: white; font-style: italic; }
 
-        /* Contenedor Gráficos Inferiores */
-        .charts-row { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 40px; }
-        
+        /* GRILLA DE GRÁFICOS NUEVA */
+        .charts-grid-top { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px; }
         .chart-container { background: white; border-radius: 12px; padding: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); border: 1px solid #f1f5f9; }
         .chart-header { font-size: 0.75rem; font-weight: 800; color: #64748b; text-transform: uppercase; margin-bottom: 15px; }
-        .bar-wrapper { position: relative; height: 200px; width: 100%; }
+        .bar-wrapper-chart { position: relative; height: 220px; width: 100%; display: flex; justify-content: center; align-items: center;}
+        
+        .full-width { grid-column: 1 / -1; margin-bottom: 40px; }
+
+        .text-green { color: #10b981 !important; } .text-yellow { color: #f59e0b !important; } .text-red { color: #ef4444 !important; }
 
         #loading { text-align: center; padding: 50px; font-size: 0.9rem; font-weight: 600; color: #64748b; }
+        #debug-panel { display: none; background: #fee2e2; border: 1px solid #fca5a5; padding: 15px; border-radius: 8px; color: #991b1b; font-size: 0.85rem; margin-bottom: 20px; font-weight: 500; text-align: left; }
+
+        @media (max-width: 1024px) {
+            .charts-grid-top { grid-template-columns: 1fr; }
+        }
     </style>
 </head>
 <body>
@@ -87,22 +77,19 @@
                 <a href="index.html" class="back-btn">←</a>
                 <div class="title-group">
                     <h1 class="title">AUTOSOL VW - POSVENTA</h1>
-                    <div class="subtitle">Módulo de Operación (PPT)</div>
+                    <div class="subtitle">Módulo de Operación (PPT y ORs)</div>
                 </div>
-            </div>
-            <div class="days-badge">
-                <span class="days-label">Días Hábiles</span>
-                <span class="days-val" id="dias-text">-</span>
             </div>
         </div>
     </div>
 
     <div class="container">
-        <div id="loading">Sincronizando Base de Datos PPT... ⏳</div>
+        
+        <div id="debug-panel"></div>
+        <div id="loading">Sincronizando Base de Datos Operación... ⏳</div>
 
         <div id="dashboard" style="display: none;">
             
-            <!-- Barra de Filtros Ultra Compacta -->
             <div class="filters-bar">
                 <div class="filter-group">
                     <span class="filter-label">AÑO</span>
@@ -121,7 +108,7 @@
                         <option value="MARZO">Mar</option>
                         <option value="ABRIL">Abr</option>
                         <option value="MAYO">May</option>
-                        <option value="JUNIO">Jun</option>
+                        <option value="JUNIO">Junio</option>
                         <option value="JULIO">Julio</option>
                         <option value="AGOSTO">Ago</option>
                         <option value="SEPTIEMBRE" selected>Sep</option>
@@ -143,15 +130,14 @@
                 </div>
             </div>
 
-            <!-- Grilla Principal -->
+            <!-- TARJETAS SUPERIORES -->
             <div class="top-grid">
-                <div class="data-card"><div class="card-header">🎯 OBJETIVO PPT</div><div id="obj-list"></div></div>
-                <div class="data-card"><div class="card-header">📈 AVANCE DE PPT</div><div id="ava-list"></div></div>
-                <div class="data-card"><div class="card-header">📊 PPT DIARIOS (COL K)</div><div id="pptdia-list"></div></div>
-                <div class="data-card"><div class="card-header">🔧 SERVIS DIARIOS (COL M)</div><div id="srvdia-list"></div></div>
+                <div class="data-card border-blue"><div class="card-header">OBJETIVO PPT</div><div id="obj-list"></div></div>
+                <div class="data-card border-cyan"><div class="card-header">AVANCE PPT (REAL)</div><div id="ava-list"></div></div>
+                <div class="data-card border-red"><div class="card-header">DESVÍO PPT</div><div id="des-list"></div></div>
             </div>
             
-            <!-- Relojes Oscuros -->
+            <!-- RELOJES DE EFICIENCIA -->
             <div class="gauges-container">
                 <div class="gauge-header">
                     <div class="gauge-header-title">PERFORMANCE: % SERVIS VS PPT</div>
@@ -164,255 +150,304 @@
                 <div class="gauge-grid" id="gauge-container"></div>
             </div>
 
-            <!-- Gráficos Inferiores (Semanal e Interanual) -->
-            <div class="charts-row">
+            <!-- SECCIÓN DE GRÁFICOS: SEMANAL VS ORs -->
+            <div class="charts-grid-top">
                 <div class="chart-container">
                     <div class="chart-header">EVOLUCIÓN SEMANAL DE PPT (MES ACTUAL)</div>
-                    <div class="bar-wrapper"><canvas id="semanalChart"></canvas></div>
+                    <div class="bar-wrapper-chart"><canvas id="semanalChart"></canvas></div>
                 </div>
                 
                 <div class="chart-container">
-                    <div class="chart-header">COMPARATIVA INTERANUAL DE PPT (2025 VS 2026)</div>
-                    <div class="bar-wrapper"><canvas id="interanualChart"></canvas></div>
+                    <div class="chart-header">DISTRIBUCIÓN DE O.R. (CANTIDAD FÍSICA)</div>
+                    <div class="bar-wrapper-chart"><canvas id="orDoughnutChart"></canvas></div>
                 </div>
+            </div>
+
+            <!-- GRÁFICO INTERANUAL ABAJO -->
+            <div class="chart-container full-width">
+                <div class="chart-header">COMPARATIVA INTERANUAL DE PPT (2025 VS 2026)</div>
+                <div class="bar-wrapper-chart"><canvas id="interanualChart"></canvas></div>
             </div>
             
         </div>
     </div>
 
     <script>
+        // ----------------------------------------------------
         // PEGA AQUÍ TU ENLACE DE APPS SCRIPT
-        const scriptUrl ="https://script.google.com/macros/s/AKfycbxPq-hBNXnoVv2zdmKx-oBVPRpM2vfKc6ZlsnWDtSvb49V0tkx6bEX-36KyLG_zdH5M/exec"
+        // ----------------------------------------------------
+        const scriptUrl ="https://script.google.com/macros/s/AKfycbwKka7XPcfVA9bRe_Iw3nGrmqTR7PIdFf41JptcszTjVniXAzknOpMRCv7frCS_egmw/exec"
 
-        let rawData = [];
+        let rawPpt = [];
+        let rawCargos = [];
         let currentFilters = { ano: '2026', sucursal: 'TODAS', mes: 'SEPTIEMBRE' };
-        let interanualChart;
+        
         let semanalChart;
+        let orDoughnutChart;
+        let interanualChart;
 
-        const formatNumber = (n) => {
-            return new Intl.NumberFormat('es-AR', { maximumFractionDigits: 1 }).format(n);
-        };
-
-        const getPptColor = (pct) => {
+        // Regla de color para PPT: >60 Verde, >50 Amarillo, <50 Rojo
+        const getStatusColorPpt = (pct) => { 
             if (pct >= 60) return '#10b981'; 
             if (pct >= 50) return '#f59e0b'; 
             return '#ef4444'; 
         };
 
+        function loadData() {
+            // Usamos V12, ¡la misma memoria que Facturación para que cargue al instante!
+            let cached = sessionStorage.getItem('autosolDataV12');
+            let cacheTime = sessionStorage.getItem('autosolTimeV12');
+            let now = new Date().getTime();
+            let cacheValido = cacheTime && (now - cacheTime < (5 * 60 * 1000));
+
+            if (cached && cacheValido) {
+                initSystem(JSON.parse(cached));
+            } else {
+                fetch(scriptUrl)
+                .then(res => res.text()) 
+                .then(text => {
+                    try {
+                        let data = JSON.parse(text);
+                        sessionStorage.setItem('autosolDataV12', JSON.stringify(data));
+                        sessionStorage.setItem('autosolTimeV12', now.toString());
+                        initSystem(data);
+                    } catch(e) {
+                        showError("<b>⚠️ Error de Permisos:</b><br>Verifica Apps Script y asegura que el enlace es público.");
+                    }
+                })
+                .catch(error => {
+                    showError("<b>⚠️ Error de Red:</b><br>No se pudo conectar con Apps Script.");
+                });
+            }
+        }
+
+        function showError(msg) {
+            document.getElementById('loading').style.display = 'none';
+            let debug = document.getElementById('debug-panel');
+            debug.innerHTML = msg;
+            debug.style.display = 'block';
+        }
+
+        function initSystem(data) {
+            document.getElementById('loading').style.display = 'none';
+            if (data.error) { showError("<b>Error en Script:</b> " + data.error); return; }
+            
+            document.getElementById('dashboard').style.display = 'block';
+            rawPpt = data.pptRaw || [];
+            rawCargos = data.cargosRaw || [];
+            
+            processData(); 
+        }
+
         function processData() {
-            let filtered = rawData.filter(row => {
+            // 1. FILTRAR PPT
+            let filteredPpt = rawPpt.filter(row => {
                 let matchAno = currentFilters.ano === 'TODOS' || row.ano === currentFilters.ano;
-                let matchSucursal = currentFilters.sucursal === 'TODAS' || row.sucursal.includes(currentFilters.sucursal);
+                let matchSuc = currentFilters.sucursal === 'TODAS' || row.sucursal.includes(currentFilters.sucursal);
                 let matchMes = currentFilters.mes === 'TODOS' || row.mes === currentFilters.mes;
-                return matchAno && matchSucursal && matchMes;
+                return matchAno && matchSuc && matchMes;
             });
 
-            let totals = {
-                'SANTA FE': { obj: 0, ava: 0, pptDia: 0, srvDia: 0, conv_sum: 0, count: 0, sem: [0,0,0,0,0] }, 
-                'JUJUY': { obj: 0, ava: 0, pptDia: 0, srvDia: 0, conv_sum: 0, count: 0, sem: [0,0,0,0,0] },
-                'EXPRESS': { obj: 0, ava: 0, pptDia: 0, srvDia: 0, conv_sum: 0, count: 0, sem: [0,0,0,0,0] }, 
-                'MOVIL': { obj: 0, ava: 0, pptDia: 0, srvDia: 0, conv_sum: 0, count: 0, sem: [0,0,0,0,0] }, 
-                'TARTAGAL': { obj: 0, ava: 0, pptDia: 0, srvDia: 0, conv_sum: 0, count: 0, sem: [0,0,0,0,0] },
-                'CONSOLIDADO': { obj: 0, ava: 0, pptDia: 0, srvDia: 0, conv_sum: 0, count: 0, sem: [0,0,0,0,0] }
+            let totals = { 
+                'SANTA FE': { obj: 0, ava: 0, conv_sum: 0, count: 0 }, 
+                'JUJUY': { obj: 0, ava: 0, conv_sum: 0, count: 0 }, 
+                'EXPRESS': { obj: 0, ava: 0, conv_sum: 0, count: 0 }, 
+                'MOVIL': { obj: 0, ava: 0, conv_sum: 0, count: 0 }, 
+                'TARTAGAL': { obj: 0, ava: 0, conv_sum: 0, count: 0 }, 
+                'CONSOLIDADO': { obj: 0, ava: 0, conv_sum: 0, count: 0 } 
             };
-            
-            let diasTranscurridos = 0;
 
-            filtered.forEach(r => {
-                let sucKey = Object.keys(totals).find(k => r.sucursal.includes(k));
-                if (sucKey) {
+            filteredPpt.forEach(r => { 
+                let sucKey = Object.keys(totals).find(k => r.sucursal.includes(k)); 
+                if (sucKey) { 
                     totals[sucKey].obj += r.objetivo; 
                     totals[sucKey].ava += r.avance; 
-                    totals[sucKey].pptDia += r.pptDia; 
-                    totals[sucKey].srvDia += r.servDia;
                     totals[sucKey].conv_sum += r.conversion; 
-                    totals[sucKey].count += 1;
-                    
-                    for(let i=0; i<5; i++) totals[sucKey].sem[i] += r.semanas[i];
-                    
+                    totals[sucKey].count += 1; 
+
                     totals['CONSOLIDADO'].obj += r.objetivo; 
                     totals['CONSOLIDADO'].ava += r.avance; 
-                    totals['CONSOLIDADO'].pptDia += r.pptDia; 
-                    totals['CONSOLIDADO'].srvDia += r.servDia; 
                     totals['CONSOLIDADO'].conv_sum += r.conversion; 
-                    totals['CONSOLIDADO'].count += 1;
-                    
-                    for(let i=0; i<5; i++) totals['CONSOLIDADO'].sem[i] += r.semanas[i];
-                    
-                    if (r.dias > 0 && r.sucursal.indexOf('MOVIL') === -1) {
-                        diasTranscurridos = r.dias;
-                    }
-                }
+                    totals['CONSOLIDADO'].count += 1; 
+                } 
             });
-            
-            document.getElementById('dias-text').innerText = diasTranscurridos > 0 ? diasTranscurridos : '-';
-            renderDashboard(totals);
-            processChartData(totals);
+
+            renderDashboard(totals); 
+            processCharts(filteredPpt);
         }
 
         function renderDashboard(totals) {
-            let objHtml = '', avaHtml = '', pptDiaHtml = '', srvDiaHtml = '';
+            let objHtml = '', avaHtml = '', desHtml = ''; 
             const sucursales = ['SANTA FE', 'JUJUY', 'EXPRESS', 'MOVIL', 'TARTAGAL'];
-
-            sucursales.forEach(suc => {
-                let d = totals[suc];
-                if (d.obj > 0 || d.ava > 0 || currentFilters.sucursal === 'TODAS') {
-                    let nom = suc === 'MOVIL' ? 'MÓVIL' : suc;
-                    objHtml += `<div class="list-item"><span class="list-label">${nom}</span> <span class="list-val">${formatNumber(d.obj)}</span></div>`;
-                    avaHtml += `<div class="list-item"><span class="list-label">${nom}</span> <span class="list-val">${formatNumber(d.ava)}</span></div>`;
-                    pptDiaHtml += `<div class="list-item"><span class="list-label">${nom}</span> <span class="list-val">${formatNumber(d.pptDia)}</span></div>`;
-                    srvDiaHtml += `<div class="list-item"><span class="list-label">${nom}</span> <span class="list-val">${formatNumber(d.srvDia)}</span></div>`;
-                }
+            
+            sucursales.forEach(suc => { 
+                let d = totals[suc]; 
+                if (d.obj > 0 || d.ava > 0 || currentFilters.sucursal === 'TODAS') { 
+                    let nom = suc === 'MOVIL' ? 'MÓVIL' : suc; 
+                    let desvio = d.ava - d.obj;
+                    objHtml += `<div class="list-item"><span class="list-label">${nom}</span> <div class="list-val">${d.obj.toFixed(0)}</div></div>`; 
+                    avaHtml += `<div class="list-item"><span class="list-label">${nom}</span> <div class="list-val">${d.ava.toFixed(0)}</div></div>`; 
+                    let colorEstilo = desvio < 0 ? 'color: #ef4444;' : 'color: #10b981;'; 
+                    desHtml += `<div class="list-item"><span class="list-label">${nom}</span> <div class="list-val" style="${colorEstilo}">${desvio > 0 ? '+'+desvio.toFixed(0) : desvio.toFixed(0)}</div></div>`; 
+                } 
             });
 
             let c = totals['CONSOLIDADO'];
-            document.getElementById('obj-list').innerHTML = objHtml + `<div class="list-item consolidado"><span class="list-label">TOTAL CONSOLIDADO</span> <span class="consolidado-val color-green">${formatNumber(c.obj)}</span></div>`;
-            document.getElementById('ava-list').innerHTML = avaHtml + `<div class="list-item consolidado"><span class="list-label">TOTAL CONSOLIDADO</span> <span class="consolidado-val color-blue">${formatNumber(c.ava)}</span></div>`;
-            document.getElementById('pptdia-list').innerHTML = pptDiaHtml + `<div class="list-item consolidado"><span class="list-label">TOTAL CONSOLIDADO</span> <span class="consolidado-val">${formatNumber(c.pptDia)}</span></div>`;
-            document.getElementById('srvdia-list').innerHTML = srvDiaHtml + `<div class="list-item consolidado"><span class="list-label">TOTAL CONSOLIDADO</span> <span class="consolidado-val">${formatNumber(c.srvDia)}</span></div>`;
-
-            document.getElementById('gauge-container').innerHTML = '';
+            let desCons = c.ava - c.obj;
+            document.getElementById('obj-list').innerHTML = objHtml + `<div class="list-item consolidado"><span class="list-label">TOTAL AUTOSOL</span> <div class="consolidado-val">${c.obj.toFixed(0)}</div></div>`; 
+            document.getElementById('ava-list').innerHTML = avaHtml + `<div class="list-item consolidado"><span class="list-label">TOTAL AUTOSOL</span> <div class="consolidado-val">${c.ava.toFixed(0)}</div></div>`; 
+            let colorEstiloCons = desCons < 0 ? 'color: #ef4444;' : 'color: #10b981;'; 
+            document.getElementById('des-list').innerHTML = desHtml + `<div class="list-item consolidado"><span class="list-label">TOTAL AUTOSOL</span> <div class="consolidado-val" style="${colorEstiloCons}">${desCons > 0 ? '+'+desCons.toFixed(0) : desCons.toFixed(0)}</div></div>`;
             
-            sucursales.forEach(suc => {
-                let count = totals[suc].count;
-                let avgConv = count > 0 ? (totals[suc].conv_sum / count) : 0;
-                if (totals[suc].obj > 0 || totals[suc].ava > 0 || currentFilters.sucursal === 'TODAS') {
-                    createGauge(suc.replace(/\s+/g, ''), suc === 'MOVIL' ? 'MÓVIL' : suc, avgConv);
-                }
+            // RELOJES
+            document.getElementById('gauge-container').innerHTML = '';
+            sucursales.forEach(suc => { 
+                let count = totals[suc].count; 
+                let avgPct = count > 0 ? (totals[suc].conv_sum / count) : 0; 
+                if (totals[suc].obj > 0 || totals[suc].ava > 0 || currentFilters.sucursal === 'TODAS') { 
+                    createGauge(suc.replace(/\s+/g, ''), suc === 'MOVIL' ? 'MÓVIL' : suc, avgPct); 
+                } 
             });
-            let cAvgConv = c.count > 0 ? (c.conv_sum / c.count) : 0;
-            createGauge('total', 'CONSOLIDADO', cAvgConv);
+            let cAvgPct = c.count > 0 ? (c.conv_sum / c.count) : 0; 
+            createGauge('total', 'CONSOLIDADO', cAvgPct);
         }
 
         function createGauge(id, name, pct) {
-            let color = getPptColor(pct);
-            
-            let html = `
-                <div class="gauge-card">
-                    <div class="chart-wrapper"><canvas id="gauge-${id}"></canvas></div>
-                    <div class="gauge-pct">${pct.toFixed(1)}%</div>
-                    <div class="gauge-title">${name}</div>
-                </div>`;
+            let color = getStatusColorPpt(pct); 
+            let colorClass = pct >= 60 ? 'text-green' : pct >= 50 ? 'text-yellow' : 'text-red';
+            let html = `<div class="gauge-card"><div class="chart-wrapper"><canvas id="gauge-${id}"></canvas></div><div class="gauge-pct ${colorClass}">${pct.toFixed(1)}%</div><div class="gauge-title">${name}</div></div>`;
             document.getElementById('gauge-container').insertAdjacentHTML('beforeend', html);
-
-            new Chart(document.getElementById(`gauge-${id}`).getContext('2d'), {
-                type: 'doughnut',
-                data: { datasets: [{ data: [pct > 100 ? 100 : pct, pct > 100 ? 0 : 100 - pct], backgroundColor: [color, 'rgba(255,255,255,0.08)'], borderWidth: 0, circumference: 180, rotation: 270 }] },
-                options: { responsive: true, maintainAspectRatio: false, cutout: '75%', plugins: { tooltip: { enabled: false } }, hover: { mode: null } }
+            
+            new Chart(document.getElementById(`gauge-${id}`).getContext('2d'), { 
+                type: 'doughnut', 
+                data: { datasets: [{ data: [pct > 100 ? 100 : pct, pct > 100 ? 0 : 100 - pct], backgroundColor: [color, 'rgba(255,255,255,0.08)'], borderWidth: 0, circumference: 180, rotation: 270 }] }, 
+                options: { responsive: true, maintainAspectRatio: false, cutout: '75%', plugins: { tooltip: { enabled: false } }, hover: { mode: null } } 
             });
         }
 
-        function processChartData(totals) {
-            // 1. GRAFICO INTERANUAL (Barras)
-            let chartFiltered = rawData.filter(row => {
-                return currentFilters.sucursal === 'TODAS' || row.sucursal.includes(currentFilters.sucursal);
+        function processCharts(filteredPpt) {
+            // ----------------------------------------------------
+            // 1. GRÁFICO SEMANAL (Línea)
+            // ----------------------------------------------------
+            let semData = [0, 0, 0, 0, 0];
+            filteredPpt.forEach(r => {
+                semData[0] += r.semanas[0];
+                semData[1] += r.semanas[1];
+                semData[2] += r.semanas[2];
+                semData[3] += r.semanas[3];
+                semData[4] += r.semanas[4];
             });
 
-            let data25 = Array(12).fill(0);
-            let data26 = Array(12).fill(0);
-            const mesesList = ['ENERO', 'FEBRERO', 'MARZO', 'ABRIL', 'MAYO', 'JUNIO', 'JULIO', 'AGOSTO', 'SEPTIEMBRE', 'OCTUBRE', 'NOVIEMBRE', 'DICIEMBRE'];
-
-            chartFiltered.forEach(r => {
-                let mIdx = mesesList.indexOf(r.mes);
-                if (mIdx !== -1) {
-                    if (r.ano === '2025') data25[mIdx] += r.avance; 
-                    if (r.ano === '2026') data26[mIdx] += r.avance;
-                }
-            });
-
-            if (interanualChart) interanualChart.destroy();
-            interanualChart = new Chart(document.getElementById('interanualChart').getContext('2d'), {
-                type: 'bar',
-                data: {
-                    labels: ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'],
-                    datasets: [
-                        { label: '2025', data: data25, backgroundColor: '#cbd5e1', borderRadius: 4 },
-                        { label: '2026', data: data26, backgroundColor: '#2563eb', borderRadius: 4 }
-                    ]
-                },
-                options: {
-                    responsive: true, maintainAspectRatio: false,
-                    plugins: { legend: { position: 'bottom', labels: { font: { family: 'Inter', size: 10, weight: '600' }, color: '#475569' } } },
-                    scales: {
-                        y: { beginAtZero: true, ticks: { font: { family: 'Inter', size: 9 }, color: '#64748b' }, grid: { color: '#f1f5f9' }, border: { display: false } },
-                        x: { grid: { display: false }, ticks: { font: { family: 'Inter', size: 10, weight: '500' }, color: '#475569' }, border: { display: false } }
-                    }
-                }
-            });
-
-            // 2. GRAFICO SEMANAL (Línea Naranja con relleno suavizado)
-            let semData = currentFilters.sucursal === 'TODAS' ? totals['CONSOLIDADO'].sem : totals[currentFilters.sucursal].sem;
-            
             if (semanalChart) semanalChart.destroy();
             semanalChart = new Chart(document.getElementById('semanalChart').getContext('2d'), {
                 type: 'line',
                 data: {
                     labels: ['Sem 1', 'Sem 2', 'Sem 3', 'Sem 4', 'Sem 5'],
                     datasets: [{
-                        label: 'Avance PPT Semanal',
+                        label: 'Evolución PPT',
                         data: semData,
-                        borderColor: '#f97316', 
-                        backgroundColor: 'rgba(249, 115, 22, 0.15)', 
-                        borderWidth: 2,
+                        borderColor: '#f97316', // Naranja
+                        backgroundColor: 'rgba(249, 115, 22, 0.1)',
+                        tension: 0.4,
+                        borderWidth: 3,
                         fill: true,
-                        tension: 0.3, 
                         pointBackgroundColor: '#ffffff',
                         pointBorderColor: '#f97316',
-                        pointRadius: 4
+                        pointRadius: 5
                     }]
                 },
                 options: {
                     responsive: true, maintainAspectRatio: false,
                     plugins: { legend: { display: false } },
                     scales: {
-                        y: { beginAtZero: true, ticks: { font: { family: 'Inter', size: 9 }, color: '#64748b' }, grid: { color: '#f1f5f9' }, border: { display: false } },
-                        x: { grid: { display: false }, ticks: { font: { family: 'Inter', size: 10, weight: '500' }, color: '#475569' }, border: { display: false } }
+                        y: { beginAtZero: true, grid: { color: '#f1f5f9' }, border: { display: false } },
+                        x: { grid: { display: false }, border: { display: false } }
                     }
                 }
             });
+
+            // ----------------------------------------------------
+            // 2. GRÁFICO DE O.R. (Doughnut) - NUEVO
+            // ----------------------------------------------------
+            let orCli = 0, orGar = 0, orIn = 0;
+            rawCargos.forEach(r => {
+                let matchAno = currentFilters.ano === 'TODOS' || r.ano === currentFilters.ano;
+                let matchSuc = currentFilters.sucursal === 'TODAS' || r.sucursal.includes(currentFilters.sucursal);
+                let matchMes = currentFilters.mes === 'TODOS' || r.mes === currentFilters.mes;
+                if (matchAno && matchSuc && matchMes) {
+                    if (r.cargo === 'CLIENTE') orCli += r.or;
+                    else if (r.cargo === 'GARANTIA') orGar += r.or;
+                    else if (r.cargo === 'INTERNO') orIn += r.or;
+                }
+            });
+
+            if (orDoughnutChart) orDoughnutChart.destroy();
+            orDoughnutChart = new Chart(document.getElementById('orDoughnutChart').getContext('2d'), {
+                type: 'doughnut',
+                data: {
+                    labels: ['Cliente', 'Garantía', 'Interno'],
+                    datasets: [{
+                        data: [orCli, orGar, orIn],
+                        backgroundColor: ['#10b981', '#f59e0b', '#ef4444'], // Verde, Amarillo, Rojo
+                        borderWidth: 2,
+                        borderColor: '#ffffff'
+                    }]
+                },
+                options: {
+                    responsive: true, maintainAspectRatio: false,
+                    cutout: '65%',
+                    plugins: {
+                        legend: { position: 'right', labels: { font: { family: 'Inter', weight: '600' }, color: '#475569', padding: 15 } }
+                    }
+                }
+            });
+
+            // ----------------------------------------------------
+            // 3. GRÁFICO INTERANUAL (Barras - Abajo)
+            // ----------------------------------------------------
+            let chartFiltered = rawPpt.filter(row => { return (currentFilters.sucursal === 'TODAS' || row.sucursal.includes(currentFilters.sucursal)); });
+            let data25 = Array(12).fill(0), data26 = Array(12).fill(0); 
+            const mesesList = ['ENERO', 'FEBRERO', 'MARZO', 'ABRIL', 'MAYO', 'JUNIO', 'JULIO', 'AGOSTO', 'SEPTIEMBRE', 'OCTUBRE', 'NOVIEMBRE', 'DICIEMBRE'];
+            
+            chartFiltered.forEach(r => { 
+                let mIdx = mesesList.indexOf(r.mes); 
+                if (mIdx !== -1) { 
+                    if (r.ano === '2025') data25[mIdx] += r.avance; 
+                    if (r.ano === '2026') data26[mIdx] += r.avance; 
+                } 
+            });
+            
+            if (interanualChart) interanualChart.destroy();
+            interanualChart = new Chart(document.getElementById('interanualChart').getContext('2d'), { 
+                type: 'bar', 
+                data: { 
+                    labels: ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'], 
+                    datasets: [ 
+                        { label: 'PPT 2025', data: data25, backgroundColor: '#cbd5e1', borderRadius: 4 }, 
+                        { label: 'PPT 2026', data: data26, backgroundColor: '#3b82f6', borderRadius: 4 } // Azul para PPT
+                    ] 
+                }, 
+                options: { 
+                    responsive: true, maintainAspectRatio: false, 
+                    plugins: { legend: { position: 'bottom', labels: { font: { family: 'Inter', size: 10, weight: '600' }, color: '#475569' } } }, 
+                    scales: { 
+                        y: { beginAtZero: true, grid: { color: '#f1f5f9' }, border: { display: false } }, 
+                        x: { grid: { display: false }, ticks: { font: { family: 'Inter', size: 10, weight: '500' }, color: '#475569' }, border: { display: false } } 
+                    } 
+                } 
+            });
         }
 
-        document.querySelectorAll('.filter-select').forEach(select => {
-            select.addEventListener('change', (e) => {
-                let id = e.target.id;
-                let val = e.target.value;
-                if (id === 'filter-ano') currentFilters.ano = val;
-                if (id === 'filter-sucursales') currentFilters.sucursal = val;
-                if (id === 'filter-meses') currentFilters.mes = val;
-                processData();
-            });
+        document.querySelectorAll('.filter-select').forEach(select => { 
+            select.addEventListener('change', (e) => { 
+                let id = e.target.id; 
+                if (id === 'filter-ano') currentFilters.ano = e.target.value; 
+                if (id === 'filter-sucursales') currentFilters.sucursal = e.target.value; 
+                if (id === 'filter-meses') currentFilters.mes = e.target.value; 
+                processData(); 
+            }); 
         });
 
-       // --- NUEVO MOTOR DE CARGA CON MEMORIA (Para PPT) ---
-        function loadData() {
-            let cached = sessionStorage.getItem('autosolData');
-            let cacheTime = sessionStorage.getItem('autosolTime');
-            let now = new Date().getTime();
-            
-            // La memoria dura 5 minutos
-            let cacheValido = cacheTime && (now - cacheTime < (5 * 60 * 1000));
-
-            if (cached && cacheValido) {
-                // ⚡ CARGA INSTANTÁNEA (Desde la memoria del navegador)
-                let data = JSON.parse(cached);
-                document.getElementById('loading').style.display = 'none';
-                document.getElementById('dashboard').style.display = 'block';
-                rawData = data.pptRaw; // <-- Apunta a PPT
-                processData();
-            } else {
-                // ⏳ CARGA DESDE GOOGLE (Solo la primera vez)
-                fetch(scriptUrl).then(res => res.json()).then(data => {
-                    sessionStorage.setItem('autosolData', JSON.stringify(data));
-                    sessionStorage.setItem('autosolTime', now.toString());
-                    document.getElementById('loading').style.display = 'none';
-                    document.getElementById('dashboard').style.display = 'block';
-                    rawData = data.pptRaw; // <-- Apunta a PPT
-                    processData(); 
-                });
-            }
-        }
-        
-        // Iniciar el sistema
         loadData();
     </script>
 </body>
