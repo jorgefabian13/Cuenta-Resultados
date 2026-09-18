@@ -202,7 +202,7 @@
         </div>
     </div>
 
-    <!-- USAMOS EL MOTOR IDÉNTICO AL DE FACTURACIÓN QUE SÍ FUNCIONÓ PERFECTO -->
+    <!-- SISTEMA DE CARGA DINÁMICA POR JSONP PARA EVITAR CORS -->
     <script>
         const scriptUrl ="https://script.google.com/macros/s/AKfycbzLXD7vGH_RU83diBJ3T-7ZToL4SPnAG9GJ9KeeHtISGGYdbVTV9ZNPSH1Ydp4QJsQ7/exec"
 
@@ -220,21 +220,27 @@
         };
 
         function loadData() {
-            let cached = sessionStorage.getItem('autosolDataV18');
-            let cacheTime = sessionStorage.getItem('autosolTimeV18');
+            let cached = sessionStorage.getItem('autosolDataV19');
+            let cacheTime = sessionStorage.getItem('autosolTimeV19');
             let now = new Date().getTime();
             let cacheValido = cacheTime && (now - cacheTime < (5 * 60 * 1000));
 
             if (cached && cacheValido) {
                 initSystem(JSON.parse(cached));
             } else {
-                fetch(scriptUrl).then(res => res.json()).then(data => {
-                    sessionStorage.setItem('autosolDataV18', JSON.stringify(data));
-                    sessionStorage.setItem('autosolTimeV18', now.toString());
+                // Creamos una etiqueta script dinámica para saltar el bloqueo CORS de forma nativa
+                window.handleData = function(data) {
+                    sessionStorage.setItem('autosolDataV19', JSON.stringify(data));
+                    sessionStorage.setItem('autosolTimeV19', now.toString());
                     initSystem(data);
-                }).catch(err => {
-                    showError("<b>⚠️ Error de Sincronización:</b><br>Verifica en Google Apps Script que la implementación web esté configurada con acceso para <b>'Cualquier persona'</b>.");
-                });
+                };
+
+                let script = document.createElement('script');
+                script.src = scriptUrl + (scriptUrl.includes('?') ? '&' : '?') + 'callback=handleData';
+                script.onerror = function() {
+                    showError("<b>⚠️ Error de Conexión:</b><br>No se pudo cargar la base de datos.");
+                };
+                document.body.appendChild(script);
             }
         }
 
