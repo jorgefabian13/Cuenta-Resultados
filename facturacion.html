@@ -15,7 +15,6 @@
             display: flex; flex-direction: column; align-items: center;
         }
         
-        /* Cabecera Ultracompacta Azul VW (Idéntica a PPT) */
         .navbar { background: #001E50; width: 100%; padding: 12px 0; display: flex; justify-content: center; color: white; box-shadow: 0 2px 5px rgba(0,0,0,0.1); margin-bottom: 15px; }
         .nav-content { max-width: 1400px; width: 100%; display: flex; align-items: center; justify-content: space-between; padding: 0 20px; }
         .nav-left { display: flex; align-items: center; gap: 12px; }
@@ -26,15 +25,13 @@
 
         .container { width: 100%; max-width: 1400px; padding: 0 20px; }
         
-        /* Barra de Filtros Compacta en una sola línea (Idéntica a PPT) */
         .filters-bar { background: white; border-radius: 8px; padding: 10px 20px; margin-bottom: 15px; box-shadow: 0 1px 2px rgba(0,0,0,0.05); border: 1px solid #f1f5f9; display: flex; gap: 15px; align-items: center; }
         .filter-group { display: flex; align-items: center; gap: 8px; border-right: 1px solid #e2e8f0; padding-right: 15px; }
         .filter-group:last-child { border-right: none; }
         .filter-label { font-size: 0.65rem; font-weight: 800; color: #64748b; }
         .filter-select { padding: 4px 8px; border-radius: 4px; border: 1px solid #cbd5e1; font-family: inherit; font-size: 0.75rem; font-weight: 600; color: #0f172a; background: #f8fafc; cursor: pointer; outline: none; }
 
-        /* Grilla de Tarjetas - 3 Columnas para Facturación */
-        .top-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 15px; }
+        .top-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 25px; }
         .data-card { background: white; border-radius: 12px; padding: 15px 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.03); border: 1px solid #f1f5f9; }
         
         .border-blue { border-left: 4px solid #001E50; }
@@ -55,7 +52,6 @@
         .consolidado .list-label { font-weight: 900; color: #001E50; }
         .consolidado-val { font-size: 1.1rem; color: #001E50; font-weight: 900; font-style: italic; }
 
-        /* Relojes - Dark Mode Ultra Compactos (Fondo Azul Noche Idéntico a PPT) */
         .gauges-container { background: #0b1121; border-radius: 12px; padding: 15px 20px; margin-bottom: 25px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); border: 1px solid rgba(255,255,255,0.05); }
         .gauge-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
         .gauge-header-title { font-size: 0.8rem; font-weight: 900; color: white; text-transform: uppercase; font-style: italic; }
@@ -69,10 +65,27 @@
         .chart-wrapper { position: relative; height: 50px; width: 100%; display: flex; justify-content: center; }
         .gauge-pct { font-size: 1.1rem; font-weight: 900; margin-top: -10px; color: white; font-style: italic; }
 
-        /* Contenedor Gráfico Interanual */
+        /* MÓDULO NUEVO: BARRAS HORIZONTALES DE IMPUTACIÓN */
+        .imputacion-container { background: white; border-radius: 12px; padding: 25px; margin-bottom: 25px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); border: 1px solid #f1f5f9; display: none; }
+        .imputacion-title { font-size: 0.85rem; font-weight: 800; color: #0f172a; margin-bottom: 20px; }
+        
+        .bar-row { margin-bottom: 18px; }
+        .bar-row:last-child { margin-bottom: 0; }
+        .bar-labels { display: flex; justify-content: space-between; margin-bottom: 6px; align-items: flex-end; }
+        .bar-title { font-size: 0.75rem; font-weight: 700; color: #475569; }
+        .bar-money { font-size: 0.75rem; font-weight: 500; color: #94a3b8; margin-left: 5px; }
+        .bar-pct { font-size: 0.85rem; font-weight: 800; color: #0f172a; }
+        
+        .bar-track { width: 100%; height: 8px; background: #f1f5f9; border-radius: 10px; overflow: hidden; }
+        .bar-fill { height: 100%; border-radius: 10px; transition: width 0.8s ease-out; }
+        
+        .bg-green { background-color: #10b981; }
+        .bg-yellow { background-color: #f59e0b; }
+        .bg-red { background-color: #ef4444; }
+
         .chart-container { background: white; border-radius: 12px; padding: 20px; margin-bottom: 40px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); border: 1px solid #f1f5f9; }
         .chart-header { font-size: 0.75rem; font-weight: 800; color: #64748b; text-transform: uppercase; margin-bottom: 15px; }
-        .bar-wrapper { position: relative; height: 200px; width: 100%; }
+        .bar-wrapper-chart { position: relative; height: 200px; width: 100%; }
 
         .text-green { color: #10b981 !important; }
         .text-yellow { color: #f59e0b !important; }
@@ -100,7 +113,6 @@
 
         <div id="dashboard" style="display: none;">
             
-            <!-- Barra de Filtros Ultra Compacta -->
             <div class="filters-bar">
                 <div class="filter-group">
                     <span class="filter-label">AÑO</span>
@@ -150,14 +162,12 @@
                 </div>
             </div>
 
-            <!-- Grilla Principal -->
             <div class="top-grid">
                 <div class="data-card border-blue"><div class="card-header">OBJETIVO MENSUAL</div><div id="obj-list"></div></div>
                 <div class="data-card border-cyan"><div class="card-header">AVANCE A LA FECHA</div><div id="ava-list"></div></div>
                 <div class="data-card border-red"><div class="card-header">DESVÍO A LA FECHA</div><div id="des-list"></div></div>
             </div>
             
-            <!-- Relojes Oscuros (Mantiene la regla de negocio del 95% para facturación) -->
             <div class="gauges-container">
                 <div class="gauge-header">
                     <div class="gauge-header-title">EFICIENCIA DE PERFORMANCE (KPI)</div>
@@ -170,45 +180,90 @@
                 <div class="gauge-grid" id="gauge-container"></div>
             </div>
 
-            <!-- Gráfico Interanual -->
+            <!-- MÓDULO NUEVO: IMPUTACIÓN DE MANO DE OBRA (Se muestra solo si Área = Servicios) -->
+            <div class="imputacion-container" id="imputacion-section">
+                <div class="imputacion-title">Distribución de la Facturación de Mano de Obra (Imputaciones)</div>
+                
+                <div class="bar-row">
+                    <div class="bar-labels">
+                        <div><span class="bar-title">Cargo Cliente</span><span class="bar-money" id="mo-val-cli">($ 0)</span></div>
+                        <span class="bar-pct" id="mo-pct-cli">0.0%</span>
+                    </div>
+                    <div class="bar-track"><div class="bar-fill bg-green" id="mo-bar-cli" style="width: 0%;"></div></div>
+                </div>
+                
+                <div class="bar-row">
+                    <div class="bar-labels">
+                        <div><span class="bar-title">Cargo Garantía (Fábrica)</span><span class="bar-money" id="mo-val-gar">($ 0)</span></div>
+                        <span class="bar-pct" id="mo-pct-gar">0.0%</span>
+                    </div>
+                    <div class="bar-track"><div class="bar-fill bg-yellow" id="mo-bar-gar" style="width: 0%;"></div></div>
+                </div>
+                
+                <div class="bar-row">
+                    <div class="bar-labels">
+                        <div><span class="bar-title">Cargo Interno</span><span class="bar-money" id="mo-val-in">($ 0)</span></div>
+                        <span class="bar-pct" id="mo-pct-in">0.0%</span>
+                    </div>
+                    <div class="bar-track"><div class="bar-fill bg-red" id="mo-bar-in" style="width: 0%;"></div></div>
+                </div>
+            </div>
+
             <div class="chart-container">
                 <div class="chart-header">COMPARATIVA INTERANUAL DE FACTURACIÓN (2025 VS 2026)</div>
-                <div class="bar-wrapper"><canvas id="interanualChart"></canvas></div>
+                <div class="bar-wrapper-chart"><canvas id="interanualChart"></canvas></div>
             </div>
             
         </div>
     </div>
 
     <script>
-        // PEGA AQUÍ TU ENLACE DE APPS SCRIPT
-        const scriptUrl ="https://script.google.com/macros/s/AKfycbxPq-hBNXnoVv2zdmKx-oBVPRpM2vfKc6ZlsnWDtSvb49V0tkx6bEX-36KyLG_zdH5M/exec"
+        // PEGA AQUÍ TU NUEVO ENLACE DE APPS SCRIPT
+        const scriptUrl ="https://script.google.com/macros/s/AKfycbwj4IbLShChGwkhlzjBUw2SoYCtjiT_ABJq-xooGTzHJHwQL1x2TSo4LYwXlxGpeiU5/exec"
+
         let rawData = [];
+        let rawCargos = [];
         let currentFilters = { ano: '2026', sucursal: 'TODAS', area: 'TODAS', mes: 'SEPTIEMBRE' };
         let interanualChart;
 
-        const formatMoney = (n) => {
-            let isNeg = n < 0; let val = Math.abs(n) / 1000000;
-            return (isNeg ? '-$ ' : '$ ') + val.toFixed(1) + 'M';
-        };
-        
-        const formatMoneySmall = (n) => {
-            return new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS', maximumFractionDigits: 0 }).format(n);
-        };
+        const formatMoney = (n) => { let isNeg = n < 0; let val = Math.abs(n) / 1000000; return (isNeg ? '-$' : '$ ') + val.toFixed(1) + 'M'; };
+        const formatMoneySmall = (n) => { return new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS', maximumFractionDigits: 0 }).format(n); };
+        const getStatusColor = (pct) => { if (pct >= 95) return '#10b981'; if (pct >= 90) return '#f59e0b'; return '#ef4444'; };
 
-        // Regla estricta para Facturación (No PPT)
-        const getStatusColor = (pct) => {
-            if (pct >= 95) return '#10b981'; 
-            if (pct >= 90) return '#f59e0b'; 
-            return '#ef4444'; 
-        };
+        function loadData() {
+            let cached = sessionStorage.getItem('autosolDataV5');
+            let cacheTime = sessionStorage.getItem('autosolTimeV5');
+            let now = new Date().getTime();
+            let cacheValido = cacheTime && (now - cacheTime < (5 * 60 * 1000));
+
+            if (cached && cacheValido) {
+                let data = JSON.parse(cached);
+                initSystem(data);
+            } else {
+                fetch(scriptUrl).then(res => res.json()).then(data => {
+                    sessionStorage.setItem('autosolDataV5', JSON.stringify(data));
+                    sessionStorage.setItem('autosolTimeV5', now.toString());
+                    initSystem(data);
+                });
+            }
+        }
+
+        function initSystem(data) {
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('dashboard').style.display = 'block';
+            rawData = data.facturacionRaw || [];
+            rawCargos = data.cargosRaw || [];
+            processData(); 
+        }
 
         function processData() {
+            // 1. LÓGICA TARJETAS Y RELOJES (Original)
             let filtered = rawData.filter(row => {
                 let matchAno = currentFilters.ano === 'TODOS' || row.ano === currentFilters.ano;
-                let matchSucursal = currentFilters.sucursal === 'TODAS' || row.sucursal.includes(currentFilters.sucursal);
+                let matchSuc = currentFilters.sucursal === 'TODAS' || row.sucursal.includes(currentFilters.sucursal);
                 let matchArea = currentFilters.area === 'TODAS' || row.area === currentFilters.area;
                 let matchMes = currentFilters.mes === 'TODOS' || row.mes === currentFilters.mes;
-                return matchAno && matchSucursal && matchArea && matchMes;
+                return matchAno && matchSuc && matchArea && matchMes;
             });
 
             let totals = {
@@ -232,6 +287,47 @@
             });
             renderDashboard(totals);
             processChartData();
+
+            // 2. LÓGICA DISTRIBUCIÓN DE CARGOS (Mano de Obra $)
+            let secCargos = document.getElementById('imputacion-section');
+            if (currentFilters.area === 'SERVICIOS') {
+                secCargos.style.display = 'block';
+                
+                let valCli = 0, valGar = 0, valIn = 0;
+                
+                rawCargos.forEach(r => {
+                    let matchAno = currentFilters.ano === 'TODOS' || r.ano === currentFilters.ano;
+                    let matchSuc = currentFilters.sucursal === 'TODAS' || r.sucursal.includes(currentFilters.sucursal);
+                    let matchMes = currentFilters.mes === 'TODOS' || r.mes === currentFilters.mes;
+                    
+                    if (matchAno && matchSuc && matchMes) {
+                        if (r.cargo === 'CLIENTE') valCli += r.mo;
+                        else if (r.cargo === 'GARANTIA') valGar += r.mo;
+                        else if (r.cargo === 'INTERNO') valIn += r.mo;
+                    }
+                });
+
+                let totalMO = valCli + valGar + valIn;
+                
+                let pctCli = totalMO > 0 ? (valCli / totalMO) * 100 : 0;
+                let pctGar = totalMO > 0 ? (valGar / totalMO) * 100 : 0;
+                let pctIn = totalMO > 0 ? (valIn / totalMO) * 100 : 0;
+
+                document.getElementById('mo-val-cli').innerText = `(${formatMoneySmall(valCli)})`;
+                document.getElementById('mo-pct-cli').innerText = `${pctCli.toFixed(1)}%`;
+                document.getElementById('mo-bar-cli').style.width = `${pctCli}%`;
+
+                document.getElementById('mo-val-gar').innerText = `(${formatMoneySmall(valGar)})`;
+                document.getElementById('mo-pct-gar').innerText = `${pctGar.toFixed(1)}%`;
+                document.getElementById('mo-bar-gar').style.width = `${pctGar}%`;
+
+                document.getElementById('mo-val-in').innerText = `(${formatMoneySmall(valIn)})`;
+                document.getElementById('mo-pct-in').innerText = `${pctIn.toFixed(1)}%`;
+                document.getElementById('mo-bar-in').style.width = `${pctIn}%`;
+
+            } else {
+                secCargos.style.display = 'none';
+            }
         }
 
         function renderDashboard(totals) {
@@ -289,9 +385,9 @@
 
         function processChartData() {
             let chartFiltered = rawData.filter(row => {
-                let matchSucursal = currentFilters.sucursal === 'TODAS' || row.sucursal.includes(currentFilters.sucursal);
+                let matchSuc = currentFilters.sucursal === 'TODAS' || row.sucursal.includes(currentFilters.sucursal);
                 let matchArea = currentFilters.area === 'TODAS' || row.area === currentFilters.area;
-                return matchSucursal && matchArea;
+                return matchSuc && matchArea;
             });
 
             let data25 = Array(12).fill(0);
@@ -331,45 +427,14 @@
         document.querySelectorAll('.filter-select').forEach(select => {
             select.addEventListener('change', (e) => {
                 let id = e.target.id;
-                let val = e.target.value;
-                if (id === 'filter-ano') currentFilters.ano = val;
-                if (id === 'filter-sucursales') currentFilters.sucursal = val;
-                if (id === 'filter-areas') currentFilters.area = val;
-                if (id === 'filter-meses') currentFilters.mes = val;
+                if (id === 'filter-ano') currentFilters.ano = e.target.value;
+                if (id === 'filter-sucursales') currentFilters.sucursal = e.target.value;
+                if (id === 'filter-areas') currentFilters.area = e.target.value;
+                if (id === 'filter-meses') currentFilters.mes = e.target.value;
                 processData();
             });
         });
 
-        // --- NUEVO MOTOR DE CARGA CON MEMORIA (Para Facturación) ---
-        function loadData() {
-            let cached = sessionStorage.getItem('autosolData');
-            let cacheTime = sessionStorage.getItem('autosolTime');
-            let now = new Date().getTime();
-            
-            // La memoria dura 5 minutos (5 * 60 * 1000 milisegundos)
-            let cacheValido = cacheTime && (now - cacheTime < (5 * 60 * 1000));
-
-            if (cached && cacheValido) {
-                // ⚡ CARGA INSTANTÁNEA (Desde la memoria del navegador)
-                let data = JSON.parse(cached);
-                document.getElementById('loading').style.display = 'none';
-                document.getElementById('dashboard').style.display = 'block';
-                rawData = data.facturacionRaw; // <-- Apunta a facturación
-                processData();
-            } else {
-                // ⏳ CARGA DESDE GOOGLE (Solo la primera vez)
-                fetch(scriptUrl).then(res => res.json()).then(data => {
-                    sessionStorage.setItem('autosolData', JSON.stringify(data));
-                    sessionStorage.setItem('autosolTime', now.toString());
-                    document.getElementById('loading').style.display = 'none';
-                    document.getElementById('dashboard').style.display = 'block';
-                    rawData = data.facturacionRaw; // <-- Apunta a facturación
-                    processData(); 
-                });
-            }
-        }
-        
-        // Iniciar el sistema
         loadData();
     </script>
 </body>
