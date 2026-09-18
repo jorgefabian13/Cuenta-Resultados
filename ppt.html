@@ -202,9 +202,9 @@
         </div>
     </div>
 
+    <!-- USAMOS EL MOTOR IDÉNTICO AL DE FACTURACIÓN QUE SÍ FUNCIONÓ PERFECTO -->
     <script>
-        // PEGA AQUÍ TU ENLACE DE APPS SCRIPT DIRECTO
-        const scriptUrl ="https://script.google.com/macros/s/AKfycbxc0xGL-3vtHtZpUVJMqcCbF4Az8yotGabRrKZwVZgXBwD8n3UEbvB-OfLhkgcsHyEi/exec"
+        const scriptUrl ="https://script.google.com/macros/s/AKfycbxPDd3Kz0DyU4or9QHnFITWvd3DasibTZMrUnL3rwoKHoubtdZaWo6WzLTh5tVoMJkW/exec"
 
         let rawPpt = [];
         let rawCargos = [];
@@ -220,24 +220,20 @@
         };
 
         function loadData() {
-            let cached = sessionStorage.getItem('autosolDataV17');
-            let cacheTime = sessionStorage.getItem('autosolTimeV17');
+            let cached = sessionStorage.getItem('autosolDataV18');
+            let cacheTime = sessionStorage.getItem('autosolTimeV18');
             let now = new Date().getTime();
             let cacheValido = cacheTime && (now - cacheTime < (5 * 60 * 1000));
 
             if (cached && cacheValido) {
                 initSystem(JSON.parse(cached));
             } else {
-                // LLAMADA DIRECTA LIMPIA
-                fetch(scriptUrl)
-                .then(res => res.json())
-                .then(data => {
-                    sessionStorage.setItem('autosolDataV17', JSON.stringify(data));
-                    sessionStorage.setItem('autosolTimeV17', now.toString());
+                fetch(scriptUrl).then(res => res.json()).then(data => {
+                    sessionStorage.setItem('autosolDataV18', JSON.stringify(data));
+                    sessionStorage.setItem('autosolTimeV18', now.toString());
                     initSystem(data);
-                })
-                .catch(error => {
-                    showError("<b>⚠️ Error de Conexión:</b><br>Asegúrate de que en Google Apps Script 'Quién tiene acceso' esté configurado en <b>'Cualquier persona'</b>.");
+                }).catch(err => {
+                    showError("<b>⚠️ Error de Sincronización:</b><br>Verifica en Google Apps Script que la implementación web esté configurada con acceso para <b>'Cualquier persona'</b>.");
                 });
             }
         }
