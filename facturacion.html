@@ -219,7 +219,7 @@
 
     <script>
         // PEGA AQUÍ TU ENLACE DE APPS SCRIPT
-        const scriptUrl ="https://script.google.com/macros/s/AKfycbz0vJN9zTuZPlnO5OhAuumqEuyJLU7ol5T5UAw8dyO-YbSTJwnJPY7iQKbEzg8c3qq5/exec"
+        const scriptUrl ="https://script.google.com/macros/s/AKfycbwSJ2GSP6CGnUZy-2DbYue8g-tLF8k4BTMeHWDsEF28X_8tHgICv5D3ASHwqhpVvddS/exec"
 
         let rawData = [];
         let rawCargos = [];
@@ -433,7 +433,27 @@
             });
         });
 
-        loadData();
+      function loadData() {
+            // Aumentamos a V7 para que se traiga los datos frescos sí o sí
+            let cached = sessionStorage.getItem('autosolDataV7');
+            let cacheTime = sessionStorage.getItem('autosolTimeV7');
+            let now = new Date().getTime();
+            let cacheValido = cacheTime && (now - cacheTime < (5 * 60 * 1000));
+
+            if (cached && cacheValido) {
+                let data = JSON.parse(cached);
+                initSystem(data);
+            } else {
+                fetch(scriptUrl).then(res => res.json()).then(data => {
+                    // Si ocurre un error, nos avisará
+                    if(data.error) console.error("Apps Script Error:", data.error);
+                    
+                    sessionStorage.setItem('autosolDataV7', JSON.stringify(data));
+                    sessionStorage.setItem('autosolTimeV7', now.toString());
+                    initSystem(data);
+                });
+            }
+        }
     </script>
 </body>
 </html>
