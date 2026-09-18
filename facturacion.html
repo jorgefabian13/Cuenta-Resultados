@@ -436,20 +436,20 @@
         });
 
        function loadData() {
-            // Cambiado a V6 para forzar la actualización de caché
-            let cached = sessionStorage.getItem('autosolDataV6');
-            let cacheTime = sessionStorage.getItem('autosolTimeV6');
-            let now = new Date().getTime();
-            let cacheValido = cacheTime && (now - cacheTime < (5 * 60 * 1000));
+    // Cambiado a V6 para forzar la actualización de caché
+    let cached = sessionStorage.getItem('autosolDataV6');
+    let cacheTime = sessionStorage.getItem('autosolTimeV6');
+    let now = new Date().getTime();
+    let cacheValido = cacheTime && (now - cacheTime < (5 * 60 * 1000));
 
-            if (cached && cacheValido) {
-                let data = JSON.parse(cached);
-                initSystem(data);
-            } else {
-                fetch(scriptUrl).then(res => res.json()).then(data => {
-                    sessionStorage.setItem('autosolDataV6', JSON.stringify(data));
-                    sessionStorage.setItem('autosolTimeV6', now.toString());
-                    initSystem(data);
-                });
-            }
-        }
+    if (cached && cacheValido) {
+        let data = JSON.parse(cached);
+        initSystem(data);
+    } else {
+        fetch(scriptUrl).then(res => res.json()).then(data => {
+            sessionStorage.setItem('autosolDataV6', JSON.stringify(data));
+            sessionStorage.setItem('autosolTimeV6', now.toString());
+            initSystem(data);
+        });
+    }
+}
