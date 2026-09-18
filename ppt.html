@@ -202,8 +202,8 @@
         </div>
     </div>
 
+    <!-- USAMOS UN PROXY PÚBLICO DE JSONP PARA EVITAR EL BLOQUEO CORS DE GOOGLE -->
     <script>
-        // PEGA AQUÍ TU ENLACE DE APPS SCRIPT
         const scriptUrl ="https://script.google.com/macros/s/AKfycbwgNnd8346Myc8h897kFnjH-e-6qX9NNsiTVwcKSgrBNw8tePbWhb8lAI7KZ0Zd57dk/exec"
 
         let rawPpt = [];
@@ -220,28 +220,31 @@
         };
 
         function loadData() {
-            let cached = sessionStorage.getItem('autosolDataV15');
-            let cacheTime = sessionStorage.getItem('autosolTimeV15');
+            let cached = sessionStorage.getItem('autosolDataV16');
+            let cacheTime = sessionStorage.getItem('autosolTimeV16');
             let now = new Date().getTime();
             let cacheValido = cacheTime && (now - cacheTime < (5 * 60 * 1000));
 
             if (cached && cacheValido) {
                 initSystem(JSON.parse(cached));
             } else {
-                fetch(scriptUrl)
-                .then(res => res.text()) 
-                .then(text => {
+                // Usamos un servicio proxy gratuito (api.allorigins.win) para saltar el CORS de Google
+                let proxyUrl = 'https://api.allorigins.win/get?url=' + encodeURIComponent(scriptUrl);
+
+                fetch(proxyUrl)
+                .then(res => res.json())
+                .then(response => {
                     try {
-                        let data = JSON.parse(text);
-                        sessionStorage.setItem('autosolDataV15', JSON.stringify(data));
-                        sessionStorage.setItem('autosolTimeV15', now.toString());
+                        let data = JSON.parse(response.contents);
+                        sessionStorage.setItem('autosolDataV16', JSON.stringify(data));
+                        sessionStorage.setItem('autosolTimeV16', now.toString());
                         initSystem(data);
                     } catch(e) {
-                        showError("<b>⚠️ Error de Permisos:</b><br>Verifica Apps Script y asegura que el enlace es público.");
+                        showError("<b>⚠️ Error de Formato:</b><br>Google devolvió datos que no se pudieron procesar.");
                     }
                 })
                 .catch(error => {
-                    showError("<b>⚠️ Error de Red:</b><br>No se pudo conectar con Apps Script.");
+                    showError("<b>⚠️ Error de Conexión:</b><br>El navegador bloqueó la solicitud (CORS).");
                 });
             }
         }
