@@ -202,9 +202,9 @@
         </div>
     </div>
 
-    <!-- SISTEMA DE CARGA DINÁMICA POR JSONP PARA EVITAR CORS -->
+    <!-- PUENTE ANTICORRUPCIÓN CORS -->
     <script>
-        const scriptUrl ="https://script.google.com/macros/s/AKfycbzLXD7vGH_RU83diBJ3T-7ZToL4SPnAG9GJ9KeeHtISGGYdbVTV9ZNPSH1Ydp4QJsQ7/exec"
+        const scriptUrl ="https://script.google.com/macros/s/AKfycbwR8eyYe8ae2OEeInDnks4aTzESYN-d45Mg0DGy2M5cszL-cS0K4XIvFDK69dT_Cehp/exec"
 
         let rawPpt = [];
         let rawCargos = [];
@@ -220,27 +220,35 @@
         };
 
         function loadData() {
-            let cached = sessionStorage.getItem('autosolDataV19');
-            let cacheTime = sessionStorage.getItem('autosolTimeV19');
+            let cached = sessionStorage.getItem('autosolDataV20');
+            let cacheTime = sessionStorage.getItem('autosolTimeV20');
             let now = new Date().getTime();
             let cacheValido = cacheTime && (now - cacheTime < (5 * 60 * 1000));
 
             if (cached && cacheValido) {
                 initSystem(JSON.parse(cached));
             } else {
-                // Creamos una etiqueta script dinámica para saltar el bloqueo CORS de forma nativa
-                window.handleData = function(data) {
-                    sessionStorage.setItem('autosolDataV19', JSON.stringify(data));
-                    sessionStorage.setItem('autosolTimeV19', now.toString());
-                    initSystem(data);
-                };
+                // Usamos un puente seguro que evita el bloqueo del navegador
+                let proxyUrl = 'https://api.allorigins.win/raw?url=' + encodeURIComponent(scriptUrl);
 
-                let script = document.createElement('script');
-                script.src = scriptUrl + (scriptUrl.includes('?') ? '&' : '?') + 'callback=handleData';
-                script.onerror = function() {
-                    showError("<b>⚠️ Error de Conexión:</b><br>No se pudo cargar la base de datos.");
-                };
-                document.body.appendChild(script);
+                fetch(proxyUrl)
+                .then(res => res.json())
+                .then(data => {
+                    sessionStorage.setItem('autosolDataV20', JSON.stringify(data));
+                    sessionStorage.setItem('autosolTimeV20', now.toString());
+                    initSystem(data);
+                })
+                .catch(error => {
+                    // Plan B: Si el proxy falla, intenta directo
+                    fetch(scriptUrl)
+                    .then(res => res.json())
+                    .then(data => {
+                        initSystem(data);
+                    })
+                    .catch(err => {
+                        showError("<b>⚠️ Error de Conexión:</b><br>Verifica en Google Apps Script que esté implementado como 'Cualquier persona'.");
+                    });
+                });
             }
         }
 
