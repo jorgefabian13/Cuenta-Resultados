@@ -163,7 +163,7 @@
                 <div class="gauge-grid" id="gauge-container"></div>
             </div>
 
-            <!-- SECCIÓN INTERACTIVA DE REPUESTOS UBICADA EXACTAMENTE EN EL MEDIO -->
+            <!-- SECCIÓN DE REPUESTOS UBICADA EXACTAMENTE EN EL MEDIO -->
             <div id="repuestos-section" style="display: none;">
                 <div class="charts-grid-top">
                     <div class="chart-container">
@@ -208,23 +208,30 @@
         }
 
         function loadData() {
-            let cached = sessionStorage.getItem('autosolFacturacionV23');
-            let cacheTime = sessionStorage.getItem('autosolTimeV23');
+            let cached = sessionStorage.getItem('autosolFacturacionV25');
+            let cacheTime = sessionStorage.getItem('autosolTimeV25');
             let now = new Date().getTime();
             let cacheValido = cacheTime && (now - cacheTime < (5 * 60 * 1000));
 
             if (cached && cacheValido) {
                 initSystem(JSON.parse(cached));
             } else {
-                fetch(scriptUrl)
+                let proxyUrl = 'https://api.allorigins.win/raw?url=' + encodeURIComponent(scriptUrl);
+
+                fetch(proxyUrl)
                 .then(res => res.json())
                 .then(data => {
-                    sessionStorage.setItem('autosolFacturacionV23', JSON.stringify(data));
-                    sessionStorage.setItem('autosolTimeV23', now.toString());
+                    sessionStorage.setItem('autosolFacturacionV25', JSON.stringify(data));
+                    sessionStorage.setItem('autosolTimeV25', now.toString());
                     initSystem(data);
                 })
-                .catch(err => {
-                    showError("<b>⚠️ Error de Sincronización:</b><br>Verifica en Google Apps Script que la implementación web esté configurada con acceso para 'Cualquier persona'.");
+                .catch(error => {
+                    fetch(scriptUrl)
+                    .then(res => res.json())
+                    .then(data => { initSystem(data); })
+                    .catch(err => {
+                        showError("<b>⚠️ Error de Sincronización:</b><br>Verifica en Google Apps Script que la implementación esté configurada con acceso para 'Cualquier persona'.");
+                    });
                 });
             }
         }
