@@ -449,7 +449,7 @@
                     if (r.ano === '2026') data26[mIdx] += r.avance; 
                 } 
             });
-            <!-- SECCIÓN DE REPUESTOS (OCULTA POR DEFECTO, SE MUESTRA AL SELECCIONAR "Repuestos" EN EL ÁREA) -->
+          <!-- SECCIÓN DE REPUESTOS -->
 <div id="repuestos-section" style="display: none;">
     <div class="charts-grid-top">
         <div class="chart-container">
@@ -524,7 +524,6 @@
         });
     }
 
-    // Al cambiar el selector de área a "Repuestos", se despliega la sección entre los relojes y el interanual
     document.getElementById('filter-area').addEventListener('change', (e) => {
         let areaSeleccionada = e.target.value;
         let seccionRepuestos = document.getElementById('repuestos-section');
@@ -539,44 +538,3 @@
         }
     });
 </script>
-            if (interanualChart) interanualChart.destroy();
-            
-            interanualChart = new Chart(document.getElementById('interanualChart').getContext('2d'), { 
-                type: 'bar', 
-                data: { 
-                    labels: ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'], 
-                    datasets: [ 
-                        { label: '2025', data: data25, backgroundColor: '#cbd5e1', borderRadius: 4 }, 
-                        { label: '2026', data: data26, backgroundColor: '#eab308', borderRadius: 4 } 
-                    ] 
-                }, 
-                options: { 
-                    responsive: true, 
-                    maintainAspectRatio: false, 
-                    plugins: { 
-                        legend: { position: 'bottom', labels: { font: { family: 'Inter', size: 10, weight: '600' }, color: '#475569' } } 
-                    }, 
-                    scales: { 
-                        y: { beginAtZero: true, ticks: { callback: function(value) { return '$' + (value / 1000000).toFixed(0) + 'M'; }, font: { family: 'Inter', size: 9 }, color: '#64748b' }, grid: { color: '#f1f5f9' }, border: { display: false } }, 
-                        x: { grid: { display: false }, ticks: { font: { family: 'Inter', size: 10, weight: '500' }, color: '#475569' }, border: { display: false } } 
-                    } 
-                } 
-            });
-        }
-
-        document.querySelectorAll('.filter-select').forEach(select => { 
-            select.addEventListener('change', (e) => { 
-                let id = e.target.id; 
-                if (id === 'filter-ano') currentFilters.ano = e.target.value; 
-                if (id === 'filter-sucursales') currentFilters.sucursal = e.target.value; 
-                if (id === 'filter-areas') currentFilters.area = e.target.value; 
-                if (id === 'filter-meses') currentFilters.mes = e.target.value; 
-                processData(); 
-            }); 
-        });
-
-        // Iniciar la carga
-        loadData();
-    </script>
-</body>
-</html>
