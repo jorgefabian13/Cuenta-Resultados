@@ -204,7 +204,7 @@
         // ----------------------------------------------------
         // PEGA AQUÍ TU ENLACE NUEVO DE APPS SCRIPT
         // ----------------------------------------------------
-        const scriptUrl ="https://script.google.com/macros/s/AKfycbwKka7XPcfVA9bRe_Iw3nGrmqTR7PIdFf41JptcszTjVniXAzknOpMRCv7frCS_egmw/exec"
+        const scriptUrl ="https://script.google.com/macros/s/AKfycbxmU5eQIPWm1sTipPGfF--ep1zWBw28V0Ihxi0D6xXckSQhfd0B_wXNwDtTbHdeeQ1g/exec"
 
         let rawData = [];
         let rawCargos = [];
@@ -449,7 +449,96 @@
                     if (r.ano === '2026') data26[mIdx] += r.avance; 
                 } 
             });
-            
+            <!-- SECCIÓN DE REPUESTOS (OCULTA POR DEFECTO, SE MUESTRA AL SELECCIONAR "Repuestos" EN EL ÁREA) -->
+<div id="repuestos-section" style="display: none;">
+    <div class="charts-grid-top">
+        <div class="chart-container">
+            <div class="chart-header">COMPORTAMIENTO SEMANAL DE VENTAS (REPUESTOS)</div>
+            <div class="bar-wrapper-chart"><canvas id="repuestosSemanalChart"></canvas></div>
+        </div>
+        
+        <div class="chart-container">
+            <div class="chart-header">DISTRIBUCIÓN POR CANAL DE VENTA</div>
+            <div class="bars-wrapper" id="repuestos-barras-container"></div>
+        </div>
+    </div>
+</div>
+
+<script>
+    let repuestosChartInstance = null;
+
+    function renderRepuestosModule(repuestosData, sucursalSeleccionada) {
+        if (!repuestosData) return;
+
+        let canales = [];
+        let montos = [];
+
+        if (sucursalSeleccionada === 'SANTA FE') {
+            canales = repuestosData.santaFe.canales;
+            montos = repuestosData.santaFe.montos;
+        } else if (sucursalSeleccionada === 'JUJUY') {
+            canales = repuestosData.jujuy.canales;
+            montos = repuestosData.jujuy.montos;
+        } else {
+            canales = repuestosData.santaFe.canales;
+            montos = repuestosData.santaFe.montos.map((val, idx) => Number(val) + Number(repuestosData.jujuy.montos[idx] || 0));
+        }
+
+        let totalVenta = montos.reduce((a, b) => Number(a) + Number(b), 0);
+        let barrasHtml = '';
+        const coloresBarras = ['bg-green', 'bg-yellow', 'bg-red', 'bg-blue', 'bg-slate'];
+        
+        canales.forEach((canal, idx) => {
+            if (!canal) return;
+            let monto = Number(montos[idx]) || 0;
+            let pct = totalVenta > 0 ? (monto / totalVenta) * 100 : 0;
+            let formatoMonto = new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS', maximumFractionDigits: 0 }).format(monto);
+            let colorClase = coloresBarras[idx % coloresBarras.length];
+
+            barrasHtml += `
+                <div class="bar-row">
+                    <div class="bar-labels">
+                        <div><span class="bar-title">${canal}</span><span class="bar-money">(${formatoMonto})</span></div>
+                        <span class="bar-pct">${pct.toFixed(1)}%</span>
+                    </div>
+                    <div class="bar-track"><div class="bar-fill ${colorClase}" style="width: ${pct}%;"></div></div>
+                </div>`;
+        });
+        document.getElementById('repuestos-barras-container').innerHTML = barrasHtml;
+
+        let semLabels = repuestosData.semanas.map(s => s.semana);
+        let semValues = repuestosData.semanas.map(s => {
+            if (sucursalSeleccionada === 'SANTA FE') return s.santaFe;
+            if (sucursalSeleccionada === 'JUJUY') return s.jujuy;
+            return s.total;
+        });
+
+        if (repuestosChartInstance) repuestosChartInstance.destroy();
+        repuestosChartInstance = new Chart(document.getElementById('repuestosSemanalChart').getContext('2d'), {
+            type: 'line',
+            data: {
+                labels: semLabels,
+                datasets: [{ label: 'Venta Semanal', data: semValues, borderColor: '#3b82f6', backgroundColor: 'rgba(59, 130, 246, 0.1)', tension: 0.4, borderWidth: 3, fill: true, pointBackgroundColor: '#ffffff', pointBorderColor: '#3b82f6', pointRadius: 5 }]
+            },
+            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, grid: { color: '#f1f5f9' }, border: { display: false } }, x: { grid: { display: false }, border: { display: false } } } }
+        });
+    }
+
+    // Al cambiar el selector de área a "Repuestos", se despliega la sección entre los relojes y el interanual
+    document.getElementById('filter-area').addEventListener('change', (e) => {
+        let areaSeleccionada = e.target.value;
+        let seccionRepuestos = document.getElementById('repuestos-section');
+        
+        if (areaSeleccionada === 'Repuestos') {
+            seccionRepuestos.style.display = 'block';
+            if (window.globalDashboardData && window.globalDashboardData.repuestosData) {
+                renderRepuestosModule(window.globalDashboardData.repuestosData, document.getElementById('filter-sucursales').value);
+            }
+        } else {
+            seccionRepuestos.style.display = 'none';
+        }
+    });
+</script>
             if (interanualChart) interanualChart.destroy();
             
             interanualChart = new Chart(document.getElementById('interanualChart').getContext('2d'), { 
