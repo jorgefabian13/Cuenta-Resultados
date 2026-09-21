@@ -163,7 +163,7 @@
                 <div class="gauge-grid" id="gauge-container"></div>
             </div>
 
-            <!-- SECCIÓN DE REPUESTOS UBICADA EXACTAMENTE EN EL MEDIO -->
+            <!-- SECCIÓN DE REPUESTOS EN EL MEDIO -->
             <div id="repuestos-section" style="display: none;">
                 <div class="charts-grid-top">
                     <div class="chart-container">
@@ -188,7 +188,6 @@
 
     <script>
         const scriptUrl ="https://script.google.com/macros/s/AKfycbxmU5eQIPWm1sTipPGfF--ep1zWBw28V0Ihxi0D6xXckSQhfd0B_wXNwDtTbHdeeQ1g/exec"
-
         let rawData = [];
         let globalDashboardData = null;
         let currentFilters = { ano: '2026', sucursal: 'TODAS', area: 'TODAS', mes: 'SEPTIEMBRE' };
@@ -208,8 +207,8 @@
         }
 
         function loadData() {
-            let cached = sessionStorage.getItem('autosolFacturacionV25');
-            let cacheTime = sessionStorage.getItem('autosolTimeV25');
+            let cached = sessionStorage.getItem('autosolFacturacionV26');
+            let cacheTime = sessionStorage.getItem('autosolTimeV26');
             let now = new Date().getTime();
             let cacheValido = cacheTime && (now - cacheTime < (5 * 60 * 1000));
 
@@ -221,8 +220,8 @@
                 fetch(proxyUrl)
                 .then(res => res.json())
                 .then(data => {
-                    sessionStorage.setItem('autosolFacturacionV25', JSON.stringify(data));
-                    sessionStorage.setItem('autosolTimeV25', now.toString());
+                    sessionStorage.setItem('autosolFacturacionV26', JSON.stringify(data));
+                    sessionStorage.setItem('autosolTimeV26', now.toString());
                     initSystem(data);
                 })
                 .catch(error => {
@@ -303,20 +302,22 @@
                 let d = totals[suc]; 
                 if (d.obj > 0 || d.ava > 0 || currentFilters.sucursal === 'TODAS') { 
                     let nom = suc === 'MOVIL' ? 'MÓVIL' : suc; 
-                    let desvio = d.ava - d.obj;
+                    // Desvío a la fecha = Avance actual menos el objetivo a la fecha (objDiario)
+                    let desvioAFecha = d.ava - d.objD;
+                    
                     objHtml += `<div class="list-item"><span class="list-label">${nom}</span> <div class="list-val">${formatMoney(d.obj)}<br><span style="font-size:0.6rem; color:#94a3b8;">Diario: ${formatMoney(d.objD)}</span></div></div>`; 
                     avaHtml += `<div class="list-item"><span class="list-label">${nom}</span> <div class="list-val">${formatMoney(d.ava)}<br><span style="font-size:0.6rem; color:#94a3b8;">Promedio: ${formatMoney(d.promD)}</span></div></div>`; 
-                    let colorEstilo = desvio < 0 ? 'color: #ef4444;' : 'color: #10b981;'; 
-                    desHtml += `<div class="list-item"><span class="list-label">${nom}</span> <div class="list-val" style="${colorEstilo}">${desvio > 0 ? '+'+formatMoney(desvio) : formatMoney(desvio)}</div></div>`; 
+                    let colorEstilo = desvioAFecha < 0 ? 'color: #ef4444;' : 'color: #10b981;'; 
+                    desHtml += `<div class="list-item"><span class="list-label">${nom}</span> <div class="list-val" style="${colorEstilo}">${desvioAFecha > 0 ? '+'+formatMoney(desvioAFecha) : formatMoney(desvioAFecha)}</div></div>`; 
                 } 
             });
 
             let c = totals['CONSOLIDADO'];
-            let desCons = c.ava - c.obj;
+            let desConsAFecha = c.ava - c.objD;
             document.getElementById('obj-list').innerHTML = objHtml + `<div class="list-item consolidado"><span class="list-label">TOTAL AUTOSOL</span> <div class="consolidado-val">${formatMoney(c.obj)}</div></div>`; 
             document.getElementById('ava-list').innerHTML = avaHtml + `<div class="list-item consolidado"><span class="list-label">TOTAL AUTOSOL</span> <div class="consolidado-val">${formatMoney(c.ava)}</div></div>`; 
-            let colorEstiloCons = desCons < 0 ? 'color: #ef4444;' : 'color: #10b981;'; 
-            document.getElementById('des-list').innerHTML = desHtml + `<div class="list-item consolidado"><span class="list-label">TOTAL AUTOSOL</span> <div class="consolidado-val" style="${colorEstiloCons}">${desCons > 0 ? '+'+formatMoney(desCons) : formatMoney(desCons)}</div></div>`;
+            let colorEstiloCons = desConsAFecha < 0 ? 'color: #ef4444;' : 'color: #10b981;'; 
+            document.getElementById('des-list').innerHTML = desHtml + `<div class="list-item consolidado"><span class="list-label">TOTAL AUTOSOL</span> <div class="consolidado-val" style="${colorEstiloCons}">${desConsAFecha > 0 ? '+'+formatMoney(desConsAFecha) : formatMoney(desConsAFecha)}</div></div>`;
             
             document.getElementById('gauge-container').innerHTML = '';
             sucursales.forEach(suc => { 
