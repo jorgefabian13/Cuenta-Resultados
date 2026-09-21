@@ -163,7 +163,7 @@
                 <div class="gauge-grid" id="gauge-container"></div>
             </div>
 
-            <!-- SECCIÓN INTERACTIVA DE REPUESTOS (OCULTA HASTA SELECCIONAR ÁREA "REPUESTOS") -->
+            <!-- SECCIÓN INTERACTIVA DE REPUESTOS UBICADA EXACTAMENTE EN EL MEDIO -->
             <div id="repuestos-section" style="display: none;">
                 <div class="charts-grid-top">
                     <div class="chart-container">
@@ -208,8 +208,8 @@
         }
 
         function loadData() {
-            let cached = sessionStorage.getItem('autosolFacturacionV22');
-            let cacheTime = sessionStorage.getItem('autosolTimeV22');
+            let cached = sessionStorage.getItem('autosolFacturacionV23');
+            let cacheTime = sessionStorage.getItem('autosolTimeV23');
             let now = new Date().getTime();
             let cacheValido = cacheTime && (now - cacheTime < (5 * 60 * 1000));
 
@@ -219,8 +219,8 @@
                 fetch(scriptUrl)
                 .then(res => res.json())
                 .then(data => {
-                    sessionStorage.setItem('autosolFacturacionV22', JSON.stringify(data));
-                    sessionStorage.setItem('autosolTimeV22', now.toString());
+                    sessionStorage.setItem('autosolFacturacionV23', JSON.stringify(data));
+                    sessionStorage.setItem('autosolTimeV23', now.toString());
                     initSystem(data);
                 })
                 .catch(err => {
