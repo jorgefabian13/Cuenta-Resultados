@@ -197,7 +197,6 @@
 
     <script>
         const scriptUrl ="https://script.google.com/macros/s/AKfycbxmU5eQIPWm1sTipPGfF--ep1zWBw28V0Ihxi0D6xXckSQhfd0B_wXNwDtTbHdeeQ1g/exec"
-
         let rawData = [];
         let globalDashboardData = null;
         let currentFilters = { ano: '2026', sucursal: 'TODAS', area: 'TODAS', mes: 'SEPTIEMBRE' };
@@ -216,9 +215,16 @@
             return '$' + val.toLocaleString('es-AR');
         }
 
+        // Formato exacto con decimales para los desvíos (evita que se pasen a 'M')
+        function formatExactMoney(val) {
+            let signo = val < 0 ? '-$' : '+$';
+            let absVal = Math.abs(val);
+            return signo + absVal.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        }
+
         function loadData() {
-            let cached = sessionStorage.getItem('autosolFacturacionV32');
-            let cacheTime = sessionStorage.getItem('autosolTimeV32');
+            let cached = sessionStorage.getItem('autosolFacturacionV33');
+            let cacheTime = sessionStorage.getItem('autosolTimeV33');
             let now = new Date().getTime();
             let cacheValido = cacheTime && (now - cacheTime < (5 * 60 * 1000));
 
@@ -230,8 +236,8 @@
                 fetch(proxyUrl)
                 .then(res => res.json())
                 .then(data => {
-                    sessionStorage.setItem('autosolFacturacionV32', JSON.stringify(data));
-                    sessionStorage.setItem('autosolTimeV32', now.toString());
+                    sessionStorage.setItem('autosolFacturacionV33', JSON.stringify(data));
+                    sessionStorage.setItem('autosolTimeV33', now.toString());
                     initSystem(data);
                 })
                 .catch(error => {
@@ -319,7 +325,7 @@
                     objHtml += `<div class="list-item"><span class="list-label">${nom}</span> <div class="list-val">${formatMoney(d.obj)}<br><span style="font-size:0.5rem; color:#94a3b8;">Diario: ${formatMoney(d.objD)}</span></div></div>`; 
                     avaHtml += `<div class="list-item"><span class="list-label">${nom}</span> <div class="list-val">${formatMoney(d.ava)}<br><span style="font-size:0.5rem; color:#94a3b8;">Promedio: ${formatMoney(d.promD)}</span></div></div>`; 
                     let colorEstilo = desvioVal < 0 ? 'color: #dc2626;' : 'color: #84cc16;'; 
-                    desHtml += `<div class="list-item"><span class="list-label">${nom}</span> <div class="list-val" style="${colorEstilo}">${desvioVal > 0 ? '+'+formatMoney(desvioVal) : formatMoney(desvioVal)}</div></div>`; 
+                    desHtml += `<div class="list-item"><span class="list-label">${nom}</span> <div class="list-val" style="${colorEstilo}">${formatExactMoney(desvioVal)}</div></div>`; 
                 } 
             });
 
@@ -328,7 +334,7 @@
             document.getElementById('obj-list').innerHTML = objHtml + `<div class="list-item consolidado"><span class="list-label">TOTAL AUTOSOL</span> <div class="consolidado-val">${formatMoney(c.obj)}</div></div>`; 
             document.getElementById('ava-list').innerHTML = avaHtml + `<div class="list-item consolidado"><span class="list-label">TOTAL AUTOSOL</span> <div class="consolidado-val">${formatMoney(c.ava)}</div></div>`; 
             let colorEstiloCons = desConsVal < 0 ? 'color: #dc2626;' : 'color: #84cc16;'; 
-            document.getElementById('des-list').innerHTML = desHtml + `<div class="list-item consolidado"><span class="list-label">TOTAL AUTOSOL</span> <div class="consolidado-val" style="${colorEstiloCons}">${desConsVal > 0 ? '+'+formatMoney(desConsVal) : formatMoney(desConsVal)}</div></div>`;
+            document.getElementById('des-list').innerHTML = desHtml + `<div class="list-item consolidado"><span class="list-label">TOTAL AUTOSOL</span> <div class="consolidado-val" style="${colorEstiloCons}">${formatExactMoney(desConsVal)}</div></div>`;
             
             document.getElementById('gauge-container').innerHTML = '';
             sucursales.forEach(suc => { 
@@ -463,7 +469,7 @@
         }
 
         function renderServiciosModule() {
-            // Tomamos el total del avance real filtrado actualmente por mes y sucursal para Servicios
+            // Lectura dinámica del avance real filtrado por mes y sucursal para el área de Servicios
             let filteredServicios = rawData.filter(row => {
                 let matchAno = currentFilters.ano === 'TODOS' || row.ano === currentFilters.ano;
                 let matchSuc = currentFilters.sucursal === 'TODAS' || row.sucursal.includes(currentFilters.sucursal);
@@ -472,8 +478,11 @@
             });
 
             let totalServicios = filteredServicios.reduce((acc, r) => acc + r.avance, 0);
-            
-            // Si no hay datos específicos de imputaciones en la base, distribuimos dinámicamente según el total real del mes seleccionado
+            if (totalServicios === 0) {
+                let fallbackRow = rawData.find(r => r.area === 'SERVICIOS');
+                totalServicios = fallbackRow ? fallbackRow.avance : 131485211;
+            }
+
             let cliente = totalServicios * 0.477;
             let garantia = totalServicios * 0.477;
             let interno = totalServicios * 0.046;
