@@ -19,13 +19,12 @@
 
         .container { width: 100%; max-width: 1400px; padding: 0 20px; }
         
-        .filters-bar { background: white; border-radius: 8px; padding: 6px 15px; margin-bottom: 8px; box-shadow: 0 1px 2px rgba(0,0,0,0.05); border: 1px solid #f1f5f9; display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+        .filters-bar { background: white; border-radius: 8px; padding: 6px 15px; margin-bottom: 8px; box-shadow: 0 1px 2px rgba(0,0,0,0.05); border: 1px solid #f1f5f9; display: flex; gap: 15px; align-items: center; flex-wrap: wrap; }
         .filter-group { display: flex; align-items: center; gap: 6px; border-right: 1px solid #e2e8f0; padding-right: 12px; }
         .filter-group:last-child { border-right: none; }
         .filter-label { font-size: 0.6rem; font-weight: 800; color: #64748b; }
         .filter-select { padding: 3px 6px; border-radius: 4px; border: 1px solid #cbd5e1; font-family: inherit; font-size: 0.7rem; font-weight: 600; color: #0f172a; background: #f8fafc; cursor: pointer; outline: none; }
 
-        /* TARJETAS SUPERIORES COMPACTAS PARA ENTRAR EN UNA SOLA PANTALLA */
         .top-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 8px; }
         .data-card { background: white; border-radius: 8px; padding: 8px 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.03); border: 1px solid #f1f5f9; }
         .border-blue { border-left: 4px solid #001E50; } .border-cyan { border-left: 4px solid #00b0f0; } .border-red { border-left: 4px solid #ef4444; }
@@ -40,7 +39,6 @@
         .consolidado .list-label { font-weight: 900; color: #001E50; }
         .consolidado-val { font-size: 0.85rem; color: #001E50; font-weight: 900; font-style: italic; }
 
-        /* SEMÁFOROS (KPIs) CON EL TAMAÑO PERFECTO QUE PEDISTE */
         .gauges-container { background: #0b1121; border-radius: 10px; padding: 10px 15px; margin-bottom: 8px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); border: 1px solid rgba(255,255,255,0.05); }
         .gauge-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; }
         .gauge-header-title { font-size: 0.7rem; font-weight: 900; color: white; text-transform: uppercase; font-style: italic; }
@@ -182,7 +180,7 @@
             </div>
 
             <!-- SECCIÓN DE SERVICIOS -->
-            <div id="servicios-section" style="display: none; margin-bottom: 10px;">
+            <div id="servicios-section" style="display: none; margin-bottom: 15px;">
                 <div class="chart-container">
                     <div class="chart-header">DISTRIBUCIÓN DE LA FACTURACIÓN DE MANO DE OBRA (IMPUTACIONES)</div>
                     <div class="bars-wrapper" id="servicios-barras-container"></div>
@@ -219,8 +217,8 @@
         }
 
         function loadData() {
-            let cached = sessionStorage.getItem('autosolFacturacionV31');
-            let cacheTime = sessionStorage.getItem('autosolTimeV31');
+            let cached = sessionStorage.getItem('autosolFacturacionV32');
+            let cacheTime = sessionStorage.getItem('autosolTimeV32');
             let now = new Date().getTime();
             let cacheValido = cacheTime && (now - cacheTime < (5 * 60 * 1000));
 
@@ -232,8 +230,8 @@
                 fetch(proxyUrl)
                 .then(res => res.json())
                 .then(data => {
-                    sessionStorage.setItem('autosolFacturacionV31', JSON.stringify(data));
-                    sessionStorage.setItem('autosolTimeV31', now.toString());
+                    sessionStorage.setItem('autosolFacturacionV32', JSON.stringify(data));
+                    sessionStorage.setItem('autosolTimeV32', now.toString());
                     initSystem(data);
                 })
                 .catch(error => {
@@ -465,7 +463,7 @@
         }
 
         function renderServiciosModule() {
-            // Filtrar las filas del mes y sucursal seleccionados correspondientes a Servicios
+            // Tomamos el total del avance real filtrado actualmente por mes y sucursal para Servicios
             let filteredServicios = rawData.filter(row => {
                 let matchAno = currentFilters.ano === 'TODOS' || row.ano === currentFilters.ano;
                 let matchSuc = currentFilters.sucursal === 'TODAS' || row.sucursal.includes(currentFilters.sucursal);
@@ -473,11 +471,9 @@
                 return matchAno && matchSuc && matchMes && row.area === 'SERVICIOS';
             });
 
-            // Si tienes los datos de imputaciones en la base, los sumamos. Si no, tomamos proporcional del avance filtrado.
             let totalServicios = filteredServicios.reduce((acc, r) => acc + r.avance, 0);
-            if (totalServicios === 0) totalServicios = 131485211; // fallback por seguridad
-
-            // Distribución basada en tus proporciones habituales conectadas al mes activo
+            
+            // Si no hay datos específicos de imputaciones en la base, distribuimos dinámicamente según el total real del mes seleccionado
             let cliente = totalServicios * 0.477;
             let garantia = totalServicios * 0.477;
             let interno = totalServicios * 0.046;
