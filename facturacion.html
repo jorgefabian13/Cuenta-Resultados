@@ -29,10 +29,11 @@
         .data-card { background: white; border-radius: 12px; padding: 15px 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.03); border: 1px solid #f1f5f9; }
         .border-blue { border-left: 4px solid #001E50; } .border-cyan { border-left: 4px solid #00b0f0; } .border-red { border-left: 4px solid #ef4444; }
         .card-header { font-size: 0.65rem; font-weight: 800; color: #64748b; text-transform: uppercase; margin-bottom: 12px; border-bottom: 1px solid #f1f5f9; padding-bottom: 6px; }
-        .list-item { display: flex; justify-content: space-between; align-items: center; padding: 4px 0; border-bottom: 1px dashed #f1f5f9; }
+        
+        .list-item { display: flex; justify-content: space-between; align-items: center; padding: 6px 0; border-bottom: 1px dashed #f1f5f9; min-height: 34px; }
         .list-item:last-child { border-bottom: none; }
         .list-label { font-size: 0.65rem; font-weight: 700; color: #475569; text-transform: uppercase;}
-        .list-val { font-size: 0.9rem; font-weight: 800; color: #0f172a; font-style: italic; }
+        .list-val { font-size: 0.9rem; font-weight: 800; color: #0f172a; font-style: italic; text-align: right; }
         
         .consolidado { background: #f8fafc; padding: 8px 12px; border-radius: 6px; margin-top: 8px; }
         .consolidado .list-label { font-weight: 900; color: #001E50; }
@@ -163,7 +164,7 @@
                 <div class="gauge-grid" id="gauge-container"></div>
             </div>
 
-            <!-- SECCIÓN DE REPUESTOS EN EL MEDIO -->
+            <!-- SECCIÓN DE REPUESTOS -->
             <div id="repuestos-section" style="display: none;">
                 <div class="charts-grid-top">
                     <div class="chart-container">
@@ -178,6 +179,14 @@
                 </div>
             </div>
 
+            <!-- SECCIÓN DE SERVICIOS (DISTRIBUCIÓN DE MANO DE OBRA) -->
+            <div id="servicios-section" style="display: none; margin-bottom: 25px;">
+                <div class="chart-container">
+                    <div class="chart-header">DISTRIBUCIÓN DE LA FACTURACIÓN DE MANO DE OBRA (IMPUTACIONES)</div>
+                    <div class="bars-wrapper" id="servicios-barras-container"></div>
+                </div>
+            </div>
+
             <div class="chart-container full-width">
                 <div class="chart-header">COMPARATIVA INTERANUAL DE FACTURACIÓN (2025 VS 2026)</div>
                 <div class="bar-wrapper-chart" style="height: 220px;"><canvas id="interanualChart"></canvas></div>
@@ -188,6 +197,7 @@
 
     <script>
         const scriptUrl ="https://script.google.com/macros/s/AKfycbxmU5eQIPWm1sTipPGfF--ep1zWBw28V0Ihxi0D6xXckSQhfd0B_wXNwDtTbHdeeQ1g/exec"
+
         let rawData = [];
         let globalDashboardData = null;
         let currentFilters = { ano: '2026', sucursal: 'TODAS', area: 'TODAS', mes: 'SEPTIEMBRE' };
@@ -196,7 +206,7 @@
         let repuestosChartInstance = null;
 
         const getStatusColor = (pct) => { 
-            if (pct >= 70) return '#10b981'; 
+            if (pct > 70) return '#10b981'; 
             if (pct >= 50) return '#f59e0b'; 
             return '#ef4444'; 
         };
@@ -207,8 +217,8 @@
         }
 
         function loadData() {
-            let cached = sessionStorage.getItem('autosolFacturacionV26');
-            let cacheTime = sessionStorage.getItem('autosolTimeV26');
+            let cached = sessionStorage.getItem('autosolFacturacionV27');
+            let cacheTime = sessionStorage.getItem('autosolTimeV27');
             let now = new Date().getTime();
             let cacheValido = cacheTime && (now - cacheTime < (5 * 60 * 1000));
 
@@ -220,8 +230,8 @@
                 fetch(proxyUrl)
                 .then(res => res.json())
                 .then(data => {
-                    sessionStorage.setItem('autosolFacturacionV26', JSON.stringify(data));
-                    sessionStorage.setItem('autosolTimeV26', now.toString());
+                    sessionStorage.setItem('autosolFacturacionV27', JSON.stringify(data));
+                    sessionStorage.setItem('autosolTimeV27', now.toString());
                     initSystem(data);
                 })
                 .catch(error => {
@@ -262,12 +272,12 @@
             });
 
             let totals = { 
-                'SANTA FE': { obj: 0, ava: 0, objD: 0, promD: 0, conv_sum: 0, count: 0 }, 
-                'JUJUY': { obj: 0, ava: 0, objD: 0, promD: 0, conv_sum: 0, count: 0 }, 
-                'EXPRESS': { obj: 0, ava: 0, objD: 0, promD: 0, conv_sum: 0, count: 0 }, 
-                'MOVIL': { obj: 0, ava: 0, objD: 0, promD: 0, conv_sum: 0, count: 0 }, 
-                'TARTAGAL': { obj: 0, ava: 0, objD: 0, promD: 0, conv_sum: 0, count: 0 }, 
-                'CONSOLIDADO': { obj: 0, ava: 0, objD: 0, promD: 0, conv_sum: 0, count: 0 } 
+                'SANTA FE': { obj: 0, ava: 0, objD: 0, promD: 0, desvio: 0, conv_sum: 0, count: 0 }, 
+                'JUJUY': { obj: 0, ava: 0, objD: 0, promD: 0, desvio: 0, conv_sum: 0, count: 0 }, 
+                'EXPRESS': { obj: 0, ava: 0, objD: 0, promD: 0, desvio: 0, conv_sum: 0, count: 0 }, 
+                'MOVIL': { obj: 0, ava: 0, objD: 0, promD: 0, desvio: 0, conv_sum: 0, count: 0 }, 
+                'TARTAGAL': { obj: 0, ava: 0, objD: 0, promD: 0, desvio: 0, conv_sum: 0, count: 0 }, 
+                'CONSOLIDADO': { obj: 0, ava: 0, objD: 0, promD: 0, desvio: 0, conv_sum: 0, count: 0 } 
             };
 
             filtered.forEach(r => { 
@@ -277,6 +287,7 @@
                     totals[sucKey].ava += r.avance; 
                     totals[sucKey].objD += r.objDiario; 
                     totals[sucKey].promD += r.promDiario; 
+                    totals[sucKey].desvio += r.desvio; // Columna K real
                     totals[sucKey].conv_sum += r.pctG; 
                     totals[sucKey].count += 1; 
 
@@ -284,6 +295,7 @@
                     totals['CONSOLIDADO'].ava += r.avance; 
                     totals['CONSOLIDADO'].objD += r.objDiario; 
                     totals['CONSOLIDADO'].promD += r.promDiario; 
+                    totals['CONSOLIDADO'].desvio += r.desvio; 
                     totals['CONSOLIDADO'].conv_sum += r.pctG; 
                     totals['CONSOLIDADO'].count += 1; 
                 } 
@@ -291,7 +303,7 @@
 
             renderDashboard(totals); 
             processCharts(filtered);
-            checkRepuestosVisibility();
+            checkAreaModules();
         }
 
         function renderDashboard(totals) {
@@ -302,22 +314,21 @@
                 let d = totals[suc]; 
                 if (d.obj > 0 || d.ava > 0 || currentFilters.sucursal === 'TODAS') { 
                     let nom = suc === 'MOVIL' ? 'MÓVIL' : suc; 
-                    // Desvío a la fecha = Avance actual menos el objetivo a la fecha (objDiario)
-                    let desvioAFecha = d.ava - d.objD;
+                    let desvioVal = d.desvio;
                     
                     objHtml += `<div class="list-item"><span class="list-label">${nom}</span> <div class="list-val">${formatMoney(d.obj)}<br><span style="font-size:0.6rem; color:#94a3b8;">Diario: ${formatMoney(d.objD)}</span></div></div>`; 
                     avaHtml += `<div class="list-item"><span class="list-label">${nom}</span> <div class="list-val">${formatMoney(d.ava)}<br><span style="font-size:0.6rem; color:#94a3b8;">Promedio: ${formatMoney(d.promD)}</span></div></div>`; 
-                    let colorEstilo = desvioAFecha < 0 ? 'color: #ef4444;' : 'color: #10b981;'; 
-                    desHtml += `<div class="list-item"><span class="list-label">${nom}</span> <div class="list-val" style="${colorEstilo}">${desvioAFecha > 0 ? '+'+formatMoney(desvioAFecha) : formatMoney(desvioAFecha)}</div></div>`; 
+                    let colorEstilo = desvioVal < 0 ? 'color: #ef4444;' : 'color: #10b981;'; 
+                    desHtml += `<div class="list-item"><span class="list-label">${nom}</span> <div class="list-val" style="${colorEstilo}">${desvioVal > 0 ? '+'+formatMoney(desvioVal) : formatMoney(desvioVal)}</div></div>`; 
                 } 
             });
 
             let c = totals['CONSOLIDADO'];
-            let desConsAFecha = c.ava - c.objD;
+            let desConsVal = c.desvio;
             document.getElementById('obj-list').innerHTML = objHtml + `<div class="list-item consolidado"><span class="list-label">TOTAL AUTOSOL</span> <div class="consolidado-val">${formatMoney(c.obj)}</div></div>`; 
             document.getElementById('ava-list').innerHTML = avaHtml + `<div class="list-item consolidado"><span class="list-label">TOTAL AUTOSOL</span> <div class="consolidado-val">${formatMoney(c.ava)}</div></div>`; 
-            let colorEstiloCons = desConsAFecha < 0 ? 'color: #ef4444;' : 'color: #10b981;'; 
-            document.getElementById('des-list').innerHTML = desHtml + `<div class="list-item consolidado"><span class="list-label">TOTAL AUTOSOL</span> <div class="consolidado-val" style="${colorEstiloCons}">${desConsAFecha > 0 ? '+'+formatMoney(desConsAFecha) : formatMoney(desConsAFecha)}</div></div>`;
+            let colorEstiloCons = desConsVal < 0 ? 'color: #ef4444;' : 'color: #10b981;'; 
+            document.getElementById('des-list').innerHTML = desHtml + `<div class="list-item consolidado"><span class="list-label">TOTAL AUTOSOL</span> <div class="consolidado-val" style="${colorEstiloCons}">${desConsVal > 0 ? '+'+formatMoney(desConsVal) : formatMoney(desConsVal)}</div></div>`;
             
             document.getElementById('gauge-container').innerHTML = '';
             sucursales.forEach(suc => { 
@@ -331,7 +342,7 @@
 
         function createGauge(id, name, pct) {
             let color = getStatusColor(pct); 
-            let colorClass = pct >= 70 ? 'text-green' : pct >= 50 ? 'text-yellow' : 'text-red';
+            let colorClass = pct > 70 ? 'text-green' : pct >= 50 ? 'text-yellow' : 'text-red';
             let html = `<div class="gauge-card"><div class="chart-wrapper"><canvas id="gauge-${id}"></canvas></div><div class="gauge-pct ${colorClass}">${pct.toFixed(1)}%</div><div class="gauge-title">${name}</div></div>`;
             document.getElementById('gauge-container').insertAdjacentHTML('beforeend', html);
             
@@ -377,15 +388,21 @@
             });
         }
 
-        function checkRepuestosVisibility() {
-            let seccionRepuestos = document.getElementById('repuestos-section');
+        function checkAreaModules() {
+            let secRepuestos = document.getElementById('repuestos-section');
+            let secServicios = document.getElementById('servicios-section');
+
+            secRepuestos.style.display = 'none';
+            secServicios.style.display = 'none';
+
             if (currentFilters.area === 'REPUESTOS') {
-                seccionRepuestos.style.display = 'block';
+                secRepuestos.style.display = 'block';
                 if (globalDashboardData && globalDashboardData.repuestosData) {
                     renderRepuestosModule(globalDashboardData.repuestosData, currentFilters.sucursal);
                 }
-            } else {
-                seccionRepuestos.style.display = 'none';
+            } else if (currentFilters.area === 'SERVICIOS') {
+                secServicios.style.display = 'block';
+                renderServiciosModule();
             }
         }
 
@@ -444,6 +461,29 @@
                 },
                 options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, grid: { color: '#f1f5f9' }, border: { display: false } }, x: { grid: { display: false }, border: { display: false } } } }
             });
+        }
+
+        function renderServiciosModule() {
+            // Simulación de datos para la distribución de mano de obra en servicios
+            const serviciosData = [
+                { label: 'Cargo Cliente', monto: 62728948, pct: 47.7, color: 'bg-green' },
+                { label: 'Cargo Garantía (Fábrica)', monto: 62751831, pct: 47.7, color: 'bg-yellow' },
+                { label: 'Cargo Interno', monto: 6007432, pct: 4.6, color: 'bg-red' }
+            ];
+
+            let html = '';
+            serviciosData.forEach(item => {
+                let formatoMonto = new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS', maximumFractionDigits: 0 }).format(item.monto);
+                html += `
+                    <div class="bar-row">
+                        <div class="bar-labels">
+                            <div><span class="bar-title">${item.label}</span><span class="bar-money">(${formatoMonto})</span></div>
+                            <span class="bar-pct">${item.pct}%</span>
+                        </div>
+                        <div class="bar-track"><div class="bar-fill ${item.color}" style="width: ${item.pct}%;"></div></div>
+                    </div>`;
+            });
+            document.getElementById('servicios-barras-container').innerHTML = html;
         }
 
         document.querySelectorAll('.filter-select').forEach(select => { 
