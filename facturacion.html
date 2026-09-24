@@ -230,11 +230,12 @@
             return '$' + val.toLocaleString('es-AR');
         }
 
-        // Formato exacto con decimales para los desvíos (evita que se pasen a 'M')
+        // CAMBIO: desvíos en millones (M) con signo, igual que el resto de los montos. Ej: -$118,0M / +$4,8M
         function formatExactMoney(val) {
             let signo = val < 0 ? '-$' : '+$';
             let absVal = Math.abs(val);
-            return signo + absVal.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+            if (absVal >= 1000000) return signo + (absVal / 1000000).toFixed(1).replace('.', ',') + 'M';
+            return signo + Math.round(absVal).toLocaleString('es-AR');
         }
 
         // NUEVO: muestra u oculta el aviso sobre un gráfico
@@ -614,3 +615,4 @@
     </script>
 </body>
 </html>
+
