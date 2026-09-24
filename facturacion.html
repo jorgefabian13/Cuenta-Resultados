@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Facturación - Finanzas y Ventas</title>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800;900&display=swap');
         
@@ -17,7 +17,7 @@
         .title { font-size: 0.9rem; font-weight: 900; letter-spacing: 0.5px; margin: 0; text-transform: uppercase;}
         .subtitle { font-size: 0.6rem; color: #94a3b8; font-weight: 500; }
 
-        .container { width: 100%; max-width: 1400px; padding: 0 20px; }
+        .container { width: 100%; max-width: 1400px; padding: 0 20px; box-sizing: border-box; }
         
         .filters-bar { background: white; border-radius: 8px; padding: 6px 15px; margin-bottom: 8px; box-shadow: 0 1px 2px rgba(0,0,0,0.05); border: 1px solid #f1f5f9; display: flex; gap: 15px; align-items: center; flex-wrap: wrap; }
         .filter-group { display: flex; align-items: center; gap: 6px; border-right: 1px solid #e2e8f0; padding-right: 12px; }
@@ -54,10 +54,11 @@
         .charts-grid-top { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 10px; }
         .chart-container { background: white; border-radius: 10px; padding: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); border: 1px solid #f1f5f9; }
         .chart-header { font-size: 0.68rem; font-weight: 800; color: #64748b; text-transform: uppercase; margin-bottom: 8px; }
-        .bar-wrapper-chart { position: relative; height: 140px; width: 100%; display: flex; justify-content: center; align-items: center;}
+        /* CAMBIO: sin display:flex, así Chart.js mide bien el ancho del contenedor */
+        .bar-wrapper-chart { position: relative; height: 140px; width: 100%; }
         
         .full-width { grid-column: 1 / -1; margin-bottom: 15px; }
-        .bars-wrapper { width: 100%; padding-top: 2px; display: flex; flex-direction: column; justify-content: space-around;}
+        .bars-wrapper { width: 100%; min-height: 140px; padding-top: 2px; display: flex; flex-direction: column; justify-content: space-around;}
         .bar-row { margin-bottom: 10px; }
         .bar-row:last-child { margin-bottom: 0; }
         .bar-labels { display: flex; justify-content: space-between; margin-bottom: 3px; align-items: flex-end; }
@@ -71,6 +72,10 @@
         .text-green { color: #84cc16 !important; } .text-yellow { color: #facc15 !important; } .text-red { color: #dc2626 !important; }
         #loading { text-align: center; padding: 50px; font-size: 0.9rem; font-weight: 600; color: #64748b; }
         #debug-panel { display: none; background: #fee2e2; border: 1px solid #fca5a5; padding: 15px; border-radius: 8px; color: #991b1b; font-size: 0.85rem; margin-bottom: 20px; font-weight: 500; text-align: left; }
+
+        /* NUEVO: aviso visible cuando un gráfico no tiene datos (antes quedaba en blanco) */
+        .empty-msg { position: absolute; inset: 0; display: none; align-items: center; justify-content: center; text-align: center; padding: 10px; font-size: 0.72rem; font-weight: 600; color: #94a3b8; background: white; }
+        .empty-inline { text-align: center; font-size: 0.72rem; font-weight: 600; color: #94a3b8; padding: 20px 10px; }
 
         @media (max-width: 1024px) {
             .charts-grid-top { grid-template-columns: 1fr; }
@@ -168,8 +173,11 @@
             <div id="repuestos-section" style="display: none;">
                 <div class="charts-grid-top">
                     <div class="chart-container">
-                        <div class="chart-header">COMPORTAMIENTO SEMANAL DE VENTAS (REPUESTOS)</div>
-                        <div class="bar-wrapper-chart"><canvas id="repuestosSemanalChart"></canvas></div>
+                        <div class="chart-header" id="repuestos-chart-titulo">COMPORTAMIENTO SEMANAL DE VENTAS (REPUESTOS)</div>
+                        <div class="bar-wrapper-chart">
+                            <canvas id="repuestosSemanalChart"></canvas>
+                            <div class="empty-msg" id="repuestosSemanal-empty"></div>
+                        </div>
                     </div>
                     
                     <div class="chart-container">
@@ -189,7 +197,10 @@
 
             <div class="chart-container full-width">
                 <div class="chart-header">COMPARATIVA INTERANUAL DE FACTURACIÓN (2025 VS 2026)</div>
-                <div class="bar-wrapper-chart" style="height: 180px;"><canvas id="interanualChart"></canvas></div>
+                <div class="bar-wrapper-chart" style="height: 180px;">
+                    <canvas id="interanualChart"></canvas>
+                    <div class="empty-msg" id="interanual-empty"></div>
+                </div>
             </div>
             
         </div>
@@ -203,6 +214,10 @@
         
         let interanualChart;
         let repuestosChartInstance = null;
+
+        // CAMBIO: nueva versión de caché para no mostrar datos viejos guardados en el navegador
+        const CACHE_DATA_KEY = 'autosolFacturacionV37';
+        const CACHE_TIME_KEY = 'autosolTimeV37';
 
         const getStatusColor = (pct) => { 
             if (pct >= 95) return '#84cc16'; 
@@ -222,28 +237,46 @@
             return signo + absVal.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
         }
 
+        // NUEVO: muestra u oculta el aviso sobre un gráfico
+        function setEmpty(id, msg) {
+            let el = document.getElementById(id);
+            if (!el) return;
+            if (msg) { el.innerHTML = msg; el.style.display = 'flex'; }
+            else { el.innerHTML = ''; el.style.display = 'none'; }
+        }
+
         function loadData() {
-            let cached = sessionStorage.getItem('autosolFacturacionV33');
-            let cacheTime = sessionStorage.getItem('autosolTimeV33');
+            let cached = null, cacheTime = null;
+            try {
+                cached = sessionStorage.getItem(CACHE_DATA_KEY);
+                cacheTime = sessionStorage.getItem(CACHE_TIME_KEY);
+            } catch (e) {}
             let now = new Date().getTime();
-            let cacheValido = cacheTime && (now - cacheTime < (5 * 60 * 1000));
+            let cacheValido = cacheTime && (now - Number(cacheTime) < (5 * 60 * 1000));
 
             if (cached && cacheValido) {
                 initSystem(JSON.parse(cached));
             } else {
-                let proxyUrl = 'https://api.allorigins.win/raw?url=' + encodeURIComponent(scriptUrl);
-
-                fetch(proxyUrl)
-                .then(res => res.json())
-                .then(data => {
-                    sessionStorage.setItem('autosolFacturacionV33', JSON.stringify(data));
-                    sessionStorage.setItem('autosolTimeV33', now.toString());
+                // CAMBIO: primero se pide directo a Google (siempre datos frescos gracias a ?t=...).
+                // El intermediario allorigins guardaba copias viejas; ahora es solo plan B y también sin caché.
+                const urlFresca = scriptUrl + '?t=' + now;
+                const guardarYMostrar = data => {
+                    try {
+                        sessionStorage.setItem(CACHE_DATA_KEY, JSON.stringify(data));
+                        sessionStorage.setItem(CACHE_TIME_KEY, now.toString());
+                    } catch (e) {}
                     initSystem(data);
-                })
+                };
+
+                fetch(urlFresca)
+                .then(res => res.json())
+                .then(guardarYMostrar)
                 .catch(error => {
-                    fetch(scriptUrl)
+                    console.warn('[Facturación] Falló la conexión directa, probando intermediario:', error);
+                    let proxyUrl = 'https://api.allorigins.win/raw?url=' + encodeURIComponent(urlFresca);
+                    fetch(proxyUrl)
                     .then(res => res.json())
-                    .then(data => { initSystem(data); })
+                    .then(guardarYMostrar)
                     .catch(err => {
                         showError("<b>⚠️ Error de Sincronización:</b><br>Verifica en Google Apps Script que la implementación esté configurada con acceso para 'Cualquier persona'.");
                     });
@@ -261,6 +294,10 @@
         function initSystem(data) {
             document.getElementById('loading').style.display = 'none';
             if (data.error) { showError("<b>Error en Script:</b> " + data.error); return; }
+
+            // NUEVO: diagnóstico en la consola (F12 → Console) de lo que manda el Apps Script
+            console.log('[Facturación] Bloques recibidos del Apps Script:', Object.keys(data));
+            console.log('[Facturación] Filas de repuestos:', (data.repuestosRaw || []).length, data.repuestosError || '');
             
             document.getElementById('dashboard').style.display = 'block';
             rawData = data.facturacionRaw || [];
@@ -369,11 +406,19 @@
                 if (matchSuc && matchArea) {
                     let mIdx = mesesList.indexOf(row.mes);
                     if (mIdx !== -1) {
-                        if (row.ano === '2025') data25[mIdx] += row.avance;
-                        if (row.ano === '2026') data26[mIdx] += row.avance;
+                        if (row.ano === '2025') data25[mIdx] += Number(row.avance) || 0;
+                        if (row.ano === '2026') data26[mIdx] += Number(row.avance) || 0;
                     }
                 }
             });
+
+            // NUEVO: si no hay nada para dibujar, se avisa en vez de dejar el cuadro en blanco
+            let totalInteranual = data25.concat(data26).reduce((a, b) => a + b, 0);
+            if (totalInteranual === 0) {
+                setEmpty('interanual-empty', 'No hay facturación de 2025 ni 2026 para estos filtros.');
+            } else {
+                setEmpty('interanual-empty', null);
+            }
             
             if (interanualChart) interanualChart.destroy();
             interanualChart = new Chart(document.getElementById('interanualChart').getContext('2d'), { 
@@ -402,8 +447,17 @@
 
             if (currentFilters.area === 'REPUESTOS') {
                 secRepuestos.style.display = 'block';
-                if (globalDashboardData && globalDashboardData.repuestosData) {
-                    renderRepuestosModule(globalDashboardData.repuestosData, currentFilters.sucursal);
+                let gd = globalDashboardData || {};
+                if (gd.repuestosError) { mostrarRepuestosSinDatos(gd.repuestosError); return; }
+                if (!Array.isArray(gd.repuestosRaw)) {
+                    mostrarRepuestosSinDatos('El Apps Script no está enviando los datos de repuestos. ¿Publicaste una nueva versión de la implementación?');
+                    return;
+                }
+                try {
+                    renderRepuestosModule(gd.repuestosRaw);
+                } catch (e) {
+                    console.error('[Facturación] Error al dibujar repuestos:', e);
+                    mostrarRepuestosSinDatos('Los datos de repuestos llegaron con un formato inesperado. Detalle en la consola (F12).');
                 }
             } else if (currentFilters.area === 'SERVICIOS') {
                 secServicios.style.display = 'block';
@@ -411,101 +465,138 @@
             }
         }
 
-        function renderRepuestosModule(repuestosData, sucursalSeleccionada) {
-            if (!repuestosData) return;
+        // NUEVO: deja ambos cuadros de repuestos con un aviso legible
+        function mostrarRepuestosSinDatos(msg) {
+            if (repuestosChartInstance) { repuestosChartInstance.destroy(); repuestosChartInstance = null; }
+            setEmpty('repuestosSemanal-empty', msg);
+            document.getElementById('repuestos-barras-container').innerHTML = `<div class="empty-inline">${msg}</div>`;
+        }
 
-            let canales = [];
-            let montos = [];
-
-            if (sucursalSeleccionada === 'SANTA FE') {
-                canales = repuestosData.santaFe.canales;
-                montos = repuestosData.santaFe.montos;
-            } else if (sucursalSeleccionada === 'JUJUY') {
-                canales = repuestosData.jujuy.canales;
-                montos = repuestosData.jujuy.montos;
-            } else {
-                canales = repuestosData.santaFe.canales;
-                montos = repuestosData.santaFe.montos.map((val, idx) => Number(val) + Number(repuestosData.jujuy.montos[idx] || 0));
+        // CAMBIO: ahora usa repuestosRaw (planilla de Repuestos, una pestaña por mes)
+        // y respeta los filtros de año, mes y sucursal.
+        function renderRepuestosModule(repuestosRaw) {
+            let suc = currentFilters.sucursal;
+            if (!['TODAS', 'SANTA FE', 'JUJUY'].includes(suc)) {
+                mostrarRepuestosSinDatos('La planilla de Repuestos solo tiene datos de Santa Fe y Jujuy.');
+                return;
             }
 
-            let totalVenta = montos.reduce((a, b) => Number(a) + Number(b), 0);
-            let barrasHtml = '';
+            let filas = repuestosRaw.filter(r => {
+                let matchAno = currentFilters.ano === 'TODOS' || r.ano === currentFilters.ano;
+                let matchSuc = suc === 'TODAS' || r.sucursal === suc;
+                let matchMes = currentFilters.mes === 'TODOS' || r.mes === currentFilters.mes;
+                return matchAno && matchSuc && matchMes;
+            });
+
+            if (filas.length === 0) {
+                mostrarRepuestosSinDatos('Todavía no hay ventas de repuestos cargadas para esta selección.');
+                return;
+            }
+
+            // --- Distribución por canal ---
+            const ordenCanales = ['MOSTRADOR', 'NORA', 'TALLER', 'GARANTIA', 'INTERNO'];
+            let porCanal = {};
+            filas.forEach(r => { porCanal[r.canal] = (porCanal[r.canal] || 0) + (Number(r.monto) || 0); });
+            let canales = Object.keys(porCanal).sort((x, y) => {
+                let ix = ordenCanales.indexOf(x), iy = ordenCanales.indexOf(y);
+                return (ix === -1 ? 99 : ix) - (iy === -1 ? 99 : iy);
+            });
+            let totalVenta = canales.reduce((acc, k) => acc + porCanal[k], 0);
+
             const coloresBarras = ['bg-green', 'bg-yellow', 'bg-red', 'bg-blue', 'bg-slate'];
-            
+            let barrasHtml = '';
             canales.forEach((canal, idx) => {
-                if (!canal) return;
-                let monto = Number(montos[idx]) || 0;
+                let monto = porCanal[canal];
                 let pct = totalVenta > 0 ? (monto / totalVenta) * 100 : 0;
                 let formatoMonto = new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS', maximumFractionDigits: 0 }).format(monto);
-                let colorClase = coloresBarras[idx % coloresBarras.length];
-
+                let nombre = canal.charAt(0) + canal.slice(1).toLowerCase();
                 barrasHtml += `
                     <div class="bar-row">
                         <div class="bar-labels">
-                            <div><span class="bar-title">${canal}</span><span class="bar-money">(${formatoMonto})</span></div>
+                            <div><span class="bar-title">${nombre}</span><span class="bar-money">(${formatoMonto})</span></div>
                             <span class="bar-pct">${pct.toFixed(1)}%</span>
                         </div>
-                        <div class="bar-track"><div class="bar-fill ${colorClase}" style="width: ${pct}%;"></div></div>
+                        <div class="bar-track"><div class="bar-fill ${coloresBarras[idx % coloresBarras.length]}" style="width: ${Math.max(pct, 0)}%;"></div></div>
                     </div>`;
             });
             document.getElementById('repuestos-barras-container').innerHTML = barrasHtml;
 
-            let semLabels = repuestosData.semanas.map(s => s.semana);
-            let semValues = repuestosData.semanas.map(s => {
-                if (sucursalSeleccionada === 'SANTA FE') return s.santaFe;
-                if (sucursalSeleccionada === 'JUJUY') return s.jujuy;
-                return s.total;
-            });
+            // --- Evolución: por semana si hay un mes elegido, por mes si es anual ---
+            let labels = [], valores = [];
+            let titulo = document.getElementById('repuestos-chart-titulo');
+            if (currentFilters.mes === 'TODOS') {
+                const meses = ['ENERO','FEBRERO','MARZO','ABRIL','MAYO','JUNIO','JULIO','AGOSTO','SEPTIEMBRE','OCTUBRE','NOVIEMBRE','DICIEMBRE'];
+                const cortos = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+                valores = Array(12).fill(0);
+                filas.forEach(r => { let i = meses.indexOf(r.mes); if (i !== -1) valores[i] += Number(r.monto) || 0; });
+                labels = cortos;
+                titulo.textContent = 'COMPORTAMIENTO MENSUAL DE VENTAS (REPUESTOS)';
+            } else {
+                let porSemana = {};
+                filas.forEach(r => { porSemana[r.semana] = (porSemana[r.semana] || 0) + (Number(r.monto) || 0); });
+                labels = Object.keys(porSemana).sort((x, y) => (parseInt(x.replace(/\D/g, '')) || 0) - (parseInt(y.replace(/\D/g, '')) || 0));
+                valores = labels.map(l => porSemana[l]);
+                titulo.textContent = 'COMPORTAMIENTO SEMANAL DE VENTAS (REPUESTOS)';
+            }
 
-            if (repuestosChartInstance) repuestosChartInstance.destroy();
+            if (repuestosChartInstance) { repuestosChartInstance.destroy(); repuestosChartInstance = null; }
+            setEmpty('repuestosSemanal-empty', null);
+
             repuestosChartInstance = new Chart(document.getElementById('repuestosSemanalChart').getContext('2d'), {
                 type: 'line',
                 data: {
-                    labels: semLabels,
-                    datasets: [{ label: 'Venta Semanal', data: semValues, borderColor: '#3b82f6', backgroundColor: 'rgba(59, 130, 246, 0.1)', tension: 0.4, borderWidth: 3, fill: true, pointBackgroundColor: '#ffffff', pointBorderColor: '#3b82f6', pointRadius: 5 }]
+                    labels: labels,
+                    datasets: [{ label: 'Venta', data: valores, borderColor: '#3b82f6', backgroundColor: 'rgba(59, 130, 246, 0.1)', tension: 0.4, borderWidth: 3, fill: true, pointBackgroundColor: '#ffffff', pointBorderColor: '#3b82f6', pointRadius: 5 }]
                 },
-                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, grid: { color: '#f1f5f9' }, border: { display: false } }, x: { grid: { display: false }, border: { display: false } } } }
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { callbacks: { label: ctx => formatMoney(ctx.parsed.y) } } }, scales: { y: { beginAtZero: true, ticks: { callback: function(value) { return formatMoney(value); } }, grid: { color: '#f1f5f9' }, border: { display: false } }, x: { grid: { display: false }, border: { display: false } } } }
             });
         }
 
+        // CAMBIO: antes los porcentajes eran fijos (47,7% / 47,7% / 4,6%) y no reflejaban la realidad.
+        // Ahora se calculan con cargosRaw (ORs cerradas por tipo de cargo) que ya envía el Apps Script.
         function renderServiciosModule() {
-            // Lectura dinámica del avance real filtrado por mes y sucursal para el área de Servicios
-            let filteredServicios = rawData.filter(row => {
-                let matchAno = currentFilters.ano === 'TODOS' || row.ano === currentFilters.ano;
-                let matchSuc = currentFilters.sucursal === 'TODAS' || row.sucursal.includes(currentFilters.sucursal);
-                let matchMes = currentFilters.mes === 'TODOS' || row.mes === currentFilters.mes;
-                return matchAno && matchSuc && matchMes && row.area === 'SERVICIOS';
+            let cont = document.getElementById('servicios-barras-container');
+            let cargos = (globalDashboardData && Array.isArray(globalDashboardData.cargosRaw)) ? globalDashboardData.cargosRaw : [];
+
+            let filtrados = cargos.filter(r => {
+                let matchAno = currentFilters.ano === 'TODOS' || r.ano === currentFilters.ano;
+                let matchSuc = currentFilters.sucursal === 'TODAS' || (r.sucursal || '').includes(currentFilters.sucursal);
+                let matchMes = currentFilters.mes === 'TODOS' || r.mes === currentFilters.mes;
+                return matchAno && matchSuc && matchMes;
             });
 
-            let totalServicios = filteredServicios.reduce((acc, r) => acc + r.avance, 0);
-            if (totalServicios === 0) {
-                let fallbackRow = rawData.find(r => r.area === 'SERVICIOS');
-                totalServicios = fallbackRow ? fallbackRow.avance : 131485211;
+            let tot = {
+                CLIENTE:  { label: 'Cargo Cliente', mo: 0, ors: 0, color: 'bg-green' },
+                GARANTIA: { label: 'Cargo Garantía (Fábrica)', mo: 0, ors: 0, color: 'bg-yellow' },
+                INTERNO:  { label: 'Cargo Interno', mo: 0, ors: 0, color: 'bg-red' }
+            };
+            filtrados.forEach(r => {
+                if (tot[r.cargo]) {
+                    tot[r.cargo].mo += Number(r.mo) || 0;
+                    tot[r.cargo].ors += Number(r.or) || 0;
+                }
+            });
+
+            let totalMO = Object.values(tot).reduce((a, t) => a + t.mo, 0);
+            if (totalMO === 0) {
+                cont.innerHTML = '<div class="empty-inline">No hay ORs cerradas con mano de obra para esta selección.</div>';
+                return;
             }
 
-            let cliente = totalServicios * 0.477;
-            let garantia = totalServicios * 0.477;
-            let interno = totalServicios * 0.046;
-
-            const serviciosData = [
-                { label: 'Cargo Cliente', monto: cliente, pct: 47.7, color: 'bg-green' },
-                { label: 'Cargo Garantía (Fábrica)', monto: garantia, pct: 47.7, color: 'bg-yellow' },
-                { label: 'Cargo Interno', monto: interno, pct: 4.6, color: 'bg-red' }
-            ];
-
             let html = '';
-            serviciosData.forEach(item => {
-                let formatoMonto = new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS', maximumFractionDigits: 0 }).format(item.monto);
+            Object.values(tot).forEach(item => {
+                let pct = (item.mo / totalMO) * 100;
+                let formatoMonto = new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS', maximumFractionDigits: 0 }).format(item.mo);
                 html += `
                     <div class="bar-row">
                         <div class="bar-labels">
-                            <div><span class="bar-title">${item.label}</span><span class="bar-money">(${formatoMonto})</span></div>
-                            <span class="bar-pct">${item.pct}%</span>
+                            <div><span class="bar-title">${item.label}</span><span class="bar-money">(${formatoMonto} · ${item.ors.toLocaleString('es-AR')} ORs)</span></div>
+                            <span class="bar-pct">${pct.toFixed(1)}%</span>
                         </div>
-                        <div class="bar-track"><div class="bar-fill ${item.color}" style="width: ${item.pct}%;"></div></div>
+                        <div class="bar-track"><div class="bar-fill ${item.color}" style="width: ${pct}%;"></div></div>
                     </div>`;
             });
-            document.getElementById('servicios-barras-container').innerHTML = html;
+            cont.innerHTML = html;
         }
 
         document.querySelectorAll('.filter-select').forEach(select => { 
