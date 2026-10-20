@@ -263,33 +263,61 @@
             return '#ef4444'; 
         };
 
-        function loadData() {
-            let cached = sessionStorage.getItem('autosolDataV21');
-            let cacheTime = sessionStorage.getItem('autosolTimeV21');
-            let now = new Date().getTime();
-            let cacheValido = cacheTime && (now - cacheTime < (5 * 60 * 1000));
+        // ============================================================
+        // CARGA RÁPIDA DE DATOS
+        // 1) Muestra al instante la última copia guardada en este navegador.
+        // 2) Si tiene más de 2 minutos, pide datos frescos a Google y actualiza la vista sola.
+        // 3) Mientras tanto, precarga en segundo plano los datos de la otra página
+        //    (Facturación ⇄ PPT), así el cambio entre módulos es instantáneo.
+        // ============================================================
+        const CACHE_PREFIJO = 'autosolCache:';
+        const CACHE_VIGENCIA = 2 * 60 * 1000;
 
-            if (cached && cacheValido) {
-                initSystem(JSON.parse(cached));
-            } else {
-                let proxyUrl = 'https://api.allorigins.win/raw?url=' + encodeURIComponent(scriptUrl);
+        function leerCache(url) {
+            try {
+                let txt = localStorage.getItem(CACHE_PREFIJO + url);
+                return txt ? JSON.parse(txt) : null;
+            } catch (e) { return null; }
+        }
 
-                fetch(proxyUrl)
-                .then(res => res.json())
-                .then(data => {
-                    sessionStorage.setItem('autosolDataV21', JSON.stringify(data));
-                    sessionStorage.setItem('autosolTimeV21', now.toString());
-                    initSystem(data);
-                })
-                .catch(error => {
-                    fetch(scriptUrl)
-                    .then(res => res.json())
-                    .then(data => { initSystem(data); })
-                    .catch(err => {
-                        showError("<b>⚠️ Error de Conexión:</b><br>Verifica en Google Apps Script que la implementación esté en 'Cualquier persona'.");
-                    });
-                });
+        function guardarCache(url, data, campos) {
+            let copia = {};
+            campos.forEach(k => { if (data[k] !== undefined) copia[k] = data[k]; });
+            let txt = JSON.stringify({ t: Date.now(), data: copia });
+            try { localStorage.setItem(CACHE_PREFIJO + url, txt); }
+            catch (e) {
+                // Sin espacio: se borran las copias viejas de otras páginas y se reintenta
+                try {
+                    Object.keys(localStorage).forEach(k => { if (k.indexOf(CACHE_PREFIJO) === 0 && k !== CACHE_PREFIJO + url) localStorage.removeItem(k); });
+                    localStorage.setItem(CACHE_PREFIJO + url, txt);
+                } catch (e2) {}
             }
+        }
+
+        function pedirDatos(url) {
+            const urlFresca = url + '?t=' + Date.now();
+            return fetch(urlFresca).then(res => res.json())
+                .catch(() => fetch('https://api.allorigins.win/raw?url=' + encodeURIComponent(urlFresca)).then(res => res.json()));
+        }
+
+        function cargarDatos(url, campos, alRecibir, alFallar) {
+            let cache = leerCache(url);
+            if (cache && alRecibir) alRecibir(cache.data);
+            if (cache && Date.now() - cache.t < CACHE_VIGENCIA) return Promise.resolve();
+            return pedirDatos(url).then(data => {
+                if (!data || data.error) { if (!cache && alRecibir) alRecibir(data || { error: 'Respuesta vacía' }); return; }
+                guardarCache(url, data, campos);
+                if (alRecibir) alRecibir(data);
+            }).catch(err => { if (!cache && alFallar) alFallar(err); });
+        }
+
+        function loadData() {
+            cargarDatos(scriptUrl, ['pptRaw', 'cargosRaw', 'error'], initSystem, () => {
+                showError("<b>⚠️ Error de Sincronización:</b><br>Verifica en Google Apps Script que la implementación esté configurada con acceso para 'Cualquier persona'.");
+            }).then(() => {
+                // Precarga de la otra página, sin mostrar nada
+                cargarDatos("https://script.google.com/macros/s/AKfycbws0NQgVeq3bB8kHrtlAgAlzSb9Bfedfv6mltV2tPLOOZVbqy0JxVz1wGmgMnPA7EBj/exec", ['facturacionRaw', 'cargosRaw', 'repuestosRaw', 'repuestosError', 'repuestosAviso', 'error'], null, null);
+            });
         }
 
         function showError(msg) {
@@ -493,7 +521,20 @@
             }); 
         });
 
+        // NUEVO: al abrir, se posiciona en el mes y año en curso
+        (function seleccionarMesActual() {
+            const MESES = ['ENERO','FEBRERO','MARZO','ABRIL','MAYO','JUNIO','JULIO','AGOSTO','SEPTIEMBRE','OCTUBRE','NOVIEMBRE','DICIEMBRE'];
+            let hoy = new Date();
+            let mes = MESES[hoy.getMonth()];
+            let ano = String(hoy.getFullYear());
+            let selMes = document.getElementById('filter-meses');
+            let selAno = document.getElementById('filter-ano');
+            if (selMes && selMes.querySelector('option[value="' + mes + '"]')) { selMes.value = mes; currentFilters.mes = mes; }
+            if (selAno && selAno.querySelector('option[value="' + ano + '"]')) { selAno.value = ano; currentFilters.ano = ano; }
+        })();
+
         loadData();
     </script>
 </body>
 </html>
+
