@@ -357,6 +357,14 @@
             processCharts(filteredPpt);
         }
 
+        // Total consolidado = suma de lo que muestra cada sucursal (antes promediaba)
+        function sumaSucursales(totals, campo) {
+            return ['SANTA FE', 'JUJUY', 'EXPRESS', 'MOVIL', 'TARTAGAL'].reduce((acc, suc) => {
+                let d = totals[suc];
+                return acc + (d && d.count > 0 ? d[campo] / d.count : 0);
+            }, 0);
+        }
+
         function renderDashboard(totals) {
             let objHtml = '', avaHtml = '', ppdHtml = '', srvdHtml = ''; 
             const sucursales = ['SANTA FE', 'JUJUY', 'EXPRESS', 'MOVIL', 'TARTAGAL'];
@@ -375,8 +383,8 @@
             let c = totals['CONSOLIDADO'];
             document.getElementById('card-obj').innerHTML = objHtml + `<div class="list-item-clean"><span class="list-label-clean">TOTAL CONSOLIDADO</span> <div class="list-val-clean val-green">${c.obj.toFixed(0)}</div></div>`; 
             document.getElementById('card-ava').innerHTML = avaHtml + `<div class="list-item-clean"><span class="list-label-clean">TOTAL CONSOLIDADO</span> <div class="list-val-clean val-blue">${c.ava.toFixed(0)}</div></div>`; 
-            document.getElementById('card-pptd').innerHTML = ppdHtml + `<div class="list-item-clean"><span class="list-label-clean">TOTAL CONSOLIDADO</span> <div class="list-val-clean">${(c.count>0 ? c.ppd/c.count : 0).toFixed(2).replace('.',',')}</div></div>`; 
-            document.getElementById('card-servd').innerHTML = srvdHtml + `<div class="list-item-clean"><span class="list-label-clean">TOTAL CONSOLIDADO</span> <div class="list-val-clean">${(c.count>0 ? c.srvd/c.count : 0).toFixed(2).replace('.',',')}</div></div>`; 
+            document.getElementById('card-pptd').innerHTML = ppdHtml + `<div class="list-item-clean"><span class="list-label-clean">TOTAL CONSOLIDADO</span> <div class="list-val-clean">${sumaSucursales(totals, 'ppd').toFixed(2).replace('.',',')}</div></div>`; 
+            document.getElementById('card-servd').innerHTML = srvdHtml + `<div class="list-item-clean"><span class="list-label-clean">TOTAL CONSOLIDADO</span> <div class="list-val-clean">${sumaSucursales(totals, 'srvd').toFixed(2).replace('.',',')}</div></div>`; 
 
             document.getElementById('gauge-container').innerHTML = '';
             sucursales.forEach(suc => { 
