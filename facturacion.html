@@ -296,7 +296,7 @@
         }
 
         function loadData() {
-            cargarDatos(scriptUrl, ['facturacionRaw', 'cargosRaw', 'repuestosRaw', 'repuestosError', 'repuestosAviso', 'error'], initSystem, () => {
+            cargarDatos(scriptUrl, ['facturacionRaw', 'cargosRaw', 'repuestosRaw', 'repuestosError', 'repuestosAviso', 'productividadRaw', 'productividadError', 'error'], initSystem, () => {
                 showError("<b>⚠️ Error de Sincronización:</b><br>Verifica en Google Apps Script que la implementación esté configurada con acceso para 'Cualquier persona'.");
             }).then(() => {
                 // Precarga de la otra página, sin mostrar nada
