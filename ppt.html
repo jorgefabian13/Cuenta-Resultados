@@ -86,9 +86,27 @@
         #loading { text-align: center; padding: 50px; font-size: 0.9rem; font-weight: 600; color: #64748b; }
         #debug-panel { display: none; background: #fee2e2; border: 1px solid #fca5a5; padding: 15px; border-radius: 8px; color: #991b1b; font-size: 0.85rem; margin-bottom: 20px; font-weight: 500; text-align: left; }
 
+
+        /* ===== PRODUCTIVIDAD DEL TALLER ===== */
+        .section-title { display: flex; align-items: center; justify-content: space-between; margin: 10px 0 15px; padding-bottom: 8px; border-bottom: 2px solid #001E50; }
+        .section-title h2 { margin: 0; font-size: 0.9rem; font-weight: 900; color: #001E50; text-transform: uppercase; font-style: italic; letter-spacing: 0.5px; }
+        .card-formula { font-size: 0.55rem; font-weight: 600; color: #94a3b8; margin: -10px 0 10px 36px; }
+        .obj-badge { margin-left: auto; font-size: 0.55rem; font-weight: 800; color: #64748b; background: #f1f5f9; border-radius: 10px; padding: 2px 8px; white-space: nowrap; }
+        .prod-aviso { background: #fff7ed; border: 1px solid #fed7aa; color: #9a3412; border-radius: 8px; padding: 10px 14px; font-size: 0.72rem; font-weight: 600; margin-bottom: 15px; }
+        .prod-vacio { text-align: center; font-size: 0.72rem; font-weight: 600; color: #94a3b8; padding: 30px 10px; }
+        .val-muted { color: #94a3b8 !important; font-size: 0.8rem !important; }
+        .lav-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; height: 100%; align-content: center; }
+        .lav-box { background: #f8fafc; border-radius: 10px; padding: 12px; border: 1px solid #f1f5f9; }
+        .lav-suc { font-size: 0.62rem; font-weight: 900; color: #001E50; text-transform: uppercase; margin-bottom: 8px; }
+        .lav-row { display: flex; justify-content: space-between; align-items: baseline; padding: 3px 0; }
+        .lav-label { font-size: 0.6rem; font-weight: 700; color: #64748b; text-transform: uppercase; }
+        .lav-val { font-size: 0.95rem; font-weight: 900; font-style: italic; color: #0f172a; }
+        .lav-hs { font-size: 0.58rem; color: #94a3b8; font-weight: 600; margin-top: 6px; }
+
         @media (max-width: 1024px) {
             .top-grid-4 { grid-template-columns: repeat(2, 1fr); }
             .charts-grid-top { grid-template-columns: 1fr; }
+            .lav-grid { grid-template-columns: 1fr; }
         }
     </style>
 </head>
@@ -243,6 +261,65 @@
                 <div class="chart-header">COMPARATIVA INTERANUAL DE PPT (2025 VS 2026)</div>
                 <div class="bar-wrapper-chart"><canvas id="interanualChart"></canvas></div>
             </div>
+
+            <!-- ================= PRODUCTIVIDAD DEL TALLER ================= -->
+            <div class="section-title"><h2>Productividad del Taller</h2></div>
+            <div id="prod-aviso" class="prod-aviso" style="display:none;"></div>
+
+            <div class="top-grid-4">
+                <div class="data-card-white">
+                    <div class="card-header-icon">
+                        <div class="icon-circle icon-green"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg></div>
+                        <span class="card-header-title">GRADO DE OCUPACIÓN</span>
+                        <span class="obj-badge" id="prod-ocup-obj"></span>
+                    </div>
+                    <div class="card-formula">Hs trabajadas ÷ Hs disponibles</div>
+                    <div id="prod-ocup"></div>
+                </div>
+                <div class="data-card-white">
+                    <div class="card-header-icon">
+                        <div class="icon-circle icon-blue"><svg viewBox="0 0 24 24"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline><polyline points="17 6 23 6 23 12"></polyline></svg></div>
+                        <span class="card-header-title">PRODUCTIVIDAD</span>
+                        <span class="obj-badge" id="prod-prod-obj"></span>
+                    </div>
+                    <div class="card-formula">Hs pautas ÷ Hs productivas</div>
+                    <div id="prod-prod"></div>
+                </div>
+                <div class="data-card-white">
+                    <div class="card-header-icon">
+                        <div class="icon-circle icon-slate"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg></div>
+                        <span class="card-header-title">PRODUCTIVIDAD SIAC</span>
+                        <span class="obj-badge">Referencia</span>
+                    </div>
+                    <div class="card-formula">Hs facturadas ÷ Hs productivas</div>
+                    <div id="prod-siac"></div>
+                </div>
+                <div class="data-card-white">
+                    <div class="card-header-icon">
+                        <div class="icon-circle icon-dark"><svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg></div>
+                        <span class="card-header-title">PRESENCIA</span>
+                        <span class="obj-badge">Referencia</span>
+                    </div>
+                    <div class="card-formula">Hs trabajadas ÷ Hs de presencia</div>
+                    <div id="prod-pres"></div>
+                </div>
+            </div>
+
+            <div class="charts-grid-top">
+                <div class="chart-container">
+                    <div class="chart-header">¿A DÓNDE VAN LAS HORAS? (HS DISPONIBLES)</div>
+                    <div class="bar-wrapper-chart"><canvas id="horasChart"></canvas><div class="prod-vacio" id="horas-vacio" style="display:none;"></div></div>
+                </div>
+                <div class="chart-container">
+                    <div class="chart-header">LAVADERO (SE MIDE APARTE, NO SUMA AL TALLER)</div>
+                    <div id="lavadero-box" style="height:180px;"></div>
+                </div>
+            </div>
+
+            <div class="chart-container full-width">
+                <div class="chart-header" id="prod-evol-titulo">EVOLUCIÓN MENSUAL: PRODUCTIVIDAD VS SIAC VS OCUPACIÓN</div>
+                <div class="bar-wrapper-chart" style="height:220px;"><canvas id="prodEvolChart"></canvas></div>
+            </div>
             
         </div>
     </div>
@@ -311,12 +388,23 @@
             }).catch(err => { if (!cache && alFallar) alFallar(err); });
         }
 
+        // Productividad: viene del mismo Apps Script que Facturación (se pide en paralelo)
+        const URL_PRODUCTIVIDAD = "https://script.google.com/macros/s/AKfycbws0NQgVeq3bB8kHrtlAgAlzSb9Bfedfv6mltV2tPLOOZVbqy0JxVz1wGmgMnPA7EBj/exec";
+        let rawProd = [];
+        let prodError = null;
+
         function loadData() {
             cargarDatos(scriptUrl, ['pptRaw', 'cargosRaw', 'error'], initSystem, () => {
                 showError("<b>⚠️ Error de Sincronización:</b><br>Verifica en Google Apps Script que la implementación esté configurada con acceso para 'Cualquier persona'.");
-            }).then(() => {
-                // Precarga de la otra página, sin mostrar nada
-                cargarDatos("https://script.google.com/macros/s/AKfycbws0NQgVeq3bB8kHrtlAgAlzSb9Bfedfv6mltV2tPLOOZVbqy0JxVz1wGmgMnPA7EBj/exec", ['facturacionRaw', 'cargosRaw', 'repuestosRaw', 'repuestosError', 'repuestosAviso', 'error'], null, null);
+            });
+            // Datos de Facturación + Productividad (también deja precargada la página de Facturación)
+            cargarDatos(URL_PRODUCTIVIDAD, ['facturacionRaw', 'cargosRaw', 'repuestosRaw', 'repuestosError', 'repuestosAviso', 'productividadRaw', 'productividadError', 'error'], data => {
+                rawProd = (data && data.productividadRaw) || [];
+                prodError = data ? (data.productividadError || (data.productividadRaw ? null : 'El Apps Script todavía no envía los datos de productividad. ¿Publicaste la nueva versión?')) : null;
+                renderProductividad();
+            }, () => {
+                prodError = 'No se pudo conectar para traer los datos de productividad.';
+                renderProductividad();
             });
         }
 
@@ -383,6 +471,7 @@
 
             renderDashboard(totals); 
             processCharts(filteredPpt);
+            renderProductividad();
         }
 
         // Total consolidado = suma de lo que muestra cada sucursal (antes promediaba)
@@ -520,6 +609,182 @@
                 processData(); 
             }); 
         });
+
+
+        // ============================================================
+        // PRODUCTIVIDAD DEL TALLER
+        // Los totales se calculan sumando horas y después dividiendo (ponderado),
+        // nunca promediando porcentajes.
+        // ============================================================
+        const MESES_PROD = ['ENERO','FEBRERO','MARZO','ABRIL','MAYO','JUNIO','JULIO','AGOSTO','SEPTIEMBRE','OCTUBRE','NOVIEMBRE','DICIEMBRE'];
+        const SUC_PROD = ['SANTA FE', 'JUJUY'];
+        let horasChart = null, prodEvolChart = null;
+
+        // Objetivo: 95% de enero a abril 2026, 97% desde mayo 2026
+        function objetivoProd(ano, mes) {
+            if (ano === '2026' && mes !== 'TODOS' && MESES_PROD.indexOf(mes) < 4) return 95;
+            return 97;
+        }
+        // Semáforo de la planilla: ≥ 97 verde · 94 a 96,9 amarillo · < 94 rojo
+        function claseSemaforo(pct) {
+            if (pct === null) return 'val-muted';
+            if (pct >= 97) return 'text-green';
+            if (pct >= 94) return 'text-yellow';
+            return 'text-red';
+        }
+        function fmtPct(p) { return p === null ? 'S/D' : p.toFixed(1).replace('.', ',') + '%'; }
+        function fmtHs(h) { return Math.round(h).toLocaleString('es-AR') + ' hs'; }
+
+        function sumarHoras(filas) {
+            let t = { disp: 0, trab: 0, prod: 0, noprod: 0, pautas: 0, fact: 0, prodConFact: 0, pres: 0, trabConPres: 0 };
+            filas.forEach(r => {
+                t.disp += r.disp || 0; t.trab += r.trab || 0; t.prod += r.prod || 0; t.noprod += r.noprod || 0; t.pautas += r.pautas || 0;
+                if (r.fact > 0) { t.fact += r.fact; t.prodConFact += r.prod || 0; }      // SIAC solo con meses que tienen facturadas
+                if (r.pres > 0) { t.pres += r.pres; t.trabConPres += r.trab || 0; }
+            });
+            return t;
+        }
+        function indicadores(t) {
+            return {
+                ocup: t.disp > 0 ? t.trab / t.disp * 100 : null,
+                prod: t.prod > 0 && t.pautas > 0 ? t.pautas / t.prod * 100 : null,
+                siac: t.prodConFact > 0 ? t.fact / t.prodConFact * 100 : null,
+                pres: t.pres > 0 ? t.trabConPres / t.pres * 100 : null
+            };
+        }
+
+        function filtrarProd(tipo, conMes) {
+            return rawProd.filter(r => {
+                if (r.tipo !== tipo) return false;
+                if (currentFilters.ano !== 'TODOS' && r.ano !== currentFilters.ano) return false;
+                if (conMes && currentFilters.mes !== 'TODOS' && r.mes !== currentFilters.mes) return false;
+                return true;
+            });
+        }
+
+        function renderProductividad() {
+            let aviso = document.getElementById('prod-aviso');
+            if (!aviso) return;
+            let suc = currentFilters.sucursal;
+            let mensajes = [];
+            if (prodError) mensajes.push(prodError);
+            if (suc !== 'TODAS' && SUC_PROD.indexOf(suc) === -1) mensajes.push('La productividad se mide solo en Santa Fe y Jujuy.');
+            aviso.innerHTML = mensajes.join('<br>');
+            aviso.style.display = mensajes.length ? 'block' : 'none';
+
+            let sucursales = suc === 'TODAS' ? SUC_PROD : SUC_PROD.filter(x => x === suc);
+            let filasTaller = filtrarProd('TALLER', true);
+            let porSuc = {};
+            sucursales.forEach(x => { porSuc[x] = sumarHoras(filasTaller.filter(r => r.sucursal === x)); });
+            let total = sumarHoras(filasTaller.filter(r => sucursales.indexOf(r.sucursal) !== -1));
+
+            // --- 4 tarjetas ---
+            const tarjetas = [['prod-ocup', 'ocup', true], ['prod-prod', 'prod', true], ['prod-siac', 'siac', false], ['prod-pres', 'pres', false]];
+            let obj = objetivoProd(currentFilters.ano, currentFilters.mes);
+            tarjetas.forEach(([id, clave, conSemaforo]) => {
+                let html = '';
+                sucursales.forEach(x => {
+                    let v = indicadores(porSuc[x])[clave];
+                    let cls = conSemaforo ? claseSemaforo(v) : (v === null ? 'val-muted' : '');
+                    html += `<div class="list-item-clean"><span class="list-label-clean">${x}</span> <div class="list-val-clean ${cls}">${fmtPct(v)}</div></div>`;
+                });
+                let vt = indicadores(total)[clave];
+                // Si a alguna sucursal le falta el dato, el consolidado no sería comparable
+                if (sucursales.some(x => indicadores(porSuc[x])[clave] === null)) vt = null;
+                let clsT = conSemaforo ? claseSemaforo(vt) : (vt === null ? 'val-muted' : '');
+                if (sucursales.length > 1) html += `<div class="list-item-clean"><span class="list-label-clean">TOTAL CONSOLIDADO</span> <div class="list-val-clean ${clsT}" style="font-size:1.1rem;">${fmtPct(vt)}</div></div>`;
+                if (!sucursales.length) html = '<div class="prod-vacio">Sin datos</div>';
+                document.getElementById(id).innerHTML = html;
+                let b = document.getElementById(id + '-obj');
+                if (b) b.textContent = 'Obj. ' + obj + '%';
+            });
+
+            // --- ¿A dónde van las horas? ---
+            let vacio = document.getElementById('horas-vacio');
+            if (horasChart) { horasChart.destroy(); horasChart = null; }
+            let hayHoras = sucursales.some(x => porSuc[x].disp > 0 || porSuc[x].trab > 0);
+            document.getElementById('horasChart').style.display = hayHoras ? 'block' : 'none';
+            vacio.style.display = hayHoras ? 'none' : 'block';
+            vacio.textContent = 'Todavía no hay horas cargadas para esta selección.';
+            if (hayHoras) {
+                let etiquetas = sucursales.map(x => x === 'SANTA FE' ? 'Santa Fe' : 'Jujuy');
+                horasChart = new Chart(document.getElementById('horasChart').getContext('2d'), {
+                    type: 'bar',
+                    data: {
+                        labels: etiquetas,
+                        datasets: [
+                            { label: 'Productivas (con OR)', data: sucursales.map(x => porSuc[x].prod), backgroundColor: '#3b82f6', borderRadius: 4 },
+                            { label: 'No productivas (sin OR)', data: sucursales.map(x => porSuc[x].noprod), backgroundColor: '#f59e0b', borderRadius: 4 },
+                            { label: 'No trabajadas', data: sucursales.map(x => Math.max(porSuc[x].disp - porSuc[x].trab, 0)), backgroundColor: '#e2e8f0', borderRadius: 4 }
+                        ]
+                    },
+                    options: {
+                        indexAxis: 'y', responsive: true, maintainAspectRatio: false,
+                        plugins: {
+                            legend: { position: 'bottom', labels: { font: { family: 'Inter', size: 10, weight: '600' }, color: '#475569', boxWidth: 12 } },
+                            tooltip: { callbacks: { label: ctx => {
+                                let d = porSuc[sucursales[ctx.dataIndex]].disp;
+                                let pct = d > 0 ? ' (' + (ctx.parsed.x / d * 100).toFixed(1).replace('.', ',') + '% de las disponibles)' : '';
+                                return ctx.dataset.label + ': ' + fmtHs(ctx.parsed.x) + pct;
+                            } } }
+                        },
+                        scales: {
+                            x: { stacked: true, beginAtZero: true, ticks: { callback: v => v.toLocaleString('es-AR') + ' hs', font: { family: 'Inter', size: 9 }, color: '#64748b' }, grid: { color: '#f1f5f9' }, border: { display: false } },
+                            y: { stacked: true, grid: { display: false }, ticks: { font: { family: 'Inter', size: 11, weight: '700' }, color: '#0f172a' }, border: { display: false } }
+                        }
+                    }
+                });
+            }
+
+            // --- Lavadero ---
+            let filasLav = filtrarProd('LAVADERO', true);
+            let lavHtml = '';
+            sucursales.forEach(x => {
+                let t = sumarHoras(filasLav.filter(r => r.sucursal === x));
+                let ind = indicadores(t);
+                let nombre = x === 'SANTA FE' ? 'Santa Fe' : 'Jujuy';
+                if (t.disp === 0 && t.trab === 0) {
+                    lavHtml += `<div class="lav-box"><div class="lav-suc">${nombre}</div><div class="prod-vacio" style="padding:15px 0;">Sin datos de lavadero cargados</div></div>`;
+                } else {
+                    lavHtml += `<div class="lav-box"><div class="lav-suc">${nombre}</div>
+                        <div class="lav-row"><span class="lav-label">Ocupación</span><span class="lav-val">${fmtPct(ind.ocup)}</span></div>
+                        <div class="lav-row"><span class="lav-label">Productividad</span><span class="lav-val">${fmtPct(ind.prod)}</span></div>
+                        <div class="lav-hs">${fmtHs(t.trab)} trabajadas de ${fmtHs(t.disp)} disponibles</div></div>`;
+                }
+            });
+            document.getElementById('lavadero-box').innerHTML = sucursales.length ? `<div class="lav-grid">${lavHtml}</div>` : '<div class="prod-vacio">Sin datos</div>';
+
+            // --- Evolución mensual (año elegido, todos los meses) ---
+            let filasAno = filtrarProd('TALLER', false).filter(r => sucursales.indexOf(r.sucursal) !== -1);
+            let serie = MESES_PROD.map(m => indicadores(sumarHoras(filasAno.filter(r => r.mes === m))));
+            let anoTxt = currentFilters.ano === 'TODOS' ? 'histórico' : currentFilters.ano;
+            document.getElementById('prod-evol-titulo').textContent = 'EVOLUCIÓN MENSUAL ' + anoTxt.toUpperCase() + ': PRODUCTIVIDAD VS SIAC VS OCUPACIÓN';
+            if (prodEvolChart) prodEvolChart.destroy();
+            const linea = (label, datos, color, extra) => Object.assign({ label: label, data: datos, borderColor: color, backgroundColor: color, tension: 0.35, borderWidth: 3, pointRadius: 4, pointBackgroundColor: '#ffffff', pointBorderColor: color, spanGaps: false }, extra || {});
+            prodEvolChart = new Chart(document.getElementById('prodEvolChart').getContext('2d'), {
+                type: 'line',
+                data: {
+                    labels: ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'],
+                    datasets: [
+                        linea('Productividad', serie.map(x => x.prod), '#3b82f6'),
+                        linea('Productividad SIAC', serie.map(x => x.siac), '#94a3b8', { borderDash: [5, 4] }),
+                        linea('Ocupación', serie.map(x => x.ocup), '#10b981'),
+                        linea('Objetivo', MESES_PROD.map(m => objetivoProd(currentFilters.ano === 'TODOS' ? '2026' : currentFilters.ano, m)), '#ef4444', { borderDash: [3, 3], borderWidth: 2, pointRadius: 0, tension: 0 })
+                    ]
+                },
+                options: {
+                    responsive: true, maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'bottom', labels: { font: { family: 'Inter', size: 10, weight: '600' }, color: '#475569', boxWidth: 12 } },
+                        tooltip: { callbacks: { label: ctx => ctx.dataset.label + ': ' + fmtPct(ctx.parsed.y) } }
+                    },
+                    scales: {
+                        y: { ticks: { callback: v => v + '%', font: { family: 'Inter', size: 9 }, color: '#64748b' }, grid: { color: '#f1f5f9' }, border: { display: false } },
+                        x: { grid: { display: false }, ticks: { font: { family: 'Inter', size: 10 }, color: '#475569' }, border: { display: false } }
+                    }
+                }
+            });
+        }
 
         // NUEVO: al abrir, se posiciona en el mes y año en curso
         (function seleccionarMesActual() {
