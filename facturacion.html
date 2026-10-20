@@ -234,8 +234,9 @@
         function formatExactMoney(val) {
             let signo = val < 0 ? '-$' : '+$';
             let absVal = Math.abs(val);
-            if (absVal >= 1000000) return signo + (absVal / 1000000).toFixed(1).replace('.', ',') + 'M';
-            return signo + Math.round(absVal).toLocaleString('es-AR');
+            // Siempre en M: 1 decimal desde 1M (ej. -$64,2M), 2 decimales por debajo (ej. -$0,17M)
+            let decimales = absVal >= 1000000 ? 1 : 2;
+            return signo + (absVal / 1000000).toFixed(decimales).replace('.', ',') + 'M';
         }
 
         // NUEVO: muestra u oculta el aviso sobre un gráfico
